@@ -159,7 +159,7 @@ while (have_posts()) :
             <!-- BOTTOM SHARE CALLOUT -->
             <div class="me-bottom-share-callout">
                 <div class="callout-text">
-                    <h4><i class="fas fa-heart" style="color:#e31c61;"></i> Gostou desta análise do Mercado Erótico?</h4>
+                    <h4><i class="fas fa-heart" style="color:#e31c61;"></i> Gostou deste artigo do Mercado Erótico?</h4>
                     <p>Compartilhe informação de qualidade com seus colegas, parceiros e rede de contatos.</p>
                 </div>
                 <div class="callout-buttons">
