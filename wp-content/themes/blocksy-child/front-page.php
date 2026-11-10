@@ -5,6 +5,10 @@
 
 get_header();
 
+// 0. Total Published Posts Count (Dynamic)
+$count_posts = wp_count_posts('post');
+$total_published_count = !empty($count_posts->publish) ? number_format($count_posts->publish, 0, ',', '.') : '2.115';
+
 // 1. Featured Posts for Bento Hero
 // Top 4 stories rotate inside the Main Bento Slide
 $main_slides = get_posts(array(
@@ -138,8 +142,8 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         <div class="acervo-callout-inner">
             <div class="acervo-callout-left">
                 <span class="callout-tag">★ MEMÓRIA & DOCUMENTAÇÃO DO MERCADO ÍNTIMO</span>
-                <h2 class="callout-title">Pesquise em Mais de 2.115 Reportagens e Análises Históricas</h2>
-                <p class="callout-desc">O mais completo arquivo jornalístico, analítico e regulatório do mercado erótico e bem-estar sexual no Brasil, documentado continuamente desde 2018. Explore por temas, marcas, produtos e censos.</p>
+                <h2 class="callout-title">Pesquise em Mais de <?php echo esc_html($total_published_count); ?> Reportagens e Análises Históricas</h2>
+                <p class="callout-desc">O mais completo arquivo jornalístico, analítico e regulatório do mercado erótico e bem-estar sexual no Brasil, com <?php echo esc_html($total_published_count); ?> matérias documentadas continuamente desde 2018. Explore por temas, marcas, produtos e censos.</p>
                 <div class="callout-pills">
                     <span class="pill-mini">🏢 Negócios & Mercado</span>
                     <span class="pill-mini">📊 Pesquisas & Censos</span>
