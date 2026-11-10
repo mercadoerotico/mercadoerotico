@@ -2,11 +2,21 @@
 /**
  * Plugin Name: Mercado Erótico - Livraria Digital
  * Description: Vitrine moderna e catálogo digital de livros, manuais e cursos do Mercado Erótico.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Equipe Mercado Erótico
  */
 
 if (!defined('ABSPATH')) exit;
+
+function me_slugify_cat($text) {
+    $text = mb_strtolower($text, 'UTF-8');
+    $unwanted = array(
+        'á'=>'a', 'à'=>'a', 'ã'=>'a', 'â'=>'a', 'é'=>'e', 'ê'=>'e',
+        'í'=>'i', 'ó'=>'o', 'ô'=>'o', 'õ'=>'o', 'ú'=>'u', 'ç'=>'c',
+        '&'=>'', '-'=>'', ' '=>''
+    );
+    return strtr($text, $unwanted);
+}
 
 function mercado_livraria_get_data() {
     $file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
@@ -15,7 +25,6 @@ function mercado_livraria_get_data() {
     return json_decode($content, true) ?: array();
 }
 
-// Track whether the shortcode was rendered on this page
 global $mercado_livraria_rendered;
 $mercado_livraria_rendered = false;
 
@@ -26,19 +35,55 @@ function mercado_livraria_shortcode() {
     $products = mercado_livraria_get_data();
     $total_count = count($products);
 
-    $free_count = 0;
+    // Pre-calculate products with clean ASCII slugs for 100% reliable filtering
+    $processed_products = array();
     $negocios_count = 0;
     $manuais_count = 0;
     $cursos_count = 0;
-    $saude_count = 0;
+    $sexualidade_count = 0;
+    $gratuito_count = 0;
 
     foreach ($products as $p) {
-        if (!empty($p['is_free'])) $free_count++;
-        $cats = !empty($p['categories']) ? (array)$p['categories'] : array();
-        if (in_array('Negócios', $cats)) $negocios_count++;
-        if (in_array('Manuais e etc', $cats)) $manuais_count++;
-        if (in_array('Cursos', $cats)) $cursos_count++;
-        if (in_array('Sexualidade', $cats)) $saude_count++;
+        $slugs = array('all');
+        $raw_cats = !empty($p['categories']) ? (array)$p['categories'] : array();
+
+        if (!empty($p['is_free'])) {
+            $slugs[] = 'gratuito';
+            $gratuito_count++;
+        }
+
+        $has_negocios = false;
+        $has_manuais = false;
+        $has_cursos = false;
+        $has_sexualidade = false;
+
+        foreach ($raw_cats as $rc) {
+            $norm = me_slugify_cat($rc);
+            if (strpos($norm, 'negocio') !== false || strpos($norm, 'venda') !== false) {
+                $has_negocios = true;
+            }
+            if (strpos($norm, 'manual') !== false || strpos($norm, 'manuais') !== false || strpos($norm, 'guia') !== false) {
+                $has_manuais = true;
+            }
+            if (strpos($norm, 'curso') !== false || strpos($norm, 'workshop') !== false) {
+                $has_cursos = true;
+            }
+            if (strpos($norm, 'sexual') !== false || strpos($norm, 'saude') !== false) {
+                $has_sexualidade = true;
+            }
+            if (strpos($norm, 'gratuito') !== false && !in_array('gratuito', $slugs)) {
+                $slugs[] = 'gratuito';
+                $gratuito_count++;
+            }
+        }
+
+        if ($has_negocios) { $slugs[] = 'negocios'; $negocios_count++; }
+        if ($has_manuais) { $slugs[] = 'manuais'; $manuais_count++; }
+        if ($has_cursos) { $slugs[] = 'cursos'; $cursos_count++; }
+        if ($has_sexualidade) { $slugs[] = 'sexualidade'; $sexualidade_count++; }
+
+        $p['slug_str'] = implode(',', array_unique($slugs));
+        $processed_products[] = $p;
     }
 
     ob_start();
@@ -61,46 +106,58 @@ function mercado_livraria_shortcode() {
             <!-- Search Bar -->
             <div class="livraria-search-box">
                 <i class="fas fa-search search-icon" aria-hidden="true"></i>
-                <input type="text" id="livraria-search-input" placeholder="Pesquisar por título, autor ou tema (ex: Pompoarismo, Negócios, SexPack)..." autocomplete="off">
-                <button type="button" id="livraria-search-btn" class="livraria-btn-search">Buscar</button>
+                <input type="text" id="livraria-search-input" placeholder="Pesquisar por título, autor ou tema (ex: Pompoarismo, Negócios, SexPack)..." autocomplete="off" oninput="onLivrariaSearchInput(this.value)">
+                <button type="button" id="livraria-search-btn" class="livraria-btn-search" onclick="onLivrariaSearchClick()">Buscar</button>
             </div>
         </div>
 
-        <!-- Category Filter Tabs -->
+        <!-- Category Filter Tabs (With direct inline onclick for universal compatibility) -->
         <div class="livraria-filter-section">
             <div class="filter-header">
                 <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias &amp; Formatos:</span>
             </div>
             <div class="tabs-wrap" id="livraria-tabs">
-                <button type="button" class="livraria-tab active" data-cat="all">📚 Todos os Títulos (<?php echo $total_count; ?>)</button>
-                <button type="button" class="livraria-tab" data-cat="Negócios">💼 Negócios &amp; SexShop (<?php echo $negocios_count; ?>)</button>
-                <button type="button" class="livraria-tab" data-cat="Manuais e etc">📖 Manuais &amp; Guias (<?php echo $manuais_count; ?>)</button>
-                <button type="button" class="livraria-tab" data-cat="Cursos">🎓 Cursos &amp; Workshops (<?php echo $cursos_count; ?>)</button>
-                <button type="button" class="livraria-tab" data-cat="Sexualidade">❤️ Saúde &amp; Sexualidade (<?php echo $saude_count; ?>)</button>
-                <button type="button" class="livraria-tab" data-cat="Gratuito">🎁 Gratuitos (<?php echo $free_count; ?>)</button>
+                <button type="button" class="livraria-tab active" data-slug="all" onclick="selectLivrariaTab('all', this)">
+                    📚 Todos os Títulos (<?php echo $total_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="negocios" onclick="selectLivrariaTab('negocios', this)">
+                    💼 Negócios &amp; SexShop (<?php echo $negocios_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="manuais" onclick="selectLivrariaTab('manuais', this)">
+                    📖 Manuais &amp; Guias (<?php echo $manuais_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="cursos" onclick="selectLivrariaTab('cursos', this)">
+                    🎓 Cursos &amp; Workshops (<?php echo $cursos_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="sexualidade" onclick="selectLivrariaTab('sexualidade', this)">
+                    ❤️ Saúde &amp; Sexualidade (<?php echo $sexualidade_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="gratuito" onclick="selectLivrariaTab('gratuito', this)">
+                    🎁 Gratuitos (<?php echo $gratuito_count; ?>)
+                </button>
             </div>
         </div>
 
         <!-- Results Counter -->
         <div class="livraria-results-bar">
             <div id="livraria-count" class="results-count">Exibindo <strong><?php echo $total_count; ?></strong> itens</div>
-            <button type="button" id="livraria-clear-btn" class="clear-filters-btn" style="display:none;"><i class="fas fa-times"></i> Limpar Filtro</button>
+            <button type="button" id="livraria-clear-btn" class="clear-filters-btn" style="display:none;" onclick="resetLivrariaFilters()"><i class="fas fa-times"></i> Limpar Filtro</button>
         </div>
 
         <!-- Products Grid -->
         <div id="livraria-grid" class="livraria-grid">
-            <?php foreach ($products as $p): ?>
+            <?php foreach ($processed_products as $p): ?>
                 <?php
                 $pid = esc_attr($p['id']);
                 $pname = esc_attr($p['name']);
-                $pcats = esc_attr(implode(',', $p['categories']));
+                $slug_str = esc_attr($p['slug_str']);
                 $pfree = !empty($p['is_free']) ? '1' : '0';
                 $pimg = !empty($p['image']) ? esc_url($p['image']) : '';
                 ?>
                 <div class="book-card" 
                      data-id="<?php echo $pid; ?>" 
                      data-name="<?php echo strtolower($pname); ?>"
-                     data-cats="<?php echo $pcats; ?>"
+                     data-slugs="<?php echo $slug_str; ?>"
                      data-free="<?php echo $pfree; ?>">
                     <div class="book-cover-wrap" onclick="openBookModal(<?php echo $pid; ?>)">
                         <?php if ($pimg): ?>
@@ -110,7 +167,7 @@ function mercado_livraria_shortcode() {
                         <?php endif; ?>
                         
                         <?php if (!empty($p['is_free'])): ?>
-                            <span class="badge-free">GRATUITO</span>
+                            <span class="badge-free" onclick="event.stopPropagation(); selectLivrariaTab('gratuito');">GRATUITO</span>
                         <?php endif; ?>
 
                         <div class="book-hover-overlay">
@@ -121,7 +178,17 @@ function mercado_livraria_shortcode() {
                     <div class="book-info">
                         <div class="book-cats">
                             <?php foreach (array_slice($p['categories'], 0, 2) as $cat): ?>
-                                <span class="cat-pill"><?php echo esc_html($cat); ?></span>
+                                <?php 
+                                $cat_norm = me_slugify_cat($cat);
+                                $cat_target_slug = 'all';
+                                if (strpos($cat_norm, 'negocio') !== false || strpos($cat_norm, 'venda') !== false) $cat_target_slug = 'negocios';
+                                elseif (strpos($cat_norm, 'manual') !== false || strpos($cat_norm, 'guia') !== false) $cat_target_slug = 'manuais';
+                                elseif (strpos($cat_norm, 'curso') !== false) $cat_target_slug = 'cursos';
+                                elseif (strpos($cat_norm, 'sexual') !== false) $cat_target_slug = 'sexualidade';
+                                ?>
+                                <span class="cat-pill clickable" onclick="event.stopPropagation(); selectLivrariaTab('<?php echo $cat_target_slug; ?>');" title="Filtrar por <?php echo esc_attr($cat); ?>">
+                                    <?php echo esc_html($cat); ?>
+                                </span>
                             <?php endforeach; ?>
                         </div>
                         <h3 class="book-title" onclick="openBookModal(<?php echo $pid; ?>)"><?php echo esc_html($p['name']); ?></h3>
@@ -157,6 +224,96 @@ function mercado_livraria_shortcode() {
             </div>
         </div>
     </div>
+
+    <!-- Inline Filter Logic Available Immediately -->
+    <script>
+    window.currentLivrariaSlug = 'all';
+    window.currentLivrariaSearch = '';
+
+    window.selectLivrariaTab = function(slug, btn) {
+        window.currentLivrariaSlug = slug || 'all';
+
+        // Update tab buttons
+        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
+        tabs.forEach(function(t) {
+            if (t.getAttribute('data-slug') === slug) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+
+        window.applyLivrariaFilter();
+    };
+
+    window.applyLivrariaFilter = function() {
+        const slug = window.currentLivrariaSlug || 'all';
+        const query = (window.currentLivrariaSearch || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.book-card');
+        const noResults = document.getElementById('livraria-no-results');
+        let visibleCount = 0;
+
+        cards.forEach(function(card) {
+            const slugs = (card.getAttribute('data-slugs') || '').split(',');
+            const name = card.getAttribute('data-name') || '';
+
+            const matchCat = (slug === 'all') || (slugs.indexOf(slug) !== -1);
+            const matchSearch = !query || (name.indexOf(query) !== -1);
+
+            if (matchCat && matchSearch) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const countEl = document.getElementById('livraria-count');
+        if (countEl) {
+            countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
+        }
+
+        const clearBtn = document.getElementById('livraria-clear-btn');
+        if (clearBtn) {
+            clearBtn.style.display = (slug !== 'all' || query) ? 'inline-block' : 'none';
+        }
+
+        if (noResults) {
+            noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
+        }
+    };
+
+    window.onLivrariaSearchInput = function(val) {
+        window.currentLivrariaSearch = val || '';
+        window.applyLivrariaFilter();
+    };
+
+    window.onLivrariaSearchClick = function() {
+        const input = document.getElementById('livraria-search-input');
+        if (input) {
+            window.currentLivrariaSearch = input.value || '';
+            window.applyLivrariaFilter();
+        }
+    };
+
+    window.resetLivrariaFilters = function() {
+        window.currentLivrariaSlug = 'all';
+        window.currentLivrariaSearch = '';
+        const input = document.getElementById('livraria-search-input');
+        if (input) input.value = '';
+
+        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
+        tabs.forEach(function(t) {
+            if (t.getAttribute('data-slug') === 'all') {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+
+        window.applyLivrariaFilter();
+    };
+    </script>
 
     <style>
     /* LIVRARIA STYLES */
@@ -280,7 +437,7 @@ function mercado_livraria_shortcode() {
         background: #b8144c;
     }
 
-    /* FILTERS */
+    /* FILTERS - HIGH CONTRAST & RESPONSIVE */
     .livraria-filter-section {
         margin-bottom: 25px;
     }
@@ -298,25 +455,30 @@ function mercado_livraria_shortcode() {
         flex-wrap: wrap;
     }
     .livraria-tab {
-        background: #f4f4f7;
-        color: #444;
-        border: 1px solid #e1e1e8;
-        padding: 10px 18px;
+        background: #ffffff;
+        color: #334155;
+        border: 1.5px solid #cbd5e1;
+        padding: 10px 20px;
         border-radius: 30px;
-        font-size: 0.92rem;
-        font-weight: 600;
+        font-size: 0.94rem;
+        font-weight: 700;
         cursor: pointer;
         transition: all 0.2s ease;
+        user-select: none;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     .livraria-tab:hover {
-        background: #e9e9f0;
-        border-color: #ccc;
+        background: #f8fafc;
+        border-color: #e31c61;
+        color: #e31c61;
+        transform: translateY(-1px);
     }
     .livraria-tab.active {
-        background: #111;
-        color: #fff;
-        border-color: #111;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background: #e31c61 !important;
+        color: #ffffff !important;
+        border-color: #e31c61 !important;
+        box-shadow: 0 4px 14px rgba(227, 28, 97, 0.4) !important;
     }
 
     .livraria-results-bar {
@@ -393,6 +555,7 @@ function mercado_livraria_shortcode() {
         border-radius: 20px;
         letter-spacing: 0.5px;
         box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+        cursor: pointer;
     }
     .book-hover-overlay {
         position: absolute;
@@ -439,6 +602,14 @@ function mercado_livraria_shortcode() {
         padding: 3px 8px;
         border-radius: 4px;
         text-transform: uppercase;
+        transition: all 0.2s;
+    }
+    .cat-pill.clickable {
+        cursor: pointer;
+    }
+    .cat-pill.clickable:hover {
+        background: #e31c61;
+        color: #fff;
     }
     .book-title {
         font-size: 1.05rem;
@@ -662,6 +833,10 @@ function mercado_livraria_shortcode() {
         .book-modal-content {
             padding: 25px 20px;
         }
+        .livraria-tab {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
     }
     </style>
     <?php
@@ -670,7 +845,7 @@ function mercado_livraria_shortcode() {
 add_shortcode('mercado_livraria', 'mercado_livraria_shortcode');
 
 /**
- * Output JavaScript and Data Island in wp_footer so wpautop/wptexturize never corrupt them
+ * Output JavaScript and Data Island in wp_footer
  */
 function mercado_livraria_footer_scripts() {
     global $mercado_livraria_rendered;
@@ -685,7 +860,7 @@ function mercado_livraria_footer_scripts() {
     <?php echo json_encode($products, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
     </script>
 
-    <!-- Livraria Logic -->
+    <!-- Livraria Modal Script -->
     <script>
     (function() {
         let livrariaProducts = [];
@@ -697,120 +872,6 @@ function mercado_livraria_footer_scripts() {
         } catch (e) {
             console.error('Error parsing livraria JSON:', e);
         }
-
-        let currentCat = 'all';
-        let currentSearch = '';
-
-        function filterLivraria() {
-            const cards = document.querySelectorAll('.book-card');
-            const noResults = document.getElementById('livraria-no-results');
-            let visibleCount = 0;
-
-            cards.forEach(function(card) {
-                const name = card.getAttribute('data-name') || '';
-                const cats = card.getAttribute('data-cats') || '';
-                const isFree = card.getAttribute('data-free') === '1';
-
-                let matchCat = true;
-                if (currentCat === 'Gratuito') {
-                    matchCat = isFree;
-                } else if (currentCat !== 'all') {
-                    matchCat = cats.toLowerCase().indexOf(currentCat.toLowerCase()) !== -1;
-                }
-
-                let matchSearch = true;
-                if (currentSearch) {
-                    const q = currentSearch.toLowerCase();
-                    matchSearch = (name.indexOf(q) !== -1 || cats.toLowerCase().indexOf(q) !== -1);
-                }
-
-                if (matchCat && matchSearch) {
-                    card.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            const countEl = document.getElementById('livraria-count');
-            if (countEl) {
-                countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
-            }
-
-            const clearBtn = document.getElementById('livraria-clear-btn');
-            if (clearBtn) {
-                if (currentCat !== 'all' || currentSearch) {
-                    clearBtn.style.display = 'inline-block';
-                } else {
-                    clearBtn.style.display = 'none';
-                }
-            }
-
-            if (noResults) {
-                noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-            }
-        }
-
-        // Setup Tabs
-        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
-        tabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                tabs.forEach(function(t) { t.classList.remove('active'); });
-                this.classList.add('active');
-                currentCat = this.getAttribute('data-cat') || 'all';
-                filterLivraria();
-            });
-        });
-
-        // Setup Search
-        const searchInput = document.getElementById('livraria-search-input');
-        const searchBtn = document.getElementById('livraria-search-btn');
-
-        if (searchInput) {
-            let debounceTimer = null;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(function() {
-                    currentSearch = searchInput.value.trim();
-                    filterLivraria();
-                }, 200);
-            });
-
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    currentSearch = searchInput.value.trim();
-                    filterLivraria();
-                }
-            });
-        }
-
-        if (searchBtn) {
-            searchBtn.addEventListener('click', function() {
-                if (searchInput) {
-                    currentSearch = searchInput.value.trim();
-                    filterLivraria();
-                }
-            });
-        }
-
-        // Setup Clear
-        const clearBtn = document.getElementById('livraria-clear-btn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-                resetLivrariaFilters();
-            });
-        }
-
-        window.resetLivrariaFilters = function() {
-            currentCat = 'all';
-            currentSearch = '';
-            if (searchInput) searchInput.value = '';
-            tabs.forEach(function(t) { t.classList.remove('active'); });
-            const allTab = document.querySelector('#livraria-tabs .livraria-tab[data-cat="all"]');
-            if (allTab) allTab.classList.add('active');
-            filterLivraria();
-        };
 
         // Modal Functionality
         window.openBookModal = function(id) {
@@ -847,7 +908,7 @@ function mercado_livraria_footer_scripts() {
                 : '<div class="book-no-cover" style="height:250px;"><i class="fas fa-book" style="font-size:3rem;"></i></div>';
 
             const priceClass = isFree ? 'modal-price free' : 'modal-price';
-            const fullDesc = p.description || p.short_description || p.excerpt || 'Sem descrição detalhada.';
+            const fullDesc = (p.description || p.short_description || p.excerpt || 'Sem descrição detalhada.').replace(/`/g, "'").replace(/\${/g, '{');
 
             body.innerHTML = `
                 <div class="modal-grid">
