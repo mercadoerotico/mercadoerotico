@@ -205,6 +205,7 @@ function mercado_livraria_shortcode() {
                             <?php 
                                 $btn_text = 'Detalhes';
                                 $btn_icon = 'fa-arrow-right';
+                                $btn_cls = '';
                                 if (!empty($p['is_free'])) {
                                     if (!empty($p['buy_type']) && $p['buy_type'] === 'download') {
                                         $btn_text = 'Baixar PDF';
@@ -213,9 +214,14 @@ function mercado_livraria_shortcode() {
                                         $btn_text = 'Acessar Grátis';
                                         $btn_icon = 'fa-arrow-right';
                                     }
+                                    $btn_cls = 'btn-action-free';
+                                } elseif (!empty($p['buy_type']) && ($p['buy_type'] === 'mercadopago' || (!empty($p['buy_url']) && strpos($p['buy_url'], 'mpago.la') !== false))) {
+                                    $btn_text = 'Comprar (PIX)';
+                                    $btn_icon = 'fa-shopping-cart';
+                                    $btn_cls = 'btn-action-mp';
                                 }
                             ?>
-                            <button type="button" class="btn-action <?php echo !empty($p['is_free']) ? 'btn-action-free' : ''; ?>" onclick="openBookModal(<?php echo $pid; ?>)">
+                            <button type="button" class="btn-action <?php echo esc_attr($btn_cls); ?>" onclick="openBookModal(<?php echo $pid; ?>)">
                                 <?php echo esc_html($btn_text); ?> <i class="fas <?php echo esc_attr($btn_icon); ?>"></i>
                             </button>
                         </div>
@@ -709,6 +715,12 @@ function mercado_livraria_shortcode() {
     .btn-action-free:hover {
         background: #047857;
     }
+    .btn-action-mp {
+        background: #009ee3;
+    }
+    .btn-action-mp:hover {
+        background: #0081bb;
+    }
 
     .livraria-no-results {
         text-align: center;
@@ -857,6 +869,25 @@ function mercado_livraria_shortcode() {
     .modal-btn-external:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(2, 132, 199, 0.5);
+        color: #fff !important;
+    }
+    .modal-btn-mp {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #009ee3 0%, #007eb5 100%);
+        color: #fff !important;
+        font-size: 1.05rem;
+        font-weight: 800;
+        padding: 14px 28px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 20px rgba(0, 158, 227, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modal-btn-mp:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 158, 227, 0.55);
         color: #fff !important;
     }
     .modal-btn-free {
@@ -1051,6 +1082,17 @@ function mercado_livraria_footer_scripts() {
                     <a href="${buyUrl}" target="_blank" rel="noopener" class="modal-btn-external">
                         <i class="fas fa-external-link-alt"></i> Acessar no Site Oficial <i class="fas fa-arrow-right"></i>
                     </a>
+                `;
+            } else if (buyType === 'mercadopago' || (buyUrl && buyUrl.includes('mpago.la'))) {
+                actionButtonsHtml = `
+                    <div style="width:100%;">
+                        <a href="${buyUrl}" target="_blank" rel="noopener sponsored" class="modal-btn-mp">
+                            <i class="fas fa-lock" style="font-size:1.15rem;"></i> Pagar com Mercado Pago (PIX / Cartão) <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <div style="margin-top:10px; font-size:0.85rem; color:#64748b; text-align:center;">
+                            🔒 Pagamento 100% seguro pelo Mercado Pago. Liberação imediata e envio do PDF por e-mail.
+                        </div>
+                    </div>
                 `;
             } else if (isFree || buyType === 'download') {
                 const isPdf = buyUrl && (buyUrl.toLowerCase().endsWith('.pdf') || buyType === 'download');
