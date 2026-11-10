@@ -202,8 +202,21 @@ function mercado_livraria_shortcode() {
                             <div class="book-price-block">
                                 <span class="price-val <?php echo !empty($p['is_free']) ? 'free-text' : ''; ?>"><?php echo esc_html($p['price_formatted']); ?></span>
                             </div>
-                            <button type="button" class="btn-action" onclick="openBookModal(<?php echo $pid; ?>)">
-                                <?php echo !empty($p['is_free']) ? 'Acessar' : 'Detalhes'; ?> <i class="fas fa-arrow-right"></i>
+                            <?php 
+                                $btn_text = 'Detalhes';
+                                $btn_icon = 'fa-arrow-right';
+                                if (!empty($p['is_free'])) {
+                                    if (!empty($p['buy_type']) && $p['buy_type'] === 'download') {
+                                        $btn_text = 'Baixar PDF';
+                                        $btn_icon = 'fa-download';
+                                    } else {
+                                        $btn_text = 'Acessar Grátis';
+                                        $btn_icon = 'fa-arrow-right';
+                                    }
+                                }
+                            ?>
+                            <button type="button" class="btn-action <?php echo !empty($p['is_free']) ? 'btn-action-free' : ''; ?>" onclick="openBookModal(<?php echo $pid; ?>)">
+                                <?php echo esc_html($btn_text); ?> <i class="fas <?php echo esc_attr($btn_icon); ?>"></i>
                             </button>
                         </div>
                     </div>
@@ -690,6 +703,12 @@ function mercado_livraria_shortcode() {
     .btn-action:hover {
         background: #e31c61;
     }
+    .btn-action-free {
+        background: #059669;
+    }
+    .btn-action-free:hover {
+        background: #047857;
+    }
 
     .livraria-no-results {
         text-align: center;
@@ -1033,14 +1052,21 @@ function mercado_livraria_footer_scripts() {
                         <i class="fas fa-external-link-alt"></i> Acessar no Site Oficial <i class="fas fa-arrow-right"></i>
                     </a>
                 `;
-            } else if (isFree) {
-                const freeTargetUrl = (buyUrl && !buyUrl.includes('wa.me')) ? buyUrl : mailUrl;
-                const freeTargetAttr = (buyUrl && !buyUrl.includes('wa.me')) ? 'target="_blank" rel="noopener"' : '';
-                actionButtonsHtml = `
-                    <a href="${freeTargetUrl}" ${freeTargetAttr} class="modal-btn-free">
-                        <i class="fas fa-download" style="font-size:1.15rem;"></i> Acessar Material Gratuito <i class="fas fa-arrow-right"></i>
-                    </a>
-                `;
+            } else if (isFree || buyType === 'download') {
+                const isPdf = buyUrl && (buyUrl.toLowerCase().endsWith('.pdf') || buyType === 'download');
+                if (isPdf) {
+                    actionButtonsHtml = `
+                        <a href="${buyUrl}" target="_blank" download rel="noopener" class="modal-btn-free">
+                            <i class="fas fa-file-pdf" style="font-size:1.25rem;"></i> Baixar PDF Agora (Gratuito) <i class="fas fa-download"></i>
+                        </a>
+                    `;
+                } else {
+                    actionButtonsHtml = `
+                        <a href="${mailUrl}" class="modal-btn-free">
+                            <i class="fas fa-envelope" style="font-size:1.15rem;"></i> Solicitar Envio do PDF por E-mail <i class="fas fa-arrow-right"></i>
+                        </a>
+                    `;
+                }
             } else {
                 actionButtonsHtml = `
                     <a href="${mailUrl}" class="modal-btn-email">
