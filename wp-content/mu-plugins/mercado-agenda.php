@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mercado Erótico - Agenda Global & Inscrição de Eventos
  * Description: Sistema automatizado de Agenda de Eventos do Mercado Erótico Mundial com submissão pública e moderação administrativa.
- * Version: 1.0.0
+ * Version: 1.2.0
  * Author: Equipe Portal Mercado Erótico
  */
 
@@ -89,7 +89,8 @@ function me_agenda_register_post_type() {
 add_action('admin_menu', 'me_agenda_admin_pending_badge', 999);
 function me_agenda_admin_pending_badge() {
     global $menu;
-    $pending_count = wp_count_posts('me_evento')->pending;
+    $count_obj = wp_count_posts('me_evento');
+    $pending_count = !empty($count_obj->pending) ? $count_obj->pending : 0;
     if ($pending_count > 0) {
         foreach ($menu as $key => $value) {
             if ($value[2] == 'edit.php?post_type=me_evento') {
@@ -128,6 +129,7 @@ function me_evento_details_callback($post) {
     $org_nome        = get_post_meta($post->ID, '_evento_organizador_nome', true);
     $org_email       = get_post_meta($post->ID, '_evento_organizador_email', true);
     $org_telefone    = get_post_meta($post->ID, '_evento_organizador_telefone', true);
+    $cobertura       = get_post_meta($post->ID, '_evento_cobertura_jornalistica', true);
     ?>
     <style>
         .me-admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
@@ -136,7 +138,17 @@ function me_evento_details_callback($post) {
         .me-admin-field input, .me-admin-field select { width: 100%; max-width: 100%; border-radius: 4px; border: 1px solid #cbd5e1; padding: 6px 10px; }
         .me-admin-section-title { grid-column: span 2; font-size: 14px; font-weight: bold; color: #e31c61; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 10px; }
         .me-pending-notice { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 4px; margin-bottom: 15px; }
+        .me-cobertura-badge-active { background: #eff6ff; border: 1px solid #3b82f6; border-left: 4px solid #2563eb; padding: 12px 14px; border-radius: 6px; margin-bottom: 15px; color: #1e3a8a; }
     </style>
+
+    <?php if ($cobertura === '1'): ?>
+        <div class="me-cobertura-badge-active">
+            <strong style="color:#1d4ed8;font-size:14px;"><i class="dashicons dashicons-camera" style="margin-right:4px;"></i> 📸 SOLICITAÇÃO DE COBERTURA JORNALÍSTICA ATIVA!</strong>
+            <p style="margin:6px 0 0 0;font-size:13px;color:#1e40af;">
+                O organizador deste evento <strong>solicitou cobertura da equipe do Portal Mercado Erótico</strong> (reportagem exclusiva, entrevista especial ou presença de imprensa). Entre em contato através do e-mail/WhatsApp do organizador para alinhar detalhes de credenciamento.
+            </p>
+        </div>
+    <?php endif; ?>
 
     <?php if ($post->post_status === 'pending'): ?>
         <div class="me-pending-notice">
@@ -194,6 +206,15 @@ function me_evento_details_callback($post) {
             <input type="url" id="me_link_ingressos" name="_evento_link_ingressos" placeholder="https://..." value="<?php echo esc_url($link_ingressos); ?>">
         </div>
 
+        <div class="me-admin-section-title">📸 Cobertura Jornalística & Parceria</div>
+        <div class="me-admin-field" style="grid-column: span 2;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" name="_evento_cobertura_jornalistica" value="1" <?php checked($cobertura, '1'); ?>>
+                <strong>Solicitou cobertura jornalística da equipe do Portal Mercado Erótico</strong>
+            </label>
+            <small style="color:#64748b;display:block;margin-top:4px;">Marque se a organização quer reportagem exclusiva, envio de correspondente ou entrevista com palestrantes.</small>
+        </div>
+
         <div class="me-admin-section-title">👤 Dados do Organizador / Responsável (Uso Editorial Interno)</div>
         <div class="me-admin-field">
             <label for="me_org_nome">Nome do Organizador / Produtora</label>
@@ -246,6 +267,9 @@ function me_agenda_save_meta($post_id) {
             }
         }
     }
+
+    $cobertura = !empty($_POST['_evento_cobertura_jornalistica']) ? '1' : '0';
+    update_post_meta($post_id, '_evento_cobertura_jornalistica', $cobertura);
 }
 
 // 4. COLUNAS CUSTOMIZADAS NA LISTA DE EVENTOS DO ADMIN
@@ -258,6 +282,7 @@ function me_agenda_custom_columns($columns) {
     $new_cols['data']        = 'Data';
     $new_cols['local']       = 'Local / País';
     $new_cols['tipo']        = 'Tipo';
+    $new_cols['cobertura']   = 'Cobertura';
     $new_cols['organizador'] = 'Organizador';
     $new_cols['status_lib']  = 'Liberação';
     return $new_cols;
@@ -265,6 +290,8 @@ function me_agenda_custom_columns($columns) {
 
 add_action('manage_me_evento_posts_custom_column', 'me_agenda_custom_column_content', 10, 2);
 function me_agenda_custom_column_content($column, $post_id) {
+    $today = current_time('Y-m-d');
+
     switch ($column) {
         case 'flyer':
             if (has_post_thumbnail($post_id)) {
@@ -277,12 +304,17 @@ function me_agenda_custom_column_content($column, $post_id) {
         case 'data':
             $inicio = get_post_meta($post_id, '_evento_data_inicio', true);
             $fim    = get_post_meta($post_id, '_evento_data_fim', true);
+            $limite = !empty($fim) ? $fim : $inicio;
+
             if ($inicio) {
                 $inicio_fmt = date_i18n('d/m/Y', strtotime($inicio));
                 if ($fim && $fim !== $inicio) {
                     echo '<strong>' . $inicio_fmt . '</strong> a <strong>' . date_i18n('d/m/Y', strtotime($fim)) . '</strong>';
                 } else {
                     echo '<strong>' . $inicio_fmt . '</strong>';
+                }
+                if ($limite && $limite < $today) {
+                    echo '<br><span style="color:#dc2626;font-size:10px;font-weight:bold;background:#fee2e2;padding:1px 5px;border-radius:3px;">Encerrado</span>';
                 }
             } else {
                 echo '—';
@@ -301,6 +333,15 @@ function me_agenda_custom_column_content($column, $post_id) {
         case 'tipo':
             $terms = get_the_term_list($post_id, 'tipo_evento', '', ', ', '');
             echo $terms ? $terms : '<span style="color:#94a3b8;">Geral</span>';
+            break;
+
+        case 'cobertura':
+            $cob = get_post_meta($post_id, '_evento_cobertura_jornalistica', true);
+            if ($cob === '1') {
+                echo '<span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;">📸 Solicitada</span>';
+            } else {
+                echo '<span style="color:#94a3b8;font-size:11px;">Não</span>';
+            }
             break;
 
         case 'organizador':
@@ -348,7 +389,7 @@ function me_agenda_handle_quick_approval() {
         if (!empty($org_email) && is_email($org_email)) {
             $subject = "[Portal Mercado Erótico] Seu evento foi APROVADO: " . $titulo;
             $message = "Olá!\n\nTemos o prazer de informar que seu evento '" . $titulo . "' foi aprovado pela redação e já está publicado na Agenda do Mercado Erótico Mundial!\n\nConfira na Agenda: " . home_url('/agenda/') . "\n\nAtenciosamente,\nEquipe Editorial - Portal Mercado Erótico";
-            $headers = array('Content-Type: text/plain; charset=UTF-8', 'From: Portal Mercado Erótico <redacao@mercadoerotico.org>');
+            $headers = array('Content-Type: text/plain; charset=UTF-8', 'From: Portal Mercado Erótico <contato@mercadoerotico.org>');
             wp_mail($org_email, $subject, $message, $headers);
         }
     }
@@ -369,7 +410,6 @@ function me_agenda_process_public_submission() {
 
     // 2. Proteção Honeypot Anti-Spam
     if (!empty($_POST['me_hp_company'])) {
-        // Robô detectado
         wp_send_json_error(array('message' => 'Envio inválido detectado.'));
     }
 
@@ -389,6 +429,7 @@ function me_agenda_process_public_submission() {
     $data_fim      = sanitize_text_field($_POST['evento_data_fim'] ?? '');
     $horario       = sanitize_text_field($_POST['evento_horario'] ?? '');
     $local_nome    = sanitize_text_field($_POST['evento_local_nome'] ?? '');
+    $cobertura     = !empty($_POST['evento_cobertura']) ? '1' : '0';
 
     if (empty($titulo) || empty($data_inicio) || empty($descricao) || empty($org_nome) || empty($org_email)) {
         wp_send_json_error(array('message' => 'Por favor, preencha todos os campos obrigatórios (Nome do Evento, Data de Início, Descrição, Organizador e E-mail).'));
@@ -402,7 +443,7 @@ function me_agenda_process_public_submission() {
     $post_data = array(
         'post_title'    => $titulo,
         'post_content'  => $descricao,
-        'post_status'   => 'pending', // CRÍTICO: Não vai ao ar sem liberação do adm!
+        'post_status'   => 'pending', // Não vai ao ar sem liberação do adm!
         'post_type'     => 'me_evento',
         'post_author'   => 1
     );
@@ -428,6 +469,7 @@ function me_agenda_process_public_submission() {
     update_post_meta($post_id, '_evento_organizador_nome', $org_nome);
     update_post_meta($post_id, '_evento_organizador_email', $org_email);
     update_post_meta($post_id, '_evento_organizador_telefone', $org_telefone);
+    update_post_meta($post_id, '_evento_cobertura_jornalistica', $cobertura);
 
     // 6. Atribui Categoria e Região
     if ($categoria_id > 0) {
@@ -443,7 +485,6 @@ function me_agenda_process_public_submission() {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
 
-        // Permitir apenas imagens
         $file_type = wp_check_filetype($_FILES['evento_flyer']['name']);
         $allowed = array('jpg', 'jpeg', 'png', 'webp');
         if (in_array(strtolower($file_type['ext']), $allowed)) {
@@ -456,7 +497,7 @@ function me_agenda_process_public_submission() {
 
     // 8. Notificação por E-mail para a Redação / Administrador
     $admin_email = get_option('admin_email');
-    $notify_emails = array($admin_email, 'portalmercadoerotico@gmail.com');
+    $notify_emails = array($admin_email, 'contato@mercadoerotico.org');
     $subject = "[Agenda Mercado Erótico] Novo Evento Inscrito: " . $titulo . " (Aguardando Liberação)";
     
     $body  = "Um novo evento foi inscrito na Agenda do Mercado Erótico e aguarda aprovação:\n\n";
@@ -465,13 +506,21 @@ function me_agenda_process_public_submission() {
     $body .= "📍 Formato/Local: " . $formato . " | " . $cidade_pais . " (" . $local_nome . ")\n";
     $body .= "👤 Organizador: " . $org_nome . " (" . $org_email . " - " . $org_telefone . ")\n";
     if ($site_oficial) $body .= "🔗 Site Oficial: " . $site_oficial . "\n";
+
+    if ($cobertura === '1') {
+        $body .= "\n🚨📸 SOLICITAÇÃO DE COBERTURA JORNALÍSTICA: SIM!\n";
+        $body .= "O organizador solicitou cobertura editorial, reportagem ou entrevista exclusiva com a equipe do Portal Mercado Erótico.\n";
+    } else {
+        $body .= "\n📸 Cobertura Jornalística Solicitada: Não\n";
+    }
+
     $body .= "\n----------------------------------------\n";
     $body .= "👉 Para revisar e LIBERAR o evento para o público, acesse o painel:\n";
     $body .= admin_url('post.php?post=' . $post_id . '&action=edit') . "\n";
     $body .= "Ou veja a lista de pendentes em:\n";
     $body .= admin_url('edit.php?post_status=pending&post_type=me_evento') . "\n";
 
-    $headers = array('Content-Type: text/plain; charset=UTF-8', 'From: Portal Mercado Erótico <redacao@mercadoerotico.org>');
+    $headers = array('Content-Type: text/plain; charset=UTF-8', 'From: Portal Mercado Erótico <contato@mercadoerotico.org>');
     @wp_mail($notify_emails, $subject, $body, $headers);
 
     wp_send_json_success(array(
@@ -484,7 +533,9 @@ add_shortcode('mercado_agenda', 'me_agenda_shortcode_render');
 function me_agenda_shortcode_render() {
     ob_start();
 
-    // Query dos eventos PUBLICADOS (post_status = publish)
+    $today = current_time('Y-m-d');
+
+    // Query dos eventos PUBLICADOS
     $args = array(
         'post_type'      => 'me_evento',
         'post_status'    => 'publish', // Somente liberados pelo administrador!
@@ -493,7 +544,28 @@ function me_agenda_shortcode_render() {
         'orderby'        => 'meta_value',
         'order'          => 'ASC'
     );
-    $events_query = new WP_Query($args);
+    $all_events_query = new WP_Query($args);
+
+    // Filtrar apenas eventos cuja data de término (ou início) NÃO tenha passado
+    $active_posts = array();
+    if ($all_events_query->have_posts()) {
+        while ($all_events_query->have_posts()) {
+            $all_events_query->the_post();
+            $pid = get_the_ID();
+            $data_inicio = get_post_meta($pid, '_evento_data_inicio', true);
+            $data_fim    = get_post_meta($pid, '_evento_data_fim', true);
+            $data_limite = !empty($data_fim) ? $data_fim : $data_inicio;
+
+            // Se o evento terminou antes de hoje, NÃO exibe na agenda pública
+            if ($data_limite && $data_limite < $today) {
+                continue;
+            }
+            $active_posts[] = $pid;
+        }
+        wp_reset_postdata();
+    }
+
+    $total_active_events = count($active_posts);
 
     // Tipos de evento para os filtros e formulário
     $tipos = get_terms(array(
@@ -515,7 +587,7 @@ function me_agenda_shortcode_render() {
                     <i class="fas fa-plus-circle"></i> Inscrever Meu Evento Gratuitamente
                 </a>
                 <a href="#explorar-agenda" class="me-agenda-btn-secondary">
-                    <i class="fas fa-calendar-alt"></i> Ver Próximos Eventos
+                    <i class="fas fa-calendar-alt"></i> Ver Próximos Eventos (<?php echo $total_active_events; ?>)
                 </a>
             </div>
         </div>
@@ -525,7 +597,7 @@ function me_agenda_shortcode_render() {
             <div class="me-stat-card">
                 <div class="me-stat-icon">🌍</div>
                 <div class="me-stat-info">
-                    <span class="me-stat-num">Global & Brasil</span>
+                    <span class="me-stat-num">Global &amp; Brasil</span>
                     <span class="me-stat-desc">Eventos nacionais e internacionais</span>
                 </div>
             </div>
@@ -533,7 +605,7 @@ function me_agenda_shortcode_render() {
                 <div class="me-stat-icon">🛡️</div>
                 <div class="me-stat-info">
                     <span class="me-stat-num">Curadoria Oficial</span>
-                    <span class="me-stat-desc">Todos os eventos são auditados pelo adm</span>
+                    <span class="me-stat-desc">Eventos auditados e revisados pelo adm</span>
                 </div>
             </div>
             <div class="me-stat-card">
@@ -560,7 +632,7 @@ function me_agenda_shortcode_render() {
                     <input type="text" id="me-event-search" placeholder="Buscar por evento, cidade, tema ou organizador..." autocomplete="off">
                 </div>
                 <div class="me-filter-stats">
-                    <span id="me-event-counter"><?php echo $events_query->found_posts; ?></span> eventos disponíveis
+                    <span id="me-event-counter"><?php echo $total_active_events; ?></span> eventos disponíveis
                 </div>
             </div>
 
@@ -568,25 +640,25 @@ function me_agenda_shortcode_render() {
             <div class="me-filter-pills-wrap">
                 <div class="me-filter-group">
                     <span class="me-filter-label">Formato:</span>
-                    <button class="me-pill active" data-filter="all" data-type="formato">Todos</button>
-                    <button class="me-pill" data-filter="Presencial" data-type="formato">🏢 Presencial</button>
-                    <button class="me-pill" data-filter="Online" data-type="formato">🌐 Online</button>
-                    <button class="me-pill" data-filter="Híbrido" data-type="formato">🔄 Híbrido</button>
+                    <button type="button" class="me-pill active" data-filter="all" data-type="formato">Todos</button>
+                    <button type="button" class="me-pill" data-filter="Presencial" data-type="formato">🏢 Presencial</button>
+                    <button type="button" class="me-pill" data-filter="Online" data-type="formato">🌐 Online</button>
+                    <button type="button" class="me-pill" data-filter="Híbrido" data-type="formato">🔄 Híbrido</button>
                 </div>
                 <div class="me-filter-group">
                     <span class="me-filter-label">Região:</span>
-                    <button class="me-pill active" data-filter="all" data-type="regiao">Todas</button>
-                    <button class="me-pill" data-filter="Brasil" data-type="regiao">🇧🇷 Brasil</button>
-                    <button class="me-pill" data-filter="Internacional" data-type="regiao">🌍 Internacional</button>
+                    <button type="button" class="me-pill active" data-filter="all" data-type="regiao">Todas</button>
+                    <button type="button" class="me-pill" data-filter="Brasil" data-type="regiao">🇧🇷 Brasil</button>
+                    <button type="button" class="me-pill" data-filter="Internacional" data-type="regiao">🌍 Internacional</button>
                 </div>
             </div>
         </div>
 
-        <!-- GRID DE EVENTOS -->
+        <!-- GRID DE EVENTOS (SOMENTE DATAS VÁLIDAS / FUTURAS) -->
         <div class="me-events-grid" id="me-events-grid">
-            <?php if ($events_query->have_posts()): ?>
-                <?php while ($events_query->have_posts()): $events_query->the_post(); 
-                    $post_id      = get_the_ID();
+            <?php if (!empty($active_posts)): ?>
+                <?php foreach ($active_posts as $post_id): 
+                    $post = get_post($post_id);
                     $data_inicio  = get_post_meta($post_id, '_evento_data_inicio', true);
                     $data_fim     = get_post_meta($post_id, '_evento_data_fim', true);
                     $horario      = get_post_meta($post_id, '_evento_horario', true);
@@ -597,6 +669,7 @@ function me_agenda_shortcode_render() {
                     $site_oficial = get_post_meta($post_id, '_evento_site_oficial', true);
                     $link_ingr    = get_post_meta($post_id, '_evento_link_ingressos', true);
                     $org_nome     = get_post_meta($post_id, '_evento_organizador_nome', true);
+                    $cobertura    = get_post_meta($post_id, '_evento_cobertura_jornalistica', true);
 
                     $is_brasil = (stripos($pais, 'Brasil') !== false || stripos($cidade_pais, 'Brasil') !== false || stripos($cidade_pais, 'SP') !== false || stripos($cidade_pais, 'RJ') !== false);
                     $regiao_attr = $is_brasil ? 'Brasil' : 'Internacional';
@@ -620,24 +693,24 @@ function me_agenda_shortcode_render() {
                     } else {
                         $gcal_dates .= '/' . date('Ymd', strtotime($data_inicio . ' +1 day'));
                     }
-                    $gcal_url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode(get_the_title()) . '&dates=' . $gcal_dates . '&details=' . urlencode(wp_strip_all_tags(get_the_excerpt() ?: get_the_content()) . "\n\nMais informações: " . ($site_oficial ?: home_url('/agenda/'))) . '&location=' . urlencode($local_nome . ' - ' . $cidade_pais);
+                    $gcal_url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode($post->post_title) . '&dates=' . $gcal_dates . '&details=' . urlencode(wp_strip_all_tags($post->post_excerpt ?: $post->post_content) . "\n\nMais informações: " . ($site_oficial ?: home_url('/agenda/'))) . '&location=' . urlencode($local_nome . ' - ' . $cidade_pais);
 
                     // Imagem
-                    $thumb_url = has_post_thumbnail() ? get_the_post_thumbnail_url($post_id, 'large') : 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png';
+                    $thumb_url = has_post_thumbnail($post_id) ? get_the_post_thumbnail_url($post_id, 'large') : 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png';
                     
                     // Termos
                     $terms = wp_get_post_terms($post_id, 'tipo_evento');
                     $tipo_nome = !empty($terms) ? $terms[0]->name : 'Evento';
                 ?>
                     <article class="me-event-card" 
-                             data-title="<?php echo esc_attr(strtolower(get_the_title())); ?>" 
+                             data-title="<?php echo esc_attr(strtolower($post->post_title)); ?>" 
                              data-location="<?php echo esc_attr(strtolower($cidade_pais . ' ' . $local_nome)); ?>"
                              data-formato="<?php echo esc_attr($formato); ?>"
                              data-regiao="<?php echo esc_attr($regiao_attr); ?>">
                         
                         <!-- BANNER & DATE BADGE -->
                         <div class="me-card-image-wrap">
-                            <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="me-card-img" loading="lazy">
+                            <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr($post->post_title); ?>" class="me-card-img" loading="lazy">
                             <div class="me-date-badge">
                                 <span class="me-date-month"><?php echo esc_html($mes_inicio); ?></span>
                                 <span class="me-date-day"><?php echo esc_html($dia_inicio); ?></span>
@@ -646,6 +719,9 @@ function me_agenda_shortcode_render() {
                             <div class="me-format-badge <?php echo esc_attr(strtolower($formato)); ?>">
                                 <?php echo esc_html($formato); ?>
                             </div>
+                            <?php if ($cobertura === '1'): ?>
+                                <span class="me-coverage-badge" title="Cobertura Jornalística do Portal Confirmada"><i class="fas fa-camera"></i> Cobertura Portal</span>
+                            <?php endif; ?>
                         </div>
 
                         <!-- CONTEÚDO DO CARD -->
@@ -657,7 +733,7 @@ function me_agenda_shortcode_render() {
                                 </span>
                             </div>
 
-                            <h3 class="me-card-title"><?php the_title(); ?></h3>
+                            <h3 class="me-card-title"><?php echo esc_html($post->post_title); ?></h3>
 
                             <div class="me-card-info-list">
                                 <div class="me-info-item">
@@ -677,13 +753,13 @@ function me_agenda_shortcode_render() {
                             </div>
 
                             <div class="me-card-excerpt">
-                                <?php echo wp_trim_words(get_the_excerpt() ?: get_the_content(), 22, '...'); ?>
+                                <?php echo wp_trim_words($post->post_excerpt ?: $post->post_content, 22, '...'); ?>
                             </div>
 
                             <div class="me-card-footer">
                                 <?php if ($site_oficial || $link_ingr): ?>
                                     <a href="<?php echo esc_url($link_ingr ?: $site_oficial); ?>" target="_blank" rel="noopener" class="me-card-btn-action">
-                                        Site & Ingressos <i class="fas fa-external-link-alt"></i>
+                                        Site &amp; Ingressos <i class="fas fa-external-link-alt"></i>
                                     </a>
                                 <?php else: ?>
                                     <span class="me-card-btn-action disabled">Inscrições em breve</span>
@@ -695,10 +771,12 @@ function me_agenda_shortcode_render() {
                             </div>
                         </div>
                     </article>
-                <?php endwhile; wp_reset_postdata(); ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <div class="me-no-events">
-                    <p>Nenhum evento agendado no momento. Seja o primeiro a inscrever seu evento abaixo!</p>
+                    <i class="fas fa-calendar-check" style="font-size:3rem;color:#cbd5e1;margin-bottom:15px;display:block;"></i>
+                    <p style="font-size:1.1rem;font-weight:700;color:#334155;">Nenhum evento futuro agendado no momento.</p>
+                    <p style="color:#64748b;">Os eventos anteriores já foram concluídos. Seja o primeiro a inscrever seu evento gratuito abaixo!</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -706,7 +784,7 @@ function me_agenda_shortcode_render() {
         <div id="me-empty-results" class="me-empty-results" style="display:none;">
             <i class="fas fa-search" style="font-size:2rem;color:#94a3b8;margin-bottom:10px;"></i>
             <p>Nenhum evento encontrado para os filtros selecionados.</p>
-            <button class="me-btn-reset" onclick="meResetFilters()">Limpar Filtros</button>
+            <button type="button" class="me-btn-reset" onclick="meResetFilters()">Limpar Filtros</button>
         </div>
 
         <!-- FORMULÁRIO DE INSCRIÇÃO AUTOMATIZADO -->
@@ -718,6 +796,15 @@ function me_agenda_shortcode_render() {
                     Feiras de negócios, congressos, simpósios, conferências, lançamentos e workshops: qualquer produtor ou empresa pode inscrever seu evento. 
                     Após o envio, as informações passam pela <strong>revisão e liberação da nossa equipe editorial</strong> antes de entrar na Agenda Oficial.
                 </p>
+
+                <!-- GUIA DE ESPECIFICAÇÃO DE IMAGEM -->
+                <div class="me-sub-spec-banner">
+                    <div class="spec-banner-icon"><i class="fas fa-image"></i></div>
+                    <div class="spec-banner-text">
+                        <strong>Tamanho Recomendado para o Cartaz / Flyer:</strong>
+                        <span>Envie em <strong>1200 x 675 pixels</strong> (proporção 16:9 horizontal) ou <strong>1080 x 1080 pixels</strong> (quadrado). Formatos: JPG, PNG ou WEBP (máx. 5 MB). Isso garante que o cartaz fique perfeitamente nítido e legível tanto no computador quanto no celular.</span>
+                    </div>
+                </div>
             </div>
 
             <form id="me-event-submit-form" class="me-event-form" enctype="multipart/form-data">
@@ -732,7 +819,7 @@ function me_agenda_shortcode_render() {
                     <div class="me-form-col">
                         <div class="me-field-group">
                             <label for="evento_nome">Nome do Evento *</label>
-                            <input type="text" id="evento_nome" name="evento_nome" required placeholder="Ex: Íntimi Expo 2026, Venus Berlin...">
+                            <input type="text" id="evento_nome" name="evento_nome" required placeholder="Ex: Íntimi Expo 2027, Venus Berlin...">
                         </div>
 
                         <div class="me-form-row">
@@ -777,7 +864,7 @@ function me_agenda_shortcode_render() {
                                 <input type="text" id="evento_pais" name="evento_pais" required value="Brasil" placeholder="Ex: Brasil, Alemanha, EUA...">
                             </div>
                             <div class="me-field-group">
-                                <label for="evento_cidade_pais">Cidade & Estado *</label>
+                                <label for="evento_cidade_pais">Cidade &amp; Estado *</label>
                                 <input type="text" id="evento_cidade_pais" name="evento_cidade_pais" required placeholder="Ex: São Paulo, SP">
                             </div>
                         </div>
@@ -800,14 +887,21 @@ function me_agenda_shortcode_render() {
                             <input type="url" id="evento_link_ingressos" name="evento_link_ingressos" placeholder="https://sympla.com.br/...">
                         </div>
 
+                        <!-- CAMPO DE FLYER COM ESPECIFICAÇÃO DE TAMANHO -->
                         <div class="me-field-group">
-                            <label for="evento_flyer">Cartaz / Flyer / Imagem do Evento (JPG, PNG ou WEBP)</label>
+                            <label for="evento_flyer">
+                                Cartaz / Flyer do Evento 
+                                <span class="me-label-highlight">(Ideal: 1200 x 675 px ou 1080 x 1080 px)</span>
+                            </label>
                             <input type="file" id="evento_flyer" name="evento_flyer" accept="image/jpeg,image/png,image/webp">
-                            <small class="me-file-tip">Recomendado: 1200x675px ou proporção 16:9 (máx 5MB).</small>
+                            <div class="me-file-tip-box">
+                                <i class="fas fa-ruler-combined"></i> 
+                                <span><strong>Dimensão ideal:</strong> 1200 x 675 px (proporção 16:9 horizontal) ou 1080 x 1080 px (1:1 quadrado). Formatos aceitos: JPG, PNG ou WEBP (máx. 5 MB).</span>
+                            </div>
                         </div>
 
                         <div class="me-field-group">
-                            <label for="evento_descricao">Descrição Completa & Programação *</label>
+                            <label for="evento_descricao">Descrição Completa &amp; Programação *</label>
                             <textarea id="evento_descricao" name="evento_descricao" rows="5" required placeholder="Apresente os objetivos do evento, principais palestrantes, atrações, público-alvo e informações essenciais para os participantes..."></textarea>
                         </div>
 
@@ -832,6 +926,22 @@ function me_agenda_shortcode_render() {
                     </div>
                 </div>
 
+                <!-- CAMPO CLICÁVEL: SOLICITAÇÃO DE COBERTURA JORNALÍSTICA -->
+                <div class="me-coverage-request-card">
+                    <label class="me-coverage-toggle" for="evento_cobertura">
+                        <input type="checkbox" id="evento_cobertura" name="evento_cobertura" value="1">
+                        <span class="me-coverage-checkbox"></span>
+                        <div class="me-coverage-content">
+                            <span class="me-coverage-title">
+                                <i class="fas fa-camera-retro"></i> Desejo cobertura jornalística da equipe do Portal Mercado Erótico
+                            </span>
+                            <span class="me-coverage-desc">
+                                Marque esta opção caso tenha interesse em pauta jornalística exclusiva, envio de correspondente/repórter para o evento, cobertura fotográfica ou entrevista especial com palestrantes e organizadores. Nossa redação entrará em contato para alinhar o credenciamento de imprensa.
+                            </span>
+                        </div>
+                    </label>
+                </div>
+
                 <div class="me-form-footer">
                     <div class="me-form-status" id="me-form-status"></div>
                     <button type="submit" class="me-btn-submit" id="me-btn-submit">
@@ -851,7 +961,7 @@ function me_agenda_shortcode_render() {
         .me-agenda-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 15px 80px 15px;
+            padding: 20px 15px 80px 15px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             color: #1e293b;
         }
@@ -911,65 +1021,62 @@ function me_agenda_shortcode_render() {
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
         }
         .me-agenda-btn-primary {
             background: linear-gradient(135deg, #e31c61 0%, #c4124e 100%);
             color: #fff !important;
-            font-weight: 700;
-            padding: 13px 26px;
+            padding: 14px 28px;
             border-radius: 30px;
-            text-decoration: none;
+            font-weight: 700;
+            text-decoration: none !important;
+            box-shadow: 0 6px 20px rgba(227, 28, 97, 0.4);
+            transition: all 0.25s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.25s ease;
-            box-shadow: 0 6px 18px rgba(227, 28, 97, 0.35);
         }
         .me-agenda-btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 24px rgba(227, 28, 97, 0.5);
+            box-shadow: 0 10px 25px rgba(227, 28, 97, 0.6);
             color: #fff !important;
         }
         .me-agenda-btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             color: #fff !important;
-            font-weight: 600;
-            padding: 13px 24px;
+            padding: 14px 28px;
             border-radius: 30px;
-            text-decoration: none;
+            font-weight: 600;
+            text-decoration: none !important;
+            border: 1px solid rgba(255,255,255,0.25);
+            backdrop-filter: blur(5px);
+            transition: all 0.25s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.25s ease;
         }
         .me-agenda-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.2);
             color: #fff !important;
         }
 
         /* STATS */
         .me-agenda-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 45px;
         }
         .me-stat-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
             border-radius: 14px;
-            padding: 18px 20px;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: transform 0.2s ease;
-        }
-        .me-stat-card:hover {
-            transform: translateY(-2px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
         .me-stat-icon {
             font-size: 2rem;
@@ -977,72 +1084,73 @@ function me_agenda_shortcode_render() {
         }
         .me-stat-num {
             display: block;
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: #0f172a;
         }
         .me-stat-desc {
-            display: block;
             font-size: 0.8rem;
             color: #64748b;
         }
 
-        /* FILTROS */
+        /* FILTERS & SEARCH */
         .me-agenda-filter-section {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #ffffff;
             border-radius: 16px;
-            padding: 22px 25px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             margin-bottom: 35px;
         }
         .me-filter-topbar {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             gap: 20px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
-            margin-bottom: 18px;
         }
         .me-search-wrapper {
             position: relative;
-            flex: 1;
-            min-width: 280px;
+            flex-grow: 1;
+            max-width: 600px;
         }
         .me-search-icon {
             position: absolute;
-            left: 15px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+            pointer-events: none;
         }
         .me-search-wrapper input {
             width: 100%;
-            padding: 12px 16px 12px 42px;
+            padding: 12px 16px 12px 45px;
+            border-radius: 30px;
             border: 1px solid #cbd5e1;
-            border-radius: 25px;
             font-size: 0.95rem;
             outline: none;
-            background: #fff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
         }
         .me-search-wrapper input:focus {
             border-color: #e31c61;
             box-shadow: 0 0 0 3px rgba(227, 28, 97, 0.15);
         }
         .me-filter-stats {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: #475569;
         }
         .me-filter-stats span {
             color: #e31c61;
-            font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
         .me-filter-pills-wrap {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
         }
         .me-filter-group {
             display: flex;
@@ -1054,174 +1162,176 @@ function me_agenda_shortcode_render() {
             font-size: 0.85rem;
             font-weight: 700;
             color: #64748b;
-            min-width: 75px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 4px;
         }
         .me-pill {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: #334155;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
             padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
         }
         .me-pill:hover {
-            border-color: #e31c61;
-            color: #e31c61;
+            background: #e2e8f0;
+            color: #1e293b;
         }
         .me-pill.active {
-            background: #e31c61;
-            border-color: #e31c61;
+            background: #0f172a;
             color: #fff;
+            border-color: #0f172a;
         }
 
-        /* GRID DE EVENTOS */
+        /* GRID */
         .me-events-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
         .me-event-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
             border-radius: 16px;
             overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.25s ease;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .me-event-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 14px 28px rgba(0,0,0,0.1);
-            border-color: rgba(227, 28, 97, 0.3);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
         }
         .me-card-image-wrap {
             position: relative;
-            width: 100%;
-            height: 190px;
-            background: #0f172a;
+            height: 200px;
             overflow: hidden;
+            background: #0f172a;
         }
         .me-card-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.4s ease;
+            transition: transform 0.35s ease;
         }
         .me-event-card:hover .me-card-img {
             transform: scale(1.05);
         }
         .me-date-badge {
             position: absolute;
-            top: 14px;
-            left: 14px;
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(227, 28, 97, 0.5);
-            border-radius: 10px;
-            padding: 6px 10px;
-            text-align: center;
+            top: 15px;
+            left: 15px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(6px);
             color: #fff;
-            min-width: 55px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            line-height: 1.1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         .me-date-month {
             display: block;
             font-size: 0.7rem;
             font-weight: 800;
-            color: #ff659c;
+            color: #e31c61;
             letter-spacing: 0.5px;
         }
         .me-date-day {
             display: block;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 900;
-            line-height: 1;
-            margin: 2px 0;
         }
         .me-date-year {
             display: block;
-            font-size: 0.68rem;
+            font-size: 0.65rem;
             color: #94a3b8;
         }
         .me-format-badge {
             position: absolute;
-            top: 14px;
-            right: 14px;
-            background: rgba(255,255,255,0.95);
-            color: #0f172a;
-            font-size: 0.72rem;
-            font-weight: 700;
+            top: 15px;
+            right: 15px;
             padding: 4px 10px;
             border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .me-format-badge.online {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .me-format-badge.híbrido {
-            background: #fef3c7;
-            color: #92400e;
+        .me-format-badge.presencial { background: #10b981; color: #fff; }
+        .me-format-badge.online { background: #3b82f6; color: #fff; }
+        .me-format-badge.híbrido { background: #8b5cf6; color: #fff; }
+
+        .me-coverage-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 15px;
+            background: rgba(227, 28, 97, 0.9);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
         }
 
         .me-card-body {
-            padding: 20px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
-            flex: 1;
+            flex-grow: 1;
         }
         .me-card-meta-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
+            margin-bottom: 12px;
         }
         .me-badge-category {
-            background: #fdf2f8;
-            color: #be185d;
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 3px 8px;
+            background: #fdf2f6;
+            color: #e31c61;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
             border-radius: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .me-badge-country {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #475569;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
         }
         .me-card-title {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: #0f172a;
-            margin: 0 0 12px 0;
-            line-height: 1.3;
+            margin: 0 0 14px 0;
+            line-height: 1.35;
         }
         .me-card-info-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 14px;
+            gap: 7px;
+            margin-bottom: 16px;
             font-size: 0.85rem;
             color: #475569;
         }
         .me-info-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 8px;
-            line-height: 1.4;
         }
         .me-info-item i {
             color: #e31c61;
-            margin-top: 3px;
-            font-size: 0.9rem;
             width: 14px;
             text-align: center;
         }
@@ -1229,31 +1339,31 @@ function me_agenda_shortcode_render() {
             font-size: 0.88rem;
             color: #64748b;
             line-height: 1.5;
-            margin-bottom: 18px;
-            flex: 1;
+            margin-bottom: 20px;
+            flex-grow: 1;
         }
         .me-card-footer {
             display: flex;
-            align-items: center;
             gap: 10px;
-            padding-top: 14px;
             border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
+            margin-top: auto;
         }
         .me-card-btn-action {
-            flex: 1;
+            flex-grow: 1;
             background: #0f172a;
-            color: #ffffff !important;
+            color: #fff !important;
             text-align: center;
             padding: 10px 14px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
-            text-decoration: none;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
             display: inline-flex;
             justify-content: center;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s ease;
         }
         .me-card-btn-action:hover {
             background: #e31c61;
@@ -1267,26 +1377,27 @@ function me_agenda_shortcode_render() {
         .me-card-btn-gcal {
             background: #f1f5f9;
             color: #475569 !important;
-            padding: 10px 13px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 0.95rem;
-            text-decoration: none;
+            font-size: 1rem;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
         }
         .me-card-btn-gcal:hover {
             background: #4285f4;
             color: #fff !important;
         }
 
-        .me-empty-results {
+        .me-no-events, .me-empty-results {
+            grid-column: 1 / -1;
             text-align: center;
-            padding: 40px 20px;
-            background: #f8fafc;
-            border-radius: 12px;
-            margin-bottom: 40px;
+            padding: 50px 20px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px dashed #cbd5e1;
         }
         .me-btn-reset {
             background: #e31c61;
@@ -1294,115 +1405,240 @@ function me_agenda_shortcode_render() {
             border: none;
             padding: 8px 18px;
             border-radius: 20px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
             margin-top: 10px;
         }
 
-        /* FORMULÁRIO DE INSCRIÇÃO */
+        /* SUBMISSION SECTION */
         .me-submission-section {
             background: #ffffff;
-            border: 2px solid #f1f5f9;
             border-radius: 20px;
             padding: 45px 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.04);
             position: relative;
         }
         .me-submission-header {
             text-align: center;
-            max-width: 750px;
+            max-width: 760px;
             margin: 0 auto 35px auto;
         }
         .me-sub-badge {
             display: inline-block;
-            background: #fee2e2;
-            color: #dc2626;
-            font-size: 0.75rem;
+            background: #fdf2f6;
+            color: #e31c61;
+            font-size: 0.8rem;
             font-weight: 800;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
         .me-sub-title {
             font-size: 2.1rem;
-            font-weight: 800;
+            font-weight: 900;
             color: #0f172a;
             margin: 0 0 12px 0;
-            line-height: 1.25;
+            letter-spacing: -0.5px;
         }
         .me-sub-desc {
             font-size: 1rem;
             color: #64748b;
             line-height: 1.6;
+            margin-bottom: 20px;
         }
+
+        /* BANNER ESPECIFICAÇÃO DE IMAGEM */
+        .me-sub-spec-banner {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: 5px solid #e31c61;
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: left;
+            margin-top: 20px;
+        }
+        .spec-banner-icon {
+            font-size: 2rem;
+            color: #e31c61;
+            flex-shrink: 0;
+        }
+        .spec-banner-text strong {
+            display: block;
+            color: #0f172a;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+        .spec-banner-text span {
+            font-size: 0.88rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
         .me-form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
-        @media (max-width: 860px) {
-            .me-form-grid { grid-template-columns: 1fr; }
-            .me-agenda-hero-title { font-size: 2.1rem; }
-            .me-submission-section { padding: 30px 20px; }
-        }
-        .me-field-group {
-            margin-bottom: 18px;
-        }
-        .me-field-group label {
-            display: block;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .me-field-group input, 
-        .me-field-group select, 
-        .me-field-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: #fff;
-            color: #0f172a;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .me-field-group input:focus, 
-        .me-field-group select:focus, 
-        .me-field-group textarea:focus {
-            border-color: #e31c61;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(227, 28, 97, 0.15);
+        .me-form-col {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
         .me-form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        .me-file-tip {
-            display: block;
-            font-size: 0.78rem;
-            color: #94a3b8;
+        .me-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .me-field-group label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #334155;
+        }
+        .me-label-highlight {
+            color: #e31c61;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .me-field-group input, 
+        .me-field-group select, 
+        .me-field-group textarea {
+            padding: 11px 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.92rem;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .me-field-group input:focus, 
+        .me-field-group select:focus, 
+        .me-field-group textarea:focus {
+            border-color: #e31c61;
+            box-shadow: 0 0 0 3px rgba(227, 28, 97, 0.12);
+        }
+        .me-file-tip-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: #fff5f8;
+            border: 1px solid #fecdd3;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            color: #9f1239;
+            line-height: 1.45;
             margin-top: 4px;
         }
+        .me-file-tip-box i {
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
         .me-org-box {
             background: #f8fafc;
-            border: 1px dashed #cbd5e1;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 18px;
-            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .me-org-title {
             font-size: 0.85rem;
-            font-weight: 700;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: #475569;
-            margin-bottom: 12px;
+            margin-bottom: 2px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
+
+        /* CAMPO CLICÁVEL DE COBERTURA JORNALÍSTICA */
+        .me-coverage-request-card {
+            margin-top: 25px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 2px solid #a7f3d0;
+            border-radius: 14px;
+            padding: 20px 24px;
+            transition: all 0.25s ease;
+        }
+        .me-coverage-request-card:hover {
+            border-color: #10b981;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.15);
+        }
+        .me-coverage-toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .me-coverage-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .me-coverage-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid #059669;
+            background: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.2s ease;
+        }
+        .me-coverage-toggle input[type="checkbox"]:checked + .me-coverage-checkbox {
+            background: #059669;
+            border-color: #059669;
+        }
+        .me-coverage-toggle input[type="checkbox"]:checked + .me-coverage-checkbox::after {
+            content: '✓';
+            color: #fff;
+            font-size: 15px;
+            font-weight: 900;
+        }
+        .me-coverage-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .me-coverage-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #065f46;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .me-coverage-title i {
+            color: #10b981;
+            font-size: 1.15rem;
+        }
+        .me-coverage-desc {
+            font-size: 0.88rem;
+            color: #047857;
+            line-height: 1.5;
+        }
+
         .me-form-footer {
             text-align: center;
             margin-top: 30px;
@@ -1462,6 +1698,34 @@ function me_agenda_shortcode_render() {
             color: #991b1b;
             border: 1px solid #fecaca;
         }
+
+        @media (max-width: 768px) {
+            .me-agenda-hero {
+                padding: 35px 20px;
+            }
+            .me-agenda-hero-title {
+                font-size: 2rem;
+            }
+            .me-agenda-stats {
+                grid-template-columns: 1fr;
+            }
+            .me-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .me-form-row {
+                grid-template-columns: 1fr;
+            }
+            .me-submission-section {
+                padding: 30px 20px;
+            }
+            .me-sub-spec-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+            .me-events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
     <!-- JAVASCRIPT SCOPED DE BUSCA, FILTROS E SUBMISSÃO AJAX -->
@@ -1519,7 +1783,6 @@ function me_agenda_shortcode_render() {
                 const type = this.getAttribute('data-type');
                 const filterVal = this.getAttribute('data-filter');
 
-                // Atualizar classe active no grupo
                 document.querySelectorAll('.me-pill[data-type="' + type + '"]').forEach(p => p.classList.remove('active'));
                 this.classList.add('active');
 
