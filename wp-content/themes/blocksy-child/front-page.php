@@ -270,8 +270,8 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         </div>
     </section>
 
-    <!-- NÚMEROS DO SETOR NO BRASIL E NO MUNDO -->
-    <?php echo do_shortcode('[mercado_numeros_setor]'); ?>
+    <!-- RADAR ECONÔMICO: LINHA DE CHAMADA COMPACTA -->
+    <?php echo do_shortcode('[mercado_radar_home_callout]'); ?>
 
     <!-- BLOCO 4: VITRINE DIGITAL DA LIVRARIA -->
     <section class="me-livraria-showcase">
