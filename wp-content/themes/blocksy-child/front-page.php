@@ -109,18 +109,6 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         </div>
     </div>
 
-    <!-- Top Trending Ticker -->
-    <div class="me-trending-bar">
-        <div class="trending-badge"><i class="fas fa-bolt"></i> EM ALTA</div>
-        <div class="trending-ticker">
-            <?php foreach ($main_slides as $sp): ?>
-                <a href="<?php echo get_permalink($sp->ID); ?>" class="ticker-item">
-                    <span>•</span> <?php echo esc_html($sp->post_title); ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
     <!-- BLOCO 1: BENTO GRID HERO (COM SLIDE DINÂMICO NA IMAGEM PRINCIPAL) -->
     <section class="me-bento-hero">
         <!-- Main Card: Slideshow Dinâmico das 4 Matérias de Capa -->

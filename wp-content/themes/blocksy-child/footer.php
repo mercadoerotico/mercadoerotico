@@ -32,6 +32,7 @@ do_action('blocksy:content:bottom');
                     <li><a href="<?php echo home_url('/'); ?>">Início</a></li>
                     <li><a href="<?php echo home_url('/sobre/'); ?>">Sobre Nós</a></li>
                     <li><a href="<?php echo home_url('/colunistas/'); ?>">Colunistas Oficiais</a></li>
+                    <li><a href="<?php echo home_url('/agenda/'); ?>"><strong style="color:#e31c61;">Agenda do Mercado Erótico</strong></a></li>
                     <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo Histórico (Desde 2018)</a></li>
                     <li><a href="<?php echo home_url('/livraria/'); ?>">Livraria Digital</a></li>
                     <li><a href="<?php echo home_url('/contato/'); ?>">Contatos & Redação</a></li>
@@ -43,6 +44,7 @@ do_action('blocksy:content:bottom');
                 <h4 class="footer-heading">Especialidades & Guia</h4>
                 <ul class="footer-links">
                     <li><a href="<?php echo home_url('/profissionais-especialistas-em-sexualidade/'); ?>"><i class="fas fa-user-md" style="color:#e31c61; margin-right:5px;"></i> <strong>Guia de Profissionais</strong></a></li>
+                    <li><a href="<?php echo home_url('/agenda/'); ?>"><i class="far fa-calendar-alt" style="color:#e31c61; margin-right:5px;"></i> Calendário de Eventos Mundiais</a></li>
                     <li><a href="<?php echo home_url('/categoria/negocios/'); ?>">Negócios & SexShop</a></li>
                     <li><a href="<?php echo home_url('/categoria/sexologia/'); ?>">Sexologia & Saúde</a></li>
                     <li><a href="<?php echo home_url('/categoria/eventos/'); ?>">Eventos & Feiras</a></li>
