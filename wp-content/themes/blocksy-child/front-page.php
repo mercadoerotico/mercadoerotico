@@ -64,6 +64,63 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
 ?>
 
 <div class="me-home-wrapper">
+        <!-- ROTATING BANNER BILLBOARD (Espaço para Banner Rotativo) -->
+    <div class="me-banner-billboard" id="meBannerBillboard">
+        <div class="billboard-track">
+            <!-- Banner 1: Prêmio e Feira -->
+            <div class="billboard-slide active" style="background: linear-gradient(135deg, #1f1122 0%, #2e1028 100%);">
+                <a href="<?php echo home_url('/categoria/eventos/'); ?>" class="billboard-link">
+                    <div class="billboard-tag-wrap">
+                        <span class="billboard-badge">EVENTO OFICIAL</span>
+                        <span class="billboard-ad-label">Publicidade</span>
+                    </div>
+                    <div class="billboard-body">
+                        <h4 class="billboard-title"><i class="fas fa-award"></i> Prêmio & Congresso Mercado Erótico 2026</h4>
+                        <p class="billboard-desc">O maior encontro de negócios, tendências e lançamentos do setor íntimo no Brasil. Credenciamento e patrocínios abertos.</p>
+                    </div>
+                    <span class="billboard-cta">Saiba Mais <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+
+            <!-- Banner 2: Livraria e Formação -->
+            <div class="billboard-slide" style="background: linear-gradient(135deg, #120e24 0%, #1e153b 100%);">
+                <a href="<?php echo home_url('/livraria/'); ?>" class="billboard-link">
+                    <div class="billboard-tag-wrap">
+                        <span class="billboard-badge" style="background:#3b82f6;">FORMAÇÃO PROFISSIONAL</span>
+                        <span class="billboard-ad-label">Publicidade</span>
+                    </div>
+                    <div class="billboard-body">
+                        <h4 class="billboard-title"><i class="fas fa-book-open"></i> Livraria Digital Mercado Erótico</h4>
+                        <p class="billboard-desc">Manuais de sex shop, guias de atendimento, sexpack com 1.000 posts e workshops para alavancar seu negócio.</p>
+                    </div>
+                    <span class="billboard-cta" style="background:#3b82f6;">Acessar Catálogo <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+
+            <!-- Banner 3: Mídia Kit & Anúncios -->
+            <div class="billboard-slide" style="background: linear-gradient(135deg, #1c1518 0%, #301622 100%);">
+                <a href="<?php echo home_url('/contato/'); ?>" class="billboard-link">
+                    <div class="billboard-tag-wrap">
+                        <span class="billboard-badge" style="background:#10b981;">ANUNCIE NO PORTAL</span>
+                        <span class="billboard-ad-label">Publicidade</span>
+                    </div>
+                    <div class="billboard-body">
+                        <h4 class="billboard-title"><i class="fas fa-bullhorn"></i> Mídia Kit & Parcerias Comerciais</h4>
+                        <p class="billboard-desc">Conecte sua marca a milhares de profissionais, lojistas e consumidores qualificados do mercado íntimo no Brasil.</p>
+                    </div>
+                    <span class="billboard-cta" style="background:#10b981;">Fale com a Redação <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Banner Dots Indicator -->
+        <div class="billboard-dots" id="billboardDots">
+            <button class="bb-dot active" onclick="goToBanner(0)"></button>
+            <button class="bb-dot" onclick="goToBanner(1)"></button>
+            <button class="bb-dot" onclick="goToBanner(2)"></button>
+        </div>
+    </div>
+
     <!-- Top Trending Ticker -->
     <div class="me-trending-bar">
         <div class="trending-badge"><i class="fas fa-bolt"></i> EM ALTA</div>
@@ -346,63 +403,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
     </section>
 </div>
 
-<!-- RODAPÉ MODERNO COM REDES SOCIAIS -->
-<footer class="me-footer">
-    <div class="footer-inner">
-        <div class="footer-grid">
-            <!-- Coluna 1: Logo e Bio -->
-            <div class="footer-col footer-brand">
-                <a href="<?php echo home_url('/'); ?>" class="footer-logo-link">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png" alt="Mercado Erótico" class="footer-logo-img">
-                </a>
-                <p class="footer-bio">O principal portal jornalístico, analítico e documental sobre o mercado íntimo, saúde sexual e bem-estar no Brasil. Cobertura especializada contínua desde 2018.</p>
-                <div class="footer-social-links">
-                    <a href="https://www.instagram.com/mercadoerotico/" target="_blank" rel="noopener" class="social-icon instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/mercadoerotico/" target="_blank" rel="noopener" class="social-icon facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.youtube.com/@mercadoerotico" target="_blank" rel="noopener" class="social-icon youtube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    <a href="https://api.whatsapp.com/send?phone=5511999999999" target="_blank" rel="noopener" class="social-icon whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
 
-            <!-- Coluna 2: Navegação Rápida -->
-            <div class="footer-col">
-                <h4 class="footer-heading">Navegação</h4>
-                <ul class="footer-links">
-                    <li><a href="<?php echo home_url('/'); ?>">Início</a></li>
-                    <li><a href="<?php echo home_url('/sobre/'); ?>">Sobre Nós</a></li>
-                    <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo Histórico (Desde 2018)</a></li>
-                    <li><a href="<?php echo home_url('/livraria/'); ?>">Livraria Digital</a></li>
-                    <li><a href="<?php echo home_url('/contato/'); ?>">Contatos</a></li>
-                </ul>
-            </div>
-
-            <!-- Coluna 3: Especialidades & Mercado -->
-            <div class="footer-col">
-                <h4 class="footer-heading">Editorias & Destaques</h4>
-                <ul class="footer-links">
-                    <li><a href="<?php echo home_url('/categoria/negocios/'); ?>">Negócios & SexShop</a></li>
-                    <li><a href="<?php echo home_url('/categoria/sexologia/'); ?>">Sexologia & Saúde</a></li>
-                    <li><a href="<?php echo home_url('/categoria/eventos/'); ?>">Eventos & Feiras</a></li>
-                    <li><a href="<?php echo home_url('/profissionais-especialistas-em-sexualidade/'); ?>">Guia de Profissionais</a></li>
-                    <li><a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener">Guia de Sex Shop</a></li>
-                </ul>
-            </div>
-
-            <!-- Coluna 4: Canais & Atendimento -->
-            <div class="footer-col">
-                <h4 class="footer-heading">Imprensa & Contato</h4>
-                <p class="footer-contact-info"><i class="fas fa-envelope"></i> redacao@mercadoerotico.org</p>
-                <p class="footer-contact-info"><i class="fas fa-shield-alt"></i> Portal Seguro & Auditado</p>
-                <a href="<?php echo home_url('/contato/'); ?>" class="btn-footer-contact">Fale com a Redação</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; <?php echo date('Y'); ?> <strong>Portal Mercado Erótico</strong>. Todos os direitos reservados. Material jornalístico e histórico protegido.</p>
-            <p class="footer-madeby">Ambiente moderno de alto desempenho • Otimizado para Mobile</p>
-        </div>
-    </div>
-</footer>
 
 <script>
 // SLIDER DINÂMICO NO CARD PRINCIPAL DO BENTO GRID
@@ -433,6 +434,50 @@ function goToBentoSlide(idx) {
     clearInterval(bentoInterval);
     showBentoSlide(idx);
     startBentoTimer();
+
+// ROTATING BANNER BILLBOARD
+let curBannerIdx = 0;
+const bannerSlides = document.querySelectorAll('.billboard-slide');
+const bannerDots = document.querySelectorAll('#billboardDots .bb-dot');
+const totalBanners = bannerSlides.length;
+let bannerInterval = null;
+
+function showBanner(idx) {
+    if (idx >= totalBanners) curBannerIdx = 0;
+    else if (idx < 0) curBannerIdx = totalBanners - 1;
+    else curBannerIdx = idx;
+
+    bannerSlides.forEach((b, i) => {
+        if (i === curBannerIdx) b.classList.add('active');
+        else b.classList.remove('active');
+    });
+
+    bannerDots.forEach((d, i) => {
+        if (i === curBannerIdx) d.classList.add('active');
+        else d.classList.remove('active');
+    });
+}
+
+function goToBanner(idx) {
+    clearInterval(bannerInterval);
+    showBanner(idx);
+    startBannerTimer();
+}
+
+function startBannerTimer() {
+    bannerInterval = setInterval(() => {
+        showBanner(curBannerIdx + 1);
+    }, 5500); // 5.5 segundos por banner
+}
+
+const bbElem = document.getElementById('meBannerBillboard');
+if (bbElem) {
+    bbElem.addEventListener('mouseenter', () => clearInterval(bannerInterval));
+    bbElem.addEventListener('mouseleave', () => startBannerTimer());
+}
+
+startBannerTimer();
+
 }
 
 function startBentoTimer() {
@@ -448,6 +493,50 @@ if (bentoSliderElem) {
 }
 
 startBentoTimer();
+
+// ROTATING BANNER BILLBOARD
+let curBannerIdx = 0;
+const bannerSlides = document.querySelectorAll('.billboard-slide');
+const bannerDots = document.querySelectorAll('#billboardDots .bb-dot');
+const totalBanners = bannerSlides.length;
+let bannerInterval = null;
+
+function showBanner(idx) {
+    if (idx >= totalBanners) curBannerIdx = 0;
+    else if (idx < 0) curBannerIdx = totalBanners - 1;
+    else curBannerIdx = idx;
+
+    bannerSlides.forEach((b, i) => {
+        if (i === curBannerIdx) b.classList.add('active');
+        else b.classList.remove('active');
+    });
+
+    bannerDots.forEach((d, i) => {
+        if (i === curBannerIdx) d.classList.add('active');
+        else d.classList.remove('active');
+    });
+}
+
+function goToBanner(idx) {
+    clearInterval(bannerInterval);
+    showBanner(idx);
+    startBannerTimer();
+}
+
+function startBannerTimer() {
+    bannerInterval = setInterval(() => {
+        showBanner(curBannerIdx + 1);
+    }, 5500); // 5.5 segundos por banner
+}
+
+const bbElem = document.getElementById('meBannerBillboard');
+if (bbElem) {
+    bbElem.addEventListener('mouseenter', () => clearInterval(bannerInterval));
+    bbElem.addEventListener('mouseleave', () => startBannerTimer());
+}
+
+startBannerTimer();
+
 </script>
 
 <style>
@@ -1340,6 +1429,147 @@ startBentoTimer();
     color: #e31c61;
     font-weight: 600;
 }
+
+/* ROTATING BANNER BILLBOARD STYLES */
+.me-banner-billboard {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid rgba(227, 28, 97, 0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    height: 92px;
+}
+@media (max-width: 768px) {
+    .me-banner-billboard {
+        height: auto;
+        min-height: 100px;
+    }
+}
+.billboard-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.billboard-slide {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s;
+    display: flex;
+    align-items: center;
+}
+.billboard-slide.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+}
+.billboard-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 25px;
+    text-decoration: none;
+    color: #fff;
+    gap: 20px;
+}
+@media (max-width: 768px) {
+    .billboard-link {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 18px 26px;
+        gap: 10px;
+    }
+}
+.billboard-tag-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.billboard-badge {
+    background: #e31c61;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.billboard-ad-label {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.billboard-body {
+    flex-grow: 1;
+    overflow: hidden;
+}
+.billboard-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+@media (max-width: 768px) {
+    .billboard-title { white-space: normal; font-size: 0.95rem; }
+}
+.billboard-desc {
+    font-size: 0.82rem;
+    color: #d1c7d4;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+@media (max-width: 768px) {
+    .billboard-desc { display: none; }
+}
+.billboard-cta {
+    background: #e31c61;
+    color: #fff;
+    padding: 7px 18px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+.billboard-link:hover .billboard-cta {
+    transform: translateX(3px);
+}
+.billboard-dots {
+    position: absolute;
+    bottom: 6px;
+    right: 25px;
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+}
+.bb-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.bb-dot.active {
+    width: 16px;
+    border-radius: 4px;
+    background: #e31c61;
+}
+
 </style>
 
 <?php get_footer(); ?>
