@@ -71,49 +71,12 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
             <a href="<?php echo home_url('/contato/'); ?>" class="ad-standard-mediakit">Anuncie no Portal <i class="fas fa-angle-right"></i></a>
         </div>
         <div class="ad-standard-track">
-            <!-- Banner Destaque 1: Anuário Grandes Marcas 2026 -->
+            <!-- Banner Destaque: Anuário Grandes Marcas 2026 -->
             <div class="ad-standard-slide active">
                 <a href="<?php echo home_url('/anuario-grandes-marcas-do-mercado-erotico-2026/'); ?>" title="Anuário Grandes Marcas do Mercado Erótico - Baixe Grátis">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_clean.png" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1200" height="300">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_with_cover.png" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1200" height="300">
                 </a>
             </div>
-
-            <!-- Banner Padrão 2: Sex Shop Atacadão -->
-            <div class="ad-standard-slide">
-                <a href="https://www.sexshopatacadao.com.br/" target="_blank" rel="noopener sponsored" title="Sex Shop Atacadão - Distribuidor">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/06/Anuncio-Banner-30.06-VO.png" alt="Sex Shop Atacadão" class="ad-img-standard">
-                </a>
-            </div>
-
-            <!-- Banner Padrão 3: Apimentou Marketplace -->
-            <div class="ad-standard-slide">
-                <a href="https://www.apimentou.com.br/" target="_blank" rel="noopener sponsored" title="Apimentou Marketplace - Venda para todo o Brasil">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/08/BANNER-LOJISTA-APIMENTOU.png" alt="Apimentou Marketplace" class="ad-img-standard">
-                </a>
-            </div>
-
-            <!-- Banner Padrão 4: Garota Veneno Lingerie -->
-            <div class="ad-standard-slide">
-                <a href="https://garotaveneno.com.br/" target="_blank" rel="noopener sponsored" title="Garota Veneno - Lingerie de Luxo">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/09/Banner-Mercado-Erotico.jpg" alt="Garota Veneno Lingerie" class="ad-img-standard">
-                </a>
-            </div>
-
-            <!-- Banner Padrão 5: Adão & Eva Toys -->
-            <div class="ad-standard-slide">
-                <a href="<?php echo home_url('/categoria/negocios/'); ?>" target="_blank" rel="noopener sponsored" title="Adão e Eva Toys">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/06/banner.jpg" alt="Adão e Eva Toys" class="ad-img-standard">
-                </a>
-            </div>
-        </div>
-
-        <!-- Indicadores / Dots -->
-        <div class="ad-standard-dots" id="adStandardDots">
-            <button class="ad-dot active" onclick="goToAdBanner(0)" aria-label="Banner 1: Anuário Grandes Marcas"></button>
-            <button class="ad-dot" onclick="goToAdBanner(1)" aria-label="Banner 2: Sex Shop Atacadão"></button>
-            <button class="ad-dot" onclick="goToAdBanner(2)" aria-label="Banner 3: Apimentou Marketplace"></button>
-            <button class="ad-dot" onclick="goToAdBanner(3)" aria-label="Banner 4: Garota Veneno Lingerie"></button>
-            <button class="ad-dot" onclick="goToAdBanner(4)" aria-label="Banner 5: Adão e Eva Toys"></button>
         </div>
     </div>
 
