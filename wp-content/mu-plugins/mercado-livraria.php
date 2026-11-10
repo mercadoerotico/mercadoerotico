@@ -216,7 +216,7 @@ function mercado_livraria_shortcode() {
                                     }
                                     $btn_cls = 'btn-action-free';
                                 } elseif (!empty($p['buy_type']) && ($p['buy_type'] === 'mercadopago' || (!empty($p['buy_url']) && strpos($p['buy_url'], 'mpago.la') !== false))) {
-                                    $btn_text = 'Comprar (PIX)';
+                                    $btn_text = 'Comprar';
                                     $btn_icon = 'fa-shopping-cart';
                                     $btn_cls = 'btn-action-mp';
                                 }
