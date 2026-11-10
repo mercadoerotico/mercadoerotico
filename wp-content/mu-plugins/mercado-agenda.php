@@ -671,7 +671,7 @@ function me_agenda_shortcode_render() {
                     $org_nome     = get_post_meta($post_id, '_evento_organizador_nome', true);
                     $cobertura    = get_post_meta($post_id, '_evento_cobertura_jornalistica', true);
 
-                    $is_brasil = (stripos($pais, 'Brasil') !== false || stripos($cidade_pais, 'Brasil') !== false || stripos($cidade_pais, 'SP') !== false || stripos($cidade_pais, 'RJ') !== false);
+                    $is_brasil = (stripos($pais, 'Brasil') !== false || stripos($pais, 'Brazil') !== false || (empty($pais) && preg_match('/\b(Brasil|Brazil|SP|RJ|São Paulo|Rio de Janeiro)\b/i', $cidade_pais)));
                     $regiao_attr = $is_brasil ? 'Brasil' : 'Internacional';
 
                     // Formatação de Datas
@@ -696,7 +696,7 @@ function me_agenda_shortcode_render() {
                     $gcal_url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' . urlencode($post->post_title) . '&dates=' . $gcal_dates . '&details=' . urlencode(wp_strip_all_tags($post->post_excerpt ?: $post->post_content) . "\n\nMais informações: " . ($site_oficial ?: home_url('/agenda/'))) . '&location=' . urlencode($local_nome . ' - ' . $cidade_pais);
 
                     // Imagem
-                    $thumb_url = has_post_thumbnail($post_id) ? get_the_post_thumbnail_url($post_id, 'large') : 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png';
+                    $thumb_url = has_post_thumbnail($post_id) ? get_the_post_thumbnail_url($post_id, 'large') : 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/default_agenda_banner.svg';
                     
                     // Termos
                     $terms = wp_get_post_terms($post_id, 'tipo_evento');
