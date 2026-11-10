@@ -6,6 +6,14 @@ add_action("wp_enqueue_scripts", function() {
 // Desativar colapso automático do menu no dropdown "More" / "Mais"
 add_filter('blocksy:header:menu:has-responsive-desktop-menu', '__return_false');
 
+// Tradução de strings em inglês (Compartilhamento social)
+add_filter('gettext', function($translated_text, $text, $domain) {
+    if ($text === 'Share this content:' || $text === 'Share this content') {
+        return 'Compartilhe este conteúdo:';
+    }
+    return $translated_text;
+}, 20, 3);
+
 add_action("wp_head", function() {
     // 1. Injetar style.css do child theme diretamente para eliminar cache e latência
     $child_css = get_stylesheet_directory() . "/style.css";
