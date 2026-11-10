@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mercado Erótico - Livraria Digital
  * Description: Vitrine moderna e catálogo digital de livros, manuais e cursos do Mercado Erótico.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Equipe Mercado Erótico
  */
 
@@ -15,19 +15,43 @@ function mercado_livraria_get_data() {
     return json_decode($content, true) ?: array();
 }
 
+// Track whether the shortcode was rendered on this page
+global $mercado_livraria_rendered;
+$mercado_livraria_rendered = false;
+
 function mercado_livraria_shortcode() {
+    global $mercado_livraria_rendered;
+    $mercado_livraria_rendered = true;
+
     $products = mercado_livraria_get_data();
+    $total_count = count($products);
+
+    $free_count = 0;
+    $negocios_count = 0;
+    $manuais_count = 0;
+    $cursos_count = 0;
+    $saude_count = 0;
+
+    foreach ($products as $p) {
+        if (!empty($p['is_free'])) $free_count++;
+        $cats = !empty($p['categories']) ? (array)$p['categories'] : array();
+        if (in_array('Negócios', $cats)) $negocios_count++;
+        if (in_array('Manuais e etc', $cats)) $manuais_count++;
+        if (in_array('Cursos', $cats)) $cursos_count++;
+        if (in_array('Sexualidade', $cats)) $saude_count++;
+    }
+
     ob_start();
     ?>
     <div id="livraria-app" class="livraria-wrapper">
         <!-- Hero Header -->
         <div class="livraria-hero">
-            <div class="livraria-badge">★ LIVRARIA DIGITAL & FORMAÇÃO PROFISSIONAL</div>
+            <div class="livraria-badge">★ LIVRARIA DIGITAL &amp; FORMAÇÃO PROFISSIONAL</div>
             <h1 class="livraria-title">Livraria Mercado Erótico</h1>
             <p class="livraria-subtitle">E-books especializados, manuais de negócios, calendários para redes sociais e cursos práticos para o mercado íntimo e bem-estar sexual.</p>
             
             <div class="livraria-stats-bar">
-                <div class="stat-item"><span class="stat-num">54</span><span class="stat-lbl">Títulos & Manuais</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Títulos &amp; Manuais</span></div>
                 <div class="stat-sep">•</div>
                 <div class="stat-item"><span class="stat-num">Digital</span><span class="stat-lbl">Acesso Imediato</span></div>
                 <div class="stat-sep">•</div>
@@ -36,8 +60,8 @@ function mercado_livraria_shortcode() {
 
             <!-- Search Bar -->
             <div class="livraria-search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="livraria-search-input" placeholder="Pesquisar por título, tema ou tipo (ex: Pompoarismo, Negócios, SexPack, Fornecedores)...">
+                <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                <input type="text" id="livraria-search-input" placeholder="Pesquisar por título, autor ou tema (ex: Pompoarismo, Negócios, SexPack)..." autocomplete="off">
                 <button type="button" id="livraria-search-btn" class="livraria-btn-search">Buscar</button>
             </div>
         </div>
@@ -45,45 +69,52 @@ function mercado_livraria_shortcode() {
         <!-- Category Filter Tabs -->
         <div class="livraria-filter-section">
             <div class="filter-header">
-                <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias & Formatos:</span>
+                <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias &amp; Formatos:</span>
             </div>
             <div class="tabs-wrap" id="livraria-tabs">
-                <button class="livraria-tab active" data-cat="all">📚 Todos os Títulos (54)</button>
-                <button class="livraria-tab" data-cat="Negócios">💼 Negócios & SexShop (15)</button>
-                <button class="livraria-tab" data-cat="Manuais e etc">📖 Manuais & Guias (17)</button>
-                <button class="livraria-tab" data-cat="Cursos">🎓 Cursos & Workshops (11)</button>
-                <button class="livraria-tab" data-cat="Sexualidade">❤️ Saúde & Sexualidade (18)</button>
-                <button class="livraria-tab" data-cat="Gratuito">🎁 Gratuitos (7)</button>
+                <button type="button" class="livraria-tab active" data-cat="all">📚 Todos os Títulos (<?php echo $total_count; ?>)</button>
+                <button type="button" class="livraria-tab" data-cat="Negócios">💼 Negócios &amp; SexShop (<?php echo $negocios_count; ?>)</button>
+                <button type="button" class="livraria-tab" data-cat="Manuais e etc">📖 Manuais &amp; Guias (<?php echo $manuais_count; ?>)</button>
+                <button type="button" class="livraria-tab" data-cat="Cursos">🎓 Cursos &amp; Workshops (<?php echo $cursos_count; ?>)</button>
+                <button type="button" class="livraria-tab" data-cat="Sexualidade">❤️ Saúde &amp; Sexualidade (<?php echo $saude_count; ?>)</button>
+                <button type="button" class="livraria-tab" data-cat="Gratuito">🎁 Gratuitos (<?php echo $free_count; ?>)</button>
             </div>
         </div>
 
         <!-- Results Counter -->
         <div class="livraria-results-bar">
-            <div id="livraria-count" class="results-count">Exibindo <strong>54</strong> itens</div>
-            <button id="livraria-clear-btn" class="clear-filters-btn" style="display:none;"><i class="fas fa-times"></i> Limpar Filtro</button>
+            <div id="livraria-count" class="results-count">Exibindo <strong><?php echo $total_count; ?></strong> itens</div>
+            <button type="button" id="livraria-clear-btn" class="clear-filters-btn" style="display:none;"><i class="fas fa-times"></i> Limpar Filtro</button>
         </div>
 
         <!-- Products Grid -->
         <div id="livraria-grid" class="livraria-grid">
             <?php foreach ($products as $p): ?>
+                <?php
+                $pid = esc_attr($p['id']);
+                $pname = esc_attr($p['name']);
+                $pcats = esc_attr(implode(',', $p['categories']));
+                $pfree = !empty($p['is_free']) ? '1' : '0';
+                $pimg = !empty($p['image']) ? esc_url($p['image']) : '';
+                ?>
                 <div class="book-card" 
-                     data-id="<?php echo esc_attr($p['id']); ?>" 
-                     data-name="<?php echo esc_attr(strtolower($p['name'])); ?>"
-                     data-cats="<?php echo esc_attr(implode(',', $p['categories'])); ?>"
-                     data-free="<?php echo $p['is_free'] ? '1' : '0'; ?>">
-                    <div class="book-cover-wrap">
-                        <?php if ($p['image']): ?>
-                            <img src="<?php echo esc_url($p['image']); ?>" alt="<?php echo esc_attr($p['name']); ?>" class="book-cover-img" loading="lazy">
+                     data-id="<?php echo $pid; ?>" 
+                     data-name="<?php echo strtolower($pname); ?>"
+                     data-cats="<?php echo $pcats; ?>"
+                     data-free="<?php echo $pfree; ?>">
+                    <div class="book-cover-wrap" onclick="openBookModal(<?php echo $pid; ?>)">
+                        <?php if ($pimg): ?>
+                            <img src="<?php echo $pimg; ?>" alt="<?php echo $pname; ?>" class="book-cover-img" loading="lazy">
                         <?php else: ?>
                             <div class="book-no-cover"><i class="fas fa-book"></i></div>
                         <?php endif; ?>
                         
-                        <?php if ($p['is_free']): ?>
+                        <?php if (!empty($p['is_free'])): ?>
                             <span class="badge-free">GRATUITO</span>
                         <?php endif; ?>
 
                         <div class="book-hover-overlay">
-                            <button class="btn-quick-view" onclick="openBookModal(<?php echo esc_attr($p['id']); ?>)"><i class="fas fa-eye"></i> Ver Detalhes</button>
+                            <button type="button" class="btn-quick-view"><i class="fas fa-eye"></i> Ver Detalhes</button>
                         </div>
                     </div>
 
@@ -93,15 +124,15 @@ function mercado_livraria_shortcode() {
                                 <span class="cat-pill"><?php echo esc_html($cat); ?></span>
                             <?php endforeach; ?>
                         </div>
-                        <h3 class="book-title" onclick="openBookModal(<?php echo esc_attr($p['id']); ?>)"><?php echo esc_html($p['name']); ?></h3>
+                        <h3 class="book-title" onclick="openBookModal(<?php echo $pid; ?>)"><?php echo esc_html($p['name']); ?></h3>
                         <p class="book-excerpt"><?php echo esc_html($p['excerpt']); ?></p>
                         
                         <div class="book-footer">
                             <div class="book-price-block">
-                                <span class="price-val <?php echo $p['is_free'] ? 'free-text' : ''; ?>"><?php echo esc_html($p['price_formatted']); ?></span>
+                                <span class="price-val <?php echo !empty($p['is_free']) ? 'free-text' : ''; ?>"><?php echo esc_html($p['price_formatted']); ?></span>
                             </div>
-                            <button class="btn-action" onclick="openBookModal(<?php echo esc_attr($p['id']); ?>)">
-                                <?php echo $p['is_free'] ? 'Acessar' : 'Detalhes'; ?> <i class="fas fa-arrow-right"></i>
+                            <button type="button" class="btn-action" onclick="openBookModal(<?php echo $pid; ?>)">
+                                <?php echo !empty($p['is_free']) ? 'Acessar' : 'Detalhes'; ?> <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -109,21 +140,23 @@ function mercado_livraria_shortcode() {
             <?php endforeach; ?>
         </div>
 
-        <!-- Modal Details -->
+        <div id="livraria-no-results" class="livraria-no-results" style="display:none;">
+            <i class="fas fa-search" style="font-size:3rem; color:#cbd5e1; margin-bottom:15px;"></i>
+            <h3>Nenhum material encontrado</h3>
+            <p>Tente buscar por outro termo ou selecione outra categoria.</p>
+            <button type="button" class="livraria-btn-search" onclick="resetLivrariaFilters()" style="position:static; margin-top:15px;">Ver Todos os Títulos</button>
+        </div>
+
+        <!-- Modal Details Backdrop -->
         <div id="book-modal-backdrop" class="book-modal-backdrop" onclick="closeBookModal(event)">
             <div class="book-modal-content" onclick="event.stopPropagation()">
-                <button class="modal-close-btn" onclick="closeBookModal()">&times;</button>
+                <button type="button" class="modal-close-btn" onclick="closeBookModal()">&times;</button>
                 <div class="modal-body" id="modal-body-content">
-                    <!-- Dynamic modal content -->
+                    <!-- Populated dynamically via JS -->
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Embedded Products Data for Instant Filtering and Modal -->
-    <script>
-    const LIVRARIA_PRODUCTS = <?php echo json_encode($products); ?>;
-    </script>
 
     <style>
     /* LIVRARIA STYLES */
@@ -132,7 +165,7 @@ function mercado_livraria_shortcode() {
         color: #222;
         max-width: 1280px;
         margin: 0 auto;
-        padding: 0 20px 80px;
+        padding: 10px 20px 80px;
     }
     .livraria-hero {
         background: radial-gradient(circle at 50% 30%, #201322 0%, #0d0612 100%);
@@ -142,7 +175,7 @@ function mercado_livraria_shortcode() {
         color: #fff;
         margin-bottom: 40px;
         box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        border: 1px solid rgba(227, 28, 97, 0.2);
+        border: 1px solid rgba(227, 28, 97, 0.25);
     }
     .livraria-badge {
         display: inline-block;
@@ -209,12 +242,13 @@ function mercado_livraria_shortcode() {
         left: 20px;
         color: #8e8293;
         font-size: 1.1rem;
+        pointer-events: none;
     }
     .livraria-search-box input {
         width: 100%;
         padding: 16px 130px 16px 50px;
         border-radius: 50px;
-        border: 2px solid rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.18);
         background: rgba(255,255,255,0.08);
         color: #fff;
         font-size: 1rem;
@@ -225,6 +259,9 @@ function mercado_livraria_shortcode() {
         background: rgba(255,255,255,0.15);
         border-color: #e31c61;
         box-shadow: 0 0 20px rgba(227, 28, 97, 0.4);
+    }
+    .livraria-search-box input::placeholder {
+        color: #9f91a5;
     }
     .livraria-btn-search {
         position: absolute;
@@ -248,9 +285,9 @@ function mercado_livraria_shortcode() {
         margin-bottom: 25px;
     }
     .filter-header {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         font-weight: 700;
-        color: #555;
+        color: #64748b;
         margin-bottom: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -331,6 +368,7 @@ function mercado_livraria_shortcode() {
         align-items: center;
         height: 280px;
         overflow: hidden;
+        cursor: pointer;
     }
     .book-cover-img {
         max-height: 100%;
@@ -354,6 +392,7 @@ function mercado_livraria_shortcode() {
         padding: 4px 10px;
         border-radius: 20px;
         letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(16,185,129,0.3);
     }
     .book-hover-overlay {
         position: absolute;
@@ -390,6 +429,7 @@ function mercado_livraria_shortcode() {
         display: flex;
         gap: 6px;
         margin-bottom: 8px;
+        flex-wrap: wrap;
     }
     .cat-pill {
         background: #f0f0f5;
@@ -450,12 +490,30 @@ function mercado_livraria_shortcode() {
         background: #e31c61;
     }
 
+    .livraria-no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8fafc;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+    .livraria-no-results h3 {
+        font-size: 1.4rem;
+        color: #334155;
+        margin: 0 0 10px;
+    }
+    .livraria-no-results p {
+        color: #64748b;
+        margin: 0;
+    }
+
     /* MODAL */
     .book-modal-backdrop {
         display: none;
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.75);
+        background: rgba(0,0,0,0.78);
+        backdrop-filter: blur(4px);
         z-index: 999999;
         justify-content: center;
         align-items: center;
@@ -467,189 +525,381 @@ function mercado_livraria_shortcode() {
     .book-modal-content {
         background: #fff;
         border-radius: 18px;
-        max-width: 850px;
+        max-width: 860px;
         width: 100%;
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.45);
         padding: 35px;
+        animation: livModalPop 0.25s ease-out;
+    }
+    @keyframes livModalPop {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
     .modal-close-btn {
         position: absolute;
         top: 15px;
         right: 20px;
-        font-size: 2rem;
+        font-size: 2.2rem;
         background: none;
         border: none;
         color: #888;
         cursor: pointer;
         line-height: 1;
+        transition: color 0.2s;
     }
     .modal-close-btn:hover {
-        color: #111;
+        color: #e31c61;
     }
     .modal-grid {
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 30px;
     }
-    @media (max-width: 768px) {
-        .modal-grid {
-            grid-template-columns: 1fr;
-        }
-        .livraria-title {
-            font-size: 1.9rem;
-        }
-    }
     .modal-cover-wrap img {
         width: 100%;
         border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+        object-fit: cover;
     }
     .modal-title {
         font-size: 1.6rem;
         font-weight: 900;
         color: #111;
-        margin: 0 0 15px;
+        margin: 0 0 12px;
         line-height: 1.3;
     }
     .modal-price {
-        font-size: 1.8rem;
+        font-size: 1.7rem;
         font-weight: 900;
         color: #e31c61;
         margin-bottom: 20px;
+    }
+    .modal-price.free {
+        color: #10b981;
     }
     .modal-desc {
         font-size: 0.95rem;
         color: #444;
         line-height: 1.65;
         margin-bottom: 25px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 10px;
     }
-    .modal-btn-buy {
-        display: inline-block;
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: #fff;
-        font-size: 1.05rem;
+    .modal-desc p {
+        margin-bottom: 12px;
+    }
+    .modal-btn-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .modal-btn-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: #fff !important;
+        font-size: 1rem;
         font-weight: 800;
-        padding: 14px 30px;
+        padding: 14px 26px;
         border-radius: 8px;
-        text-decoration: none;
-        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        text-decoration: none !important;
+        box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
         transition: transform 0.2s, box-shadow 0.2s;
     }
-    .modal-btn-buy:hover {
+    .modal-btn-whatsapp:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
-        color: #fff;
+        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45);
+        color: #fff !important;
     }
-    </style>
+    .modal-btn-email {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f1f5f9;
+        color: #334155 !important;
+        font-size: 0.92rem;
+        font-weight: 700;
+        padding: 13px 20px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        transition: background 0.2s;
+    }
+    .modal-btn-email:hover {
+        background: #e2e8f0;
+    }
 
-    <script>
-    let currentLivrariaCat = 'all';
-    let currentLivrariaSearch = '';
-
-    function filterLivraria() {
-        const cards = document.querySelectorAll('.book-card');
-        let visibleCount = 0;
-
-        cards.forEach(card => {
-            const name = card.getAttribute('data-name');
-            const cats = card.getAttribute('data-cats');
-            const isFree = card.getAttribute('data-free') === '1';
-
-            let matchCat = true;
-            if (currentLivrariaCat === 'Gratuito') {
-                matchCat = isFree;
-            } else if (currentLivrariaCat !== 'all') {
-                matchCat = cats.includes(currentLivrariaCat);
-            }
-
-            let matchSearch = true;
-            if (currentLivrariaSearch) {
-                matchSearch = name.includes(currentLivrariaSearch.toLowerCase());
-            }
-
-            if (matchCat && matchSearch) {
-                card.style.display = 'flex';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        document.getElementById('livraria-count').innerHTML = `Exibindo <strong>${visibleCount}</strong> itens`;
-        const clearBtn = document.getElementById('livraria-clear-btn');
-        if (currentLivrariaCat !== 'all' || currentLivrariaSearch) {
-            clearBtn.style.display = 'inline-block';
-        } else {
-            clearBtn.style.display = 'none';
+    @media (max-width: 768px) {
+        .modal-grid {
+            grid-template-columns: 1fr;
+        }
+        .modal-cover-wrap {
+            text-align: center;
+        }
+        .modal-cover-wrap img {
+            max-width: 220px;
+        }
+        .livraria-title {
+            font-size: 1.9rem;
+        }
+        .livraria-stats-bar {
+            gap: 15px;
+        }
+        .livraria-search-box input {
+            padding: 14px 100px 14px 45px;
+            font-size: 0.9rem;
+        }
+        .livraria-btn-search {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        .book-modal-content {
+            padding: 25px 20px;
         }
     }
-
-    document.querySelectorAll('#livraria-tabs .livraria-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('#livraria-tabs .livraria-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            currentLivrariaCat = this.getAttribute('data-cat');
-            filterLivraria();
-        });
-    });
-
-    const searchInput = document.getElementById('livraria-search-input');
-    searchInput.addEventListener('input', function() {
-        currentLivrariaSearch = this.value.trim();
-        filterLivraria();
-    });
-    document.getElementById('livraria-search-btn').addEventListener('click', function() {
-        currentLivrariaSearch = searchInput.value.trim();
-        filterLivraria();
-    });
-
-    document.getElementById('livraria-clear-btn').addEventListener('click', function() {
-        currentLivrariaCat = 'all';
-        currentLivrariaSearch = '';
-        searchInput.value = '';
-        document.querySelectorAll('#livraria-tabs .livraria-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector('#livraria-tabs .livraria-tab[data-cat="all"]').classList.add('active');
-        filterLivraria();
-    });
-
-    function openBookModal(id) {
-        const p = LIVRARIA_PRODUCTS.find(item => item.id === id);
-        if (!p) return;
-
-        const body = document.getElementById('modal-body-content');
-        body.innerHTML = `
-            <div class="modal-grid">
-                <div class="modal-cover-wrap">
-                    <img src="${p.image}" alt="${p.name}">
-                </div>
-                <div class="modal-details">
-                    <div class="book-cats" style="margin-bottom:12px;">
-                        ${p.categories.map(c => `<span class="cat-pill">${c}</span>`).join(' ')}
-                    </div>
-                    <h2 class="modal-title">${p.name}</h2>
-                    <div class="modal-price">${p.price_formatted}</div>
-                    <div class="modal-desc">
-                        ${p.short_description || p.description}
-                    </div>
-                    <div style="margin-top:25px;">
-                        <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C+tenho+interesse+no+material+${encodeURIComponent(p.name)}" target="_blank" class="modal-btn-buy">
-                            <i class="fas fa-check-circle"></i> Adquirir / Acessar Agora
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.getElementById('book-modal-backdrop').classList.add('active');
-    }
-
-    function closeBookModal(e) {
-        document.getElementById('book-modal-backdrop').classList.remove('active');
-    }
-    </script>
+    </style>
     <?php
     return ob_get_clean();
 }
 add_shortcode('mercado_livraria', 'mercado_livraria_shortcode');
+
+/**
+ * Output JavaScript and Data Island in wp_footer so wpautop/wptexturize never corrupt them
+ */
+function mercado_livraria_footer_scripts() {
+    global $mercado_livraria_rendered;
+    if (!$mercado_livraria_rendered && !is_page('livraria')) {
+        return;
+    }
+
+    $products = mercado_livraria_get_data();
+    ?>
+    <!-- Livraria JSON Data Island -->
+    <script type="application/json" id="livraria-data-json">
+    <?php echo json_encode($products, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
+    </script>
+
+    <!-- Livraria Logic -->
+    <script>
+    (function() {
+        let livrariaProducts = [];
+        try {
+            const rawEl = document.getElementById('livraria-data-json');
+            if (rawEl) {
+                livrariaProducts = JSON.parse(rawEl.textContent);
+            }
+        } catch (e) {
+            console.error('Error parsing livraria JSON:', e);
+        }
+
+        let currentCat = 'all';
+        let currentSearch = '';
+
+        function filterLivraria() {
+            const cards = document.querySelectorAll('.book-card');
+            const noResults = document.getElementById('livraria-no-results');
+            let visibleCount = 0;
+
+            cards.forEach(function(card) {
+                const name = card.getAttribute('data-name') || '';
+                const cats = card.getAttribute('data-cats') || '';
+                const isFree = card.getAttribute('data-free') === '1';
+
+                let matchCat = true;
+                if (currentCat === 'Gratuito') {
+                    matchCat = isFree;
+                } else if (currentCat !== 'all') {
+                    matchCat = cats.toLowerCase().indexOf(currentCat.toLowerCase()) !== -1;
+                }
+
+                let matchSearch = true;
+                if (currentSearch) {
+                    const q = currentSearch.toLowerCase();
+                    matchSearch = (name.indexOf(q) !== -1 || cats.toLowerCase().indexOf(q) !== -1);
+                }
+
+                if (matchCat && matchSearch) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const countEl = document.getElementById('livraria-count');
+            if (countEl) {
+                countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
+            }
+
+            const clearBtn = document.getElementById('livraria-clear-btn');
+            if (clearBtn) {
+                if (currentCat !== 'all' || currentSearch) {
+                    clearBtn.style.display = 'inline-block';
+                } else {
+                    clearBtn.style.display = 'none';
+                }
+            }
+
+            if (noResults) {
+                noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+
+        // Setup Tabs
+        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                this.classList.add('active');
+                currentCat = this.getAttribute('data-cat') || 'all';
+                filterLivraria();
+            });
+        });
+
+        // Setup Search
+        const searchInput = document.getElementById('livraria-search-input');
+        const searchBtn = document.getElementById('livraria-search-btn');
+
+        if (searchInput) {
+            let debounceTimer = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    currentSearch = searchInput.value.trim();
+                    filterLivraria();
+                }, 200);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    currentSearch = searchInput.value.trim();
+                    filterLivraria();
+                }
+            });
+        }
+
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function() {
+                if (searchInput) {
+                    currentSearch = searchInput.value.trim();
+                    filterLivraria();
+                }
+            });
+        }
+
+        // Setup Clear
+        const clearBtn = document.getElementById('livraria-clear-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                resetLivrariaFilters();
+            });
+        }
+
+        window.resetLivrariaFilters = function() {
+            currentCat = 'all';
+            currentSearch = '';
+            if (searchInput) searchInput.value = '';
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            const allTab = document.querySelector('#livraria-tabs .livraria-tab[data-cat="all"]');
+            if (allTab) allTab.classList.add('active');
+            filterLivraria();
+        };
+
+        // Modal Functionality
+        window.openBookModal = function(id) {
+            const p = livrariaProducts.find(function(item) {
+                return String(item.id) === String(id);
+            });
+            if (!p) {
+                console.warn('Product not found for id:', id);
+                return;
+            }
+
+            const body = document.getElementById('modal-body-content');
+            if (!body) return;
+
+            const isFree = !!p.is_free;
+            const waPhone = '5562982763039';
+            const actionText = isFree ? 'Receber Gratuitamente' : 'Adquirir / Comprar';
+            const waMsg = isFree
+                ? 'Olá! Gostaria de receber o material gratuito "' + p.name + '" (ID ' + p.id + ') do Portal Mercado Erótico.'
+                : 'Olá! Gostaria de adquirir o material "' + p.name + '" (ID ' + p.id + ') do Portal Mercado Erótico.';
+
+            const waUrl = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg);
+            const mailUrl = 'mailto:contato@mercadoerotico.org?subject=' + encodeURIComponent('Interesse: ' + p.name) + '&body=' + encodeURIComponent(waMsg);
+
+            let catsHtml = '';
+            if (Array.isArray(p.categories)) {
+                catsHtml = p.categories.map(function(c) {
+                    return '<span class="cat-pill">' + c + '</span>';
+                }).join(' ');
+            }
+
+            const imgHtml = p.image 
+                ? '<img src="' + p.image + '" alt="' + (p.name || '') + '">'
+                : '<div class="book-no-cover" style="height:250px;"><i class="fas fa-book" style="font-size:3rem;"></i></div>';
+
+            const priceClass = isFree ? 'modal-price free' : 'modal-price';
+            const fullDesc = p.description || p.short_description || p.excerpt || 'Sem descrição detalhada.';
+
+            body.innerHTML = `
+                <div class="modal-grid">
+                    <div class="modal-cover-wrap">
+                        ${imgHtml}
+                    </div>
+                    <div class="modal-details">
+                        <div class="book-cats" style="margin-bottom:12px;">
+                            ${catsHtml}
+                        </div>
+                        <h2 class="modal-title">${p.name}</h2>
+                        <div class="${priceClass}">${p.price_formatted}</div>
+                        <div class="modal-desc">
+                            ${fullDesc}
+                        </div>
+                        <div class="modal-btn-group">
+                            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp">
+                                <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> ${actionText} via WhatsApp
+                            </a>
+                            <a href="${mailUrl}" class="modal-btn-email">
+                                <i class="fas fa-envelope"></i> Pedir por E-mail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const backdrop = document.getElementById('book-modal-backdrop');
+            if (backdrop) {
+                backdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeBookModal = function(e) {
+            if (e && e.target && e.target !== document.getElementById('book-modal-backdrop') && !e.target.classList.contains('modal-close-btn')) {
+                return;
+            }
+            const backdrop = document.getElementById('book-modal-backdrop');
+            if (backdrop) {
+                backdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.closeBookModal();
+            }
+        });
+    })();
+    </script>
+    <?php
+}
+add_action('wp_footer', 'mercado_livraria_footer_scripts', 99);
