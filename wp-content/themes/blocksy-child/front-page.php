@@ -64,60 +64,48 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
 ?>
 
 <div class="me-home-wrapper">
-        <!-- ROTATING BANNER BILLBOARD (Espaço para Banner Rotativo) -->
-    <div class="me-banner-billboard" id="meBannerBillboard">
-        <div class="billboard-track">
-            <!-- Banner 1: Prêmio e Feira -->
-            <div class="billboard-slide active" style="background: linear-gradient(135deg, #1f1122 0%, #2e1028 100%);">
-                <a href="<?php echo home_url('/categoria/eventos/'); ?>" class="billboard-link">
-                    <div class="billboard-tag-wrap">
-                        <span class="billboard-badge">EVENTO OFICIAL</span>
-                        <span class="billboard-ad-label">Publicidade</span>
-                    </div>
-                    <div class="billboard-body">
-                        <h4 class="billboard-title"><i class="fas fa-award"></i> Prêmio & Congresso Mercado Erótico 2026</h4>
-                        <p class="billboard-desc">O maior encontro de negócios, tendências e lançamentos do setor íntimo no Brasil. Credenciamento e patrocínios abertos.</p>
-                    </div>
-                    <span class="billboard-cta">Saiba Mais <i class="fas fa-arrow-right"></i></span>
+        <!-- ESPAÇO DE PUBLICIDADE - BANNER PADRÃO ROTATIVO (PADRÃO IAB) -->
+    <div class="me-ad-standard-container" id="meStandardAdContainer">
+        <div class="ad-standard-header">
+            <span class="ad-standard-badge"><i class="fas fa-bullhorn"></i> PUBLICIDADE</span>
+            <a href="<?php echo home_url('/contato/'); ?>" class="ad-standard-mediakit">Anuncie no Portal <i class="fas fa-angle-right"></i></a>
+        </div>
+        <div class="ad-standard-track">
+            <!-- Banner Padrão 1: Sex Shop Atacadão -->
+            <div class="ad-standard-slide active">
+                <a href="https://www.sexshopatacadao.com.br/" target="_blank" rel="noopener sponsored" title="Sex Shop Atacadão - Distribuidor">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/06/Anuncio-Banner-30.06-VO.png" alt="Sex Shop Atacadão" class="ad-img-standard">
                 </a>
             </div>
 
-            <!-- Banner 2: Livraria e Formação -->
-            <div class="billboard-slide" style="background: linear-gradient(135deg, #120e24 0%, #1e153b 100%);">
-                <a href="<?php echo home_url('/livraria/'); ?>" class="billboard-link">
-                    <div class="billboard-tag-wrap">
-                        <span class="billboard-badge" style="background:#3b82f6;">FORMAÇÃO PROFISSIONAL</span>
-                        <span class="billboard-ad-label">Publicidade</span>
-                    </div>
-                    <div class="billboard-body">
-                        <h4 class="billboard-title"><i class="fas fa-book-open"></i> Livraria Digital Mercado Erótico</h4>
-                        <p class="billboard-desc">Manuais de sex shop, guias de atendimento, sexpack com 1.000 posts e workshops para alavancar seu negócio.</p>
-                    </div>
-                    <span class="billboard-cta" style="background:#3b82f6;">Acessar Catálogo <i class="fas fa-arrow-right"></i></span>
+            <!-- Banner Padrão 2: Apimentou Marketplace -->
+            <div class="ad-standard-slide">
+                <a href="https://www.apimentou.com.br/" target="_blank" rel="noopener sponsored" title="Apimentou Marketplace - Venda para todo o Brasil">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/08/BANNER-LOJISTA-APIMENTOU.png" alt="Apimentou Marketplace" class="ad-img-standard">
                 </a>
             </div>
 
-            <!-- Banner 3: Mídia Kit & Anúncios -->
-            <div class="billboard-slide" style="background: linear-gradient(135deg, #1c1518 0%, #301622 100%);">
-                <a href="<?php echo home_url('/contato/'); ?>" class="billboard-link">
-                    <div class="billboard-tag-wrap">
-                        <span class="billboard-badge" style="background:#10b981;">ANUNCIE NO PORTAL</span>
-                        <span class="billboard-ad-label">Publicidade</span>
-                    </div>
-                    <div class="billboard-body">
-                        <h4 class="billboard-title"><i class="fas fa-bullhorn"></i> Mídia Kit & Parcerias Comerciais</h4>
-                        <p class="billboard-desc">Conecte sua marca a milhares de profissionais, lojistas e consumidores qualificados do mercado íntimo no Brasil.</p>
-                    </div>
-                    <span class="billboard-cta" style="background:#10b981;">Fale com a Redação <i class="fas fa-arrow-right"></i></span>
+            <!-- Banner Padrão 3: Garota Veneno Lingerie -->
+            <div class="ad-standard-slide">
+                <a href="https://garotaveneno.com.br/" target="_blank" rel="noopener sponsored" title="Garota Veneno - Lingerie de Luxo">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/09/Banner-Mercado-Erotico.jpg" alt="Garota Veneno Lingerie" class="ad-img-standard">
+                </a>
+            </div>
+
+            <!-- Banner Padrão 4: Adão & Eva Toys -->
+            <div class="ad-standard-slide">
+                <a href="<?php echo home_url('/categoria/negocios/'); ?>" target="_blank" rel="noopener sponsored" title="Adão e Eva Toys">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/06/banner.jpg" alt="Adão e Eva Toys" class="ad-img-standard">
                 </a>
             </div>
         </div>
 
-        <!-- Banner Dots Indicator -->
-        <div class="billboard-dots" id="billboardDots">
-            <button class="bb-dot active" onclick="goToBanner(0)"></button>
-            <button class="bb-dot" onclick="goToBanner(1)"></button>
-            <button class="bb-dot" onclick="goToBanner(2)"></button>
+        <!-- Indicadores / Dots -->
+        <div class="ad-standard-dots" id="adStandardDots">
+            <button class="ad-dot active" onclick="goToAdBanner(0)" aria-label="Banner 1"></button>
+            <button class="ad-dot" onclick="goToAdBanner(1)" aria-label="Banner 2"></button>
+            <button class="ad-dot" onclick="goToAdBanner(2)" aria-label="Banner 3"></button>
+            <button class="ad-dot" onclick="goToAdBanner(3)" aria-label="Banner 4"></button>
         </div>
     </div>
 
@@ -434,50 +422,6 @@ function goToBentoSlide(idx) {
     clearInterval(bentoInterval);
     showBentoSlide(idx);
     startBentoTimer();
-
-// ROTATING BANNER BILLBOARD
-let curBannerIdx = 0;
-const bannerSlides = document.querySelectorAll('.billboard-slide');
-const bannerDots = document.querySelectorAll('#billboardDots .bb-dot');
-const totalBanners = bannerSlides.length;
-let bannerInterval = null;
-
-function showBanner(idx) {
-    if (idx >= totalBanners) curBannerIdx = 0;
-    else if (idx < 0) curBannerIdx = totalBanners - 1;
-    else curBannerIdx = idx;
-
-    bannerSlides.forEach((b, i) => {
-        if (i === curBannerIdx) b.classList.add('active');
-        else b.classList.remove('active');
-    });
-
-    bannerDots.forEach((d, i) => {
-        if (i === curBannerIdx) d.classList.add('active');
-        else d.classList.remove('active');
-    });
-}
-
-function goToBanner(idx) {
-    clearInterval(bannerInterval);
-    showBanner(idx);
-    startBannerTimer();
-}
-
-function startBannerTimer() {
-    bannerInterval = setInterval(() => {
-        showBanner(curBannerIdx + 1);
-    }, 5500); // 5.5 segundos por banner
-}
-
-const bbElem = document.getElementById('meBannerBillboard');
-if (bbElem) {
-    bbElem.addEventListener('mouseenter', () => clearInterval(bannerInterval));
-    bbElem.addEventListener('mouseleave', () => startBannerTimer());
-}
-
-startBannerTimer();
-
 }
 
 function startBentoTimer() {
@@ -494,49 +438,51 @@ if (bentoSliderElem) {
 
 startBentoTimer();
 
-// ROTATING BANNER BILLBOARD
-let curBannerIdx = 0;
-const bannerSlides = document.querySelectorAll('.billboard-slide');
-const bannerDots = document.querySelectorAll('#billboardDots .bb-dot');
-const totalBanners = bannerSlides.length;
-let bannerInterval = null;
+// BANNER PADRÃO ROTATIVO (PADRÃO IAB)
+let curAdIdx = 0;
+const adSlides = document.querySelectorAll('.ad-standard-slide');
+const adDots = document.querySelectorAll('#adStandardDots .ad-dot');
+const totalAds = adSlides.length;
+let adInterval = null;
 
-function showBanner(idx) {
-    if (idx >= totalBanners) curBannerIdx = 0;
-    else if (idx < 0) curBannerIdx = totalBanners - 1;
-    else curBannerIdx = idx;
+function showAdBanner(idx) {
+    if (totalAds === 0) return;
+    if (idx >= totalAds) curAdIdx = 0;
+    else if (idx < 0) curAdIdx = totalAds - 1;
+    else curAdIdx = idx;
 
-    bannerSlides.forEach((b, i) => {
-        if (i === curBannerIdx) b.classList.add('active');
-        else b.classList.remove('active');
+    adSlides.forEach((s, i) => {
+        if (i === curAdIdx) s.classList.add('active');
+        else s.classList.remove('active');
     });
 
-    bannerDots.forEach((d, i) => {
-        if (i === curBannerIdx) d.classList.add('active');
+    adDots.forEach((d, i) => {
+        if (i === curAdIdx) d.classList.add('active');
         else d.classList.remove('active');
     });
 }
 
-function goToBanner(idx) {
-    clearInterval(bannerInterval);
-    showBanner(idx);
-    startBannerTimer();
+function goToAdBanner(idx) {
+    clearInterval(adInterval);
+    showAdBanner(idx);
+    startAdTimer();
 }
 
-function startBannerTimer() {
-    bannerInterval = setInterval(() => {
-        showBanner(curBannerIdx + 1);
-    }, 5500); // 5.5 segundos por banner
+function startAdTimer() {
+    adInterval = setInterval(() => {
+        showAdBanner(curAdIdx + 1);
+    }, 6000);
 }
 
-const bbElem = document.getElementById('meBannerBillboard');
-if (bbElem) {
-    bbElem.addEventListener('mouseenter', () => clearInterval(bannerInterval));
-    bbElem.addEventListener('mouseleave', () => startBannerTimer());
+const adContainerElem = document.getElementById('meStandardAdContainer');
+if (adContainerElem) {
+    adContainerElem.addEventListener('mouseenter', () => clearInterval(adInterval));
+    adContainerElem.addEventListener('mouseleave', () => startAdTimer());
 }
 
-startBannerTimer();
-
+if (totalAds > 1) {
+    startAdTimer();
+}
 </script>
 
 <style>
@@ -1430,146 +1376,104 @@ startBannerTimer();
     font-weight: 600;
 }
 
-/* ROTATING BANNER BILLBOARD STYLES */
-.me-banner-billboard {
+/* ESPAÇO DE PUBLICIDADE - BANNER PADRÃO IAB */
+.me-ad-standard-container {
+    max-width: 970px;
+    margin: 15px auto 25px;
     position: relative;
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    border: 1px solid rgba(227, 28, 97, 0.2);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    height: 92px;
 }
-@media (max-width: 768px) {
-    .me-banner-billboard {
-        height: auto;
-        min-height: 100px;
-    }
-}
-.billboard-track {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.billboard-slide {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.6s ease, visibility 0.6s;
+.ad-standard-header {
     display: flex;
-    align-items: center;
-}
-.billboard-slide.active {
-    opacity: 1;
-    visibility: visible;
-    position: relative;
-}
-.billboard-link {
-    display: flex;
-    align-items: center;
     justify-content: space-between;
-    width: 100%;
-    padding: 14px 25px;
-    text-decoration: none;
-    color: #fff;
-    gap: 20px;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 0 4px;
 }
-@media (max-width: 768px) {
-    .billboard-link {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 16px 18px 26px;
-        gap: 10px;
-    }
-}
-.billboard-tag-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex-shrink: 0;
-}
-.billboard-badge {
-    background: #e31c61;
-    color: #fff;
-    font-size: 0.68rem;
+.ad-standard-badge {
+    font-size: 0.7rem;
     font-weight: 800;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-.billboard-ad-label {
-    font-size: 0.62rem;
-    color: rgba(255,255,255,0.4);
+    color: #8c828e;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
-.billboard-body {
-    flex-grow: 1;
+.ad-standard-mediakit {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #e31c61;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+.ad-standard-mediakit:hover {
+    text-decoration: underline;
+}
+.ad-standard-track {
+    position: relative;
+    border-radius: 10px;
     overflow: hidden;
-}
-.billboard-title {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-@media (max-width: 768px) {
-    .billboard-title { white-space: normal; font-size: 0.95rem; }
-}
-.billboard-desc {
-    font-size: 0.82rem;
-    color: #d1c7d4;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-@media (max-width: 768px) {
-    .billboard-desc { display: none; }
-}
-.billboard-cta {
-    background: #e31c61;
-    color: #fff;
-    padding: 7px 18px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-}
-.billboard-link:hover .billboard-cta {
-    transform: translateX(3px);
-}
-.billboard-dots {
-    position: absolute;
-    bottom: 6px;
-    right: 25px;
+    background: #fdfdfd;
+    border: 1px solid #ebdfee;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     display: flex;
-    gap: 6px;
-    z-index: 5;
+    justify-content: center;
+    align-items: center;
+    min-height: 90px;
 }
-.bb-dot {
+.ad-standard-slide {
+    display: none;
+    width: 100%;
+    text-align: center;
+    animation: adFadeIn 0.5s ease;
+}
+.ad-standard-slide.active {
+    display: block;
+}
+@keyframes adFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.ad-standard-slide a {
+    display: block;
+    line-height: 0;
+}
+.ad-img-standard {
+    width: 100%;
+    max-width: 970px;
+    height: auto;
+    max-height: 250px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    transition: transform 0.25s ease;
+}
+.ad-standard-slide:hover .ad-img-standard {
+    transform: scale(1.005);
+}
+.ad-standard-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+.ad-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.3);
+    background: #d8cbd9;
     border: none;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    padding: 0;
 }
-.bb-dot.active {
-    width: 16px;
+.ad-dot.active {
+    width: 18px;
     border-radius: 4px;
     background: #e31c61;
 }
-
+@media (max-width: 768px) {
+    .me-ad-standard-container {
+        margin: 10px auto 18px;
+    }
+}
 </style>
 
 <?php get_footer(); ?>
