@@ -1019,39 +1019,32 @@ function mercado_livraria_footer_scripts() {
             const priceClass = isFree ? 'modal-price free' : 'modal-price';
             const fullDesc = (p.description || p.short_description || p.excerpt || 'Sem descrição detalhada.').replace(/`/g, "'").replace(/\${/g, '{');
 
-            // Construct Buttons based on Product Checkout Destination
+            // Construct Buttons based on Product Checkout Destination (sem WhatsApp)
             let actionButtonsHtml = '';
             if (buyType === 'hotmart') {
                 actionButtonsHtml = `
                     <a href="${buyUrl}" target="_blank" rel="noopener sponsored" class="modal-btn-hotmart">
                         <i class="fas fa-fire" style="font-size:1.15rem;"></i> Comprar Agora no Hotmart <i class="fas fa-arrow-right"></i>
                     </a>
-                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp-secondary">
-                        <i class="fab fa-whatsapp"></i> Dúvidas no WhatsApp
-                    </a>
                 `;
             } else if (buyType === 'external') {
                 actionButtonsHtml = `
                     <a href="${buyUrl}" target="_blank" rel="noopener" class="modal-btn-external">
-                        <i class="fas fa-external-link-alt"></i> Acessar / Comprar no Site Oficial
-                    </a>
-                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp-secondary">
-                        <i class="fab fa-whatsapp"></i> Dúvidas
+                        <i class="fas fa-external-link-alt"></i> Acessar no Site Oficial <i class="fas fa-arrow-right"></i>
                     </a>
                 `;
             } else if (isFree) {
+                const freeTargetUrl = (buyUrl && !buyUrl.includes('wa.me')) ? buyUrl : mailUrl;
+                const freeTargetAttr = (buyUrl && !buyUrl.includes('wa.me')) ? 'target="_blank" rel="noopener"' : '';
                 actionButtonsHtml = `
-                    <a href="${buyUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-free">
-                        <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Receber Gratuitamente via WhatsApp
+                    <a href="${freeTargetUrl}" ${freeTargetAttr} class="modal-btn-free">
+                        <i class="fas fa-download" style="font-size:1.15rem;"></i> Acessar Material Gratuito <i class="fas fa-arrow-right"></i>
                     </a>
                 `;
             } else {
                 actionButtonsHtml = `
-                    <a href="${buyUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp">
-                        <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Adquirir via WhatsApp / PIX
-                    </a>
                     <a href="${mailUrl}" class="modal-btn-email">
-                        <i class="fas fa-envelope"></i> Pedir por E-mail
+                        <i class="fas fa-envelope"></i> Solicitar por E-mail
                     </a>
                 `;
             }
