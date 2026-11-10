@@ -1,22 +1,30 @@
 <?php
 /**
- * Front Page Template - Portal Mercado Erótico (Modern Magazine 2026)
+ * Front Page Template - Portal Mercado Erótico (Modern Bento Grid with Dynamic Hero Slide)
  */
 
 get_header();
 
-// 1. Get Top 6 Latest Posts for Dynamic Slideshow (Block 1)
-$slider_posts = get_posts(array(
-    'numberposts' => 6,
+// 1. Featured Posts for Bento Hero
+// Top 4 stories rotate inside the Main Bento Slide
+$main_slides = get_posts(array(
+    'numberposts' => 4,
     'post_status' => 'publish'
 ));
 
-// 2. Curated Categories for Eixos (Block 3)
+// 4 Secondary stories on the right side of Bento Grid
+$side_posts = get_posts(array(
+    'numberposts' => 4,
+    'offset' => 4,
+    'post_status' => 'publish'
+));
+
+// 2. Curated Categories for Eixos
 $negocios_posts = get_posts(array('category_name' => 'negocios', 'numberposts' => 3, 'post_status' => 'publish'));
 $sexologia_posts = get_posts(array('category_name' => 'sexologia', 'numberposts' => 3, 'post_status' => 'publish'));
 $eventos_posts = get_posts(array('category_name' => 'eventos', 'numberposts' => 3, 'post_status' => 'publish'));
 
-// 3. Livraria Featured Items (Block 4)
+// 3. Livraria Featured Items
 $livraria_items = array();
 $livraria_file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
 if (file_exists($livraria_file)) {
@@ -24,7 +32,14 @@ if (file_exists($livraria_file)) {
     $livraria_items = array_slice($all_books, 0, 4);
 }
 
-// 4. Query All-Time Most Read Posts (Block 5 - Campeões de Audiência)
+// 4. Recent Feed Posts (offset 8)
+$feed_posts = get_posts(array(
+    'numberposts' => 9,
+    'offset' => 8,
+    'post_status' => 'publish'
+));
+
+// 5. Query All-Time Most Read Posts (Before Footer)
 global $wpdb;
 $most_read_sql = "
     SELECT p.ID, p.post_title, p.post_date,
@@ -42,13 +57,6 @@ $most_read_sql = "
     LIMIT 6
 ";
 $most_read_posts = $wpdb->get_results($most_read_sql);
-
-// 5. Recent Feed Posts (Block 5, offset 6)
-$feed_posts = get_posts(array(
-    'numberposts' => 9,
-    'offset' => 6,
-    'post_status' => 'publish'
-));
 ?>
 
 <div class="me-home-wrapper">
@@ -56,7 +64,7 @@ $feed_posts = get_posts(array(
     <div class="me-trending-bar">
         <div class="trending-badge"><i class="fas fa-bolt"></i> EM ALTA</div>
         <div class="trending-ticker">
-            <?php foreach ($slider_posts as $sp): ?>
+            <?php foreach ($main_slides as $sp): ?>
                 <a href="<?php echo get_permalink($sp->ID); ?>" class="ticker-item">
                     <span>•</span> <?php echo esc_html($sp->post_title); ?>
                 </a>
@@ -64,51 +72,68 @@ $feed_posts = get_posts(array(
         </div>
     </div>
 
-    <!-- BLOCO 1: SLIDER DINÂMICO DE ÚLTIMAS MATÉRIAS (Transição mais lenta e elegante) -->
-    <section class="me-slider-section">
-        <div class="me-carousel-container" id="meHeroCarousel">
-            <div class="me-carousel-track">
-                <?php foreach ($slider_posts as $idx => $sp): 
-                    $thumb = get_the_post_thumbnail_url($sp->ID, 'full') ?: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1400';
-                    $cats = wp_get_post_categories($sp->ID, array('fields' => 'names'));
+    <!-- BLOCO 1: BENTO GRID HERO (COM SLIDE DINÂMICO NA IMAGEM PRINCIPAL) -->
+    <section class="me-bento-hero">
+        <!-- Main Card: Slideshow Dinâmico das 4 Matérias de Capa -->
+        <div class="bento-main-slider" id="bentoSlider">
+            <div class="bento-slides-track">
+                <?php foreach ($main_slides as $idx => $slide): 
+                    $thumb = get_the_post_thumbnail_url($slide->ID, 'full') ?: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200';
+                    $cats = wp_get_post_categories($slide->ID, array('fields' => 'names'));
                     $cat = !empty($cats) ? $cats[0] : 'Destaque';
-                    $author_name = get_the_author_meta('display_name', $sp->post_author);
+                    $author_name = get_the_author_meta('display_name', $slide->post_author);
                 ?>
-                    <div class="me-slide <?php echo $idx === 0 ? 'active' : ''; ?>">
-                        <div class="slide-bg" style="background-image: url('<?php echo esc_url($thumb); ?>');"></div>
-                        <div class="slide-overlay"></div>
-                        <div class="slide-content">
-                            <span class="slide-cat-badge"><?php echo esc_html($cat); ?></span>
-                            <h2 class="slide-title">
-                                <a href="<?php echo get_permalink($sp->ID); ?>"><?php echo esc_html($sp->post_title); ?></a>
-                            </h2>
-                            <p class="slide-excerpt"><?php echo wp_trim_words($sp->post_content, 26, '...'); ?></p>
-                            <div class="slide-meta">
-                                <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $sp->ID); ?></span>
-                                <span>•</span>
-                                <span><i class="far fa-user"></i> <?php echo esc_html($author_name); ?></span>
-                                <span>•</span>
-                                <a href="<?php echo get_permalink($sp->ID); ?>" class="slide-read-btn">Ler Matéria Completa →</a>
+                    <article class="bento-slide-item <?php echo $idx === 0 ? 'active' : ''; ?>">
+                        <a href="<?php echo get_permalink($slide->ID); ?>" class="bento-card-link">
+                            <div class="bento-bg" style="background-image: url('<?php echo esc_url($thumb); ?>');"></div>
+                            <div class="bento-gradient"></div>
+                            <div class="bento-content">
+                                <span class="bento-cat-tag"><?php echo esc_html($cat); ?></span>
+                                <h1 class="bento-main-title"><?php echo esc_html($slide->post_title); ?></h1>
+                                <p class="bento-excerpt"><?php echo wp_trim_words($slide->post_content, 22, '...'); ?></p>
+                                <div class="bento-meta">
+                                    <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $slide->ID); ?></span>
+                                    <span>•</span>
+                                    <span><i class="far fa-user"></i> <?php echo esc_html($author_name); ?></span>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </a>
+                    </article>
                 <?php endforeach; ?>
             </div>
 
-            <!-- Carousel Controls -->
-            <button class="carousel-arrow prev-arrow" onclick="moveSlide(-1)" aria-label="Slide Anterior">&#10094;</button>
-            <button class="carousel-arrow next-arrow" onclick="moveSlide(1)" aria-label="Próximo Slide">&#10095;</button>
-
-            <!-- Dots Indicator -->
-            <div class="carousel-dots" id="carouselDots">
-                <?php for ($i = 0; $i < count($slider_posts); $i++): ?>
-                    <button class="dot <?php echo $i === 0 ? 'active' : ''; ?>" onclick="goToSlide(<?php echo $i; ?>)" aria-label="Ir para slide <?php echo $i + 1; ?>"></button>
+            <!-- Bento Slider Navigation Dots -->
+            <div class="bento-dots" id="bentoDots">
+                <?php for ($i = 0; $i < count($main_slides); $i++): ?>
+                    <button class="bdot <?php echo $i === 0 ? 'active' : ''; ?>" onclick="goToBentoSlide(<?php echo $i; ?>)" aria-label="Slide <?php echo $i + 1; ?>"></button>
                 <?php endfor; ?>
             </div>
         </div>
+
+        <!-- Side 4 Cards -->
+        <div class="bento-side-grid">
+            <?php foreach ($side_posts as $sp): 
+                $sp_thumb = get_the_post_thumbnail_url($sp->ID, 'medium_large') ?: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600';
+                $sp_cats = wp_get_post_categories($sp->ID, array('fields' => 'names'));
+                $sp_cat = !empty($sp_cats) ? $sp_cats[0] : 'Mundo Erótico';
+            ?>
+                <article class="bento-side-card">
+                    <a href="<?php echo get_permalink($sp->ID); ?>" class="side-card-link">
+                        <div class="side-thumb-wrap">
+                            <img src="<?php echo esc_url($sp_thumb); ?>" alt="<?php echo esc_attr($sp->post_title); ?>" loading="lazy">
+                        </div>
+                        <div class="side-content">
+                            <span class="side-cat"><?php echo esc_html($sp_cat); ?></span>
+                            <h3 class="side-title"><?php echo esc_html($sp->post_title); ?></h3>
+                            <span class="side-date"><i class="far fa-clock"></i> <?php echo get_the_date('d/m/Y', $sp->ID); ?></span>
+                        </div>
+                    </a>
+                </article>
+            <?php endforeach; ?>
+        </div>
     </section>
 
-    <!-- BLOCO 2: ACERVO HISTÓRICO (Destaque Principal de Acesso) -->
+    <!-- BLOCO 2: ACERVO HISTÓRICO -->
     <section class="me-acervo-callout">
         <div class="acervo-callout-inner">
             <div class="acervo-callout-left">
@@ -130,7 +155,7 @@ $feed_posts = get_posts(array(
         </div>
     </section>
 
-    <!-- BLOCO 3: 3 COLUNAS TEMÁTICAS CURADAS (Negócios, Sexologia, Eventos) -->
+    <!-- BLOCO 3: 3 COLUNAS TEMÁTICAS CURADAS -->
     <section class="me-thematic-columns">
         <!-- Col 1: Negócios -->
         <div class="editorial-col">
@@ -244,7 +269,40 @@ $feed_posts = get_posts(array(
         </div>
     </section>
 
-        <!-- BLOCO NOVO: 🔥 OS MAIS LIDOS DE TODOS OS TEMPOS -->
+    <!-- BLOCO 5: FEED RECENTE DE REPORTAGENS -->
+    <section class="me-feed-section">
+        <div class="feed-header">
+            <h2 class="feed-title">Mais Reportagens & Artigos Recentes</h2>
+            <div class="feed-line"></div>
+        </div>
+
+        <div class="feed-grid">
+            <?php foreach ($feed_posts as $post): 
+                $thumb = get_the_post_thumbnail_url($post->ID, 'medium_large') ?: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600';
+                $cats = wp_get_post_categories($post->ID, array('fields' => 'names'));
+                $cat = !empty($cats) ? $cats[0] : 'Geral';
+            ?>
+                <article class="feed-card">
+                    <a href="<?php echo get_permalink($post->ID); ?>" class="feed-card-link">
+                        <div class="feed-thumb-box">
+                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($post->post_title); ?>" loading="lazy">
+                            <span class="feed-cat-badge"><?php echo esc_html($cat); ?></span>
+                        </div>
+                        <div class="feed-card-body">
+                            <h3 class="feed-card-title"><?php echo esc_html($post->post_title); ?></h3>
+                            <p class="feed-excerpt"><?php echo wp_trim_words($post->post_content, 18, '...'); ?></p>
+                            <div class="feed-card-footer">
+                                <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $post->ID); ?></span>
+                                <span class="read-more-text">Ler Matéria →</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- BLOCO 6: 🔥 OS MAIS LIDOS DE TODOS OS TEMPOS (ANTES DO RODAPÉ) -->
     <section class="me-most-read-section">
         <div class="most-read-header">
             <div>
@@ -282,42 +340,9 @@ $feed_posts = get_posts(array(
             <?php endforeach; ?>
         </div>
     </section>
-
-    <!-- BLOCO 5: FEED RECENTE DE REPORTAGENS -->
-    <section class="me-feed-section">
-        <div class="feed-header">
-            <h2 class="feed-title">Mais Reportagens & Artigos Recentes</h2>
-            <div class="feed-line"></div>
-        </div>
-
-        <div class="feed-grid">
-            <?php foreach ($feed_posts as $post): 
-                $thumb = get_the_post_thumbnail_url($post->ID, 'medium_large') ?: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600';
-                $cats = wp_get_post_categories($post->ID, array('fields' => 'names'));
-                $cat = !empty($cats) ? $cats[0] : 'Geral';
-            ?>
-                <article class="feed-card">
-                    <a href="<?php echo get_permalink($post->ID); ?>" class="feed-card-link">
-                        <div class="feed-thumb-box">
-                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($post->post_title); ?>" loading="lazy">
-                            <span class="feed-cat-badge"><?php echo esc_html($cat); ?></span>
-                        </div>
-                        <div class="feed-card-body">
-                            <h3 class="feed-card-title"><?php echo esc_html($post->post_title); ?></h3>
-                            <p class="feed-excerpt"><?php echo wp_trim_words($post->post_content, 18, '...'); ?></p>
-                            <div class="feed-card-footer">
-                                <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $post->ID); ?></span>
-                                <span class="read-more-text">Ler Matéria →</span>
-                            </div>
-                        </div>
-                    </a>
-                </article>
-            <?php endforeach; ?>
-        </div>
-    </section>
 </div>
 
-<!-- BLOCO 8: RODAPÉ MODERNO COM REDES SOCIAIS -->
+<!-- RODAPÉ MODERNO COM REDES SOCIAIS -->
 <footer class="me-footer">
     <div class="footer-inner">
         <div class="footer-grid">
@@ -376,81 +401,53 @@ $feed_posts = get_posts(array(
 </footer>
 
 <script>
-// SLIDER DINÂMICO DE ÚLTIMAS MATÉRIAS COM TRANSIÇÃO SUAVE E LENTA
-let currentSlideIndex = 0;
-const slides = document.querySelectorAll('.me-slide');
-const dots = document.querySelectorAll('#carouselDots .dot');
-const totalSlides = slides.length;
-let slideInterval = null;
-const SLIDE_DURATION = 6500; // 6.5 segundos para leitura confortável
+// SLIDER DINÂMICO NO CARD PRINCIPAL DO BENTO GRID
+let bentoSlideIdx = 0;
+const bentoSlides = document.querySelectorAll('.bento-slide-item');
+const bentoDots = document.querySelectorAll('#bentoDots .bdot');
+const totalBentoSlides = bentoSlides.length;
+let bentoInterval = null;
+const BENTO_DURATION = 6000; // 6 segundos
 
-function showSlide(index) {
-    if (index >= totalSlides) currentSlideIndex = 0;
-    else if (index < 0) currentSlideIndex = totalSlides - 1;
-    else currentSlideIndex = index;
+function showBentoSlide(idx) {
+    if (idx >= totalBentoSlides) bentoSlideIdx = 0;
+    else if (idx < 0) bentoSlideIdx = totalBentoSlides - 1;
+    else bentoSlideIdx = idx;
 
-    slides.forEach((slide, i) => {
-        if (i === currentSlideIndex) {
-            slide.classList.add('active');
-        } else {
-            slide.classList.remove('active');
-        }
+    bentoSlides.forEach((slide, i) => {
+        if (i === bentoSlideIdx) slide.classList.add('active');
+        else slide.classList.remove('active');
     });
 
-    dots.forEach((dot, i) => {
-        if (i === currentSlideIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
+    bentoDots.forEach((dot, i) => {
+        if (i === bentoSlideIdx) dot.classList.add('active');
+        else dot.classList.remove('active');
     });
 }
 
-function moveSlide(direction) {
-    resetSlideTimer();
-    showSlide(currentSlideIndex + direction);
+function goToBentoSlide(idx) {
+    clearInterval(bentoInterval);
+    showBentoSlide(idx);
+    startBentoTimer();
 }
 
-function goToSlide(index) {
-    resetSlideTimer();
-    showSlide(index);
+function startBentoTimer() {
+    bentoInterval = setInterval(() => {
+        showBentoSlide(bentoSlideIdx + 1);
+    }, BENTO_DURATION);
 }
 
-function startSlideTimer() {
-    slideInterval = setInterval(() => {
-        showSlide(currentSlideIndex + 1);
-    }, SLIDE_DURATION);
+const bentoSliderElem = document.getElementById('bentoSlider');
+if (bentoSliderElem) {
+    bentoSliderElem.addEventListener('mouseenter', () => clearInterval(bentoInterval));
+    bentoSliderElem.addEventListener('mouseleave', () => startBentoTimer());
 }
 
-function resetSlideTimer() {
-    clearInterval(slideInterval);
-    startSlideTimer();
-}
-
-// Pause on hover
-const carouselElem = document.getElementById('meHeroCarousel');
-if (carouselElem) {
-    carouselElem.addEventListener('mouseenter', () => clearInterval(slideInterval));
-    carouselElem.addEventListener('mouseleave', () => startSlideTimer());
-
-    // Mobile Swipe Support
-    let touchStartX = 0;
-    let touchEndX = 0;
-    carouselElem.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, {passive: true});
-    carouselElem.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (touchStartX - touchEndX > 50) moveSlide(1);
-        if (touchEndX - touchStartX > 50) moveSlide(-1);
-    }, {passive: true});
-}
-
-startSlideTimer();
+startBentoTimer();
 </script>
 
 <style>
-/* CSS GERAL DA HOME & MOBILE OPTIMIZATIONS */
+/* CSS COMPLETO E ROBUSTO DA HOME */
 .me-home-wrapper {
     max-width: 1320px;
     margin: 0 auto;
@@ -498,73 +495,83 @@ startSlideTimer();
 .ticker-item:hover { color: #e31c61; }
 .ticker-item span { color: #e31c61; margin-right: 5px; }
 
-/* BLOCO 1: SLIDER DINÂMICO */
-.me-slider-section {
-    margin-bottom: 45px;
+/* BENTO HERO GRID COM SLIDE DINÂMICO */
+.me-bento-hero {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 24px;
+    margin-bottom: 50px;
 }
-.me-carousel-container {
-    position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    min-height: 480px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    background: #111;
-}
-@media (max-width: 768px) {
-    .me-carousel-container {
-        min-height: 420px;
-        border-radius: 14px;
+@media (max-width: 991px) {
+    .me-bento-hero {
+        grid-template-columns: 1fr;
     }
 }
-.me-carousel-track {
+.bento-main-slider {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    min-height: 480px;
+    background: #111;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+@media (max-width: 768px) {
+    .bento-main-slider {
+        min-height: 400px;
+    }
+}
+.bento-slides-track {
     position: relative;
     width: 100%;
+    height: 100%;
     min-height: 480px;
 }
-.me-slide {
+.bento-slide-item {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 50px;
 }
-.me-slide.active {
+.bento-slide-item.active {
     opacity: 1;
     visibility: visible;
     z-index: 2;
 }
-@media (max-width: 768px) {
-    .me-slide {
-        padding: 25px 20px 45px;
-    }
+.bento-card-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    position: relative;
+    text-decoration: none;
+    padding: 35px;
 }
-.slide-bg {
+@media (max-width: 768px) {
+    .bento-card-link { padding: 25px 20px; }
+}
+.bento-bg {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background-size: cover;
     background-position: center;
-    transform: scale(1.02);
-    transition: transform 7s ease;
+    transition: transform 6s ease;
 }
-.me-slide.active .slide-bg {
-    transform: scale(1.08);
+.bento-slide-item.active .bento-bg {
+    transform: scale(1.04);
 }
-.slide-overlay {
+.bento-gradient {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(180deg, rgba(13,6,18,0.15) 0%, rgba(13,6,18,0.7) 45%, rgba(13,6,18,0.95) 100%);
+    background: linear-gradient(180deg, rgba(10,5,15,0.1) 0%, rgba(10,5,15,0.7) 50%, rgba(10,5,15,0.95) 100%);
 }
-.slide-content {
+.bento-content {
     position: relative;
-    z-index: 3;
-    max-width: 820px;
+    z-index: 2;
     color: #fff;
 }
-.slide-cat-badge {
+.bento-cat-tag {
     display: inline-block;
     background: #e31c61;
     color: #fff;
@@ -572,122 +579,135 @@ startSlideTimer();
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 4px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
-.slide-title {
-    font-size: 2.3rem;
+.bento-main-title {
+    font-size: 2rem;
     font-weight: 900;
     line-height: 1.25;
-    margin: 0 0 15px;
+    color: #fff;
+    margin: 0 0 12px;
     letter-spacing: -0.5px;
 }
-.slide-title a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-.slide-title a:hover {
-    color: #ff85ad;
-}
 @media (max-width: 768px) {
-    .slide-title {
-        font-size: 1.45rem;
-        line-height: 1.3;
-    }
+    .bento-main-title { font-size: 1.45rem; }
 }
-.slide-excerpt {
-    font-size: 1.05rem;
-    color: #e5dce7;
-    line-height: 1.55;
-    margin: 0 0 20px;
+.bento-excerpt {
+    font-size: 1rem;
+    color: #e1d8e3;
+    line-height: 1.5;
+    margin: 0 0 16px;
+    max-width: 650px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 @media (max-width: 768px) {
-    .slide-excerpt {
-        font-size: 0.9rem;
-        display: none;
-    }
+    .bento-excerpt { display: none; }
 }
-.slide-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.88rem;
-    color: #c4b5c7;
-    flex-wrap: wrap;
-}
-.slide-read-btn {
-    background: rgba(255,255,255,0.18);
-    backdrop-filter: blur(5px);
-    color: #fff;
-    padding: 6px 16px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 700;
+.bento-meta {
     font-size: 0.85rem;
-    margin-left: 10px;
-    border: 1px solid rgba(255,255,255,0.25);
-    transition: all 0.2s;
-}
-.slide-read-btn:hover {
-    background: #e31c61;
-    border-color: #e31c61;
-    color: #fff;
-}
-.carousel-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(4px);
-    color: #fff;
-    border: none;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    font-size: 1.2rem;
+    color: #c4b5c7;
     display: flex;
-    justify-content: center;
+    gap: 12px;
     align-items: center;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
 }
-.carousel-arrow:hover {
-    background: #e31c61;
-    transform: translateY(-50%) scale(1.1);
-}
-.prev-arrow { left: 20px; }
-.next-arrow { right: 20px; }
-@media (max-width: 768px) {
-    .carousel-arrow { display: none; }
-}
-.carousel-dots {
+.bento-dots {
     position: absolute;
     bottom: 20px;
-    right: 35px;
+    right: 25px;
     z-index: 10;
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
-.dot {
-    width: 12px;
-    height: 12px;
+.bdot {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: rgba(255,255,255,0.4);
     border: none;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.25s;
 }
-.dot.active {
-    width: 30px;
-    border-radius: 8px;
+.bdot.active {
+    width: 22px;
+    border-radius: 6px;
     background: #e31c61;
+}
+
+/* Side 4 Cards */
+.bento-side-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+.bento-side-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ebebeb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.bento-side-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: #ddd;
+}
+.side-card-link {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+@media (max-width: 480px) {
+    .side-card-link { grid-template-columns: 100px 1fr; }
+}
+.side-thumb-wrap {
+    overflow: hidden;
+    height: 100%;
+}
+.side-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.bento-side-card:hover .side-thumb-wrap img {
+    transform: scale(1.05);
+}
+.side-content {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.side-cat {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #e31c61;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+.side-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.side-date {
+    font-size: 0.75rem;
+    color: #888;
 }
 
 /* BLOCO 2: ACERVO CALLOUT */
@@ -729,9 +749,7 @@ startSlideTimer();
     line-height: 1.3;
 }
 @media (max-width: 768px) {
-    .callout-title {
-        font-size: 1.35rem;
-    }
+    .callout-title { font-size: 1.35rem; }
 }
 .callout-desc {
     font-size: 0.98rem;
@@ -1022,152 +1040,7 @@ startSlideTimer();
 }
 .read-more-text { font-weight: 700; color: #e31c61; }
 
-/* BLOCO 8: RODAPÉ MODERNO */
-.me-footer {
-    background: #0d0612;
-    color: #d1c7d4;
-    padding: 60px 20px 25px;
-    border-top: 3px solid #e31c61;
-    font-size: 0.92rem;
-}
-.footer-inner {
-    max-width: 1320px;
-    margin: 0 auto;
-}
-.footer-grid {
-    display: grid;
-    grid-template-columns: 1.8fr 1fr 1.2fr 1.2fr;
-    gap: 40px;
-    margin-bottom: 50px;
-}
-@media (max-width: 991px) {
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-@media (max-width: 576px) {
-    .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-}
-.footer-logo-img {
-    max-height: 55px;
-    width: auto;
-    margin-bottom: 18px;
-    filter: brightness(0) invert(1);
-}
-.footer-bio {
-    color: #a89ba9;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-}
-.footer-social-links {
-    display: flex;
-    gap: 12px;
-}
-.social-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    font-size: 1.1rem;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-.social-icon:hover {
-    background: #e31c61;
-    color: #fff;
-    transform: translateY(-3px);
-    border-color: #e31c61;
-}
-.footer-heading {
-    color: #fff;
-    font-size: 1.05rem;
-    font-weight: 800;
-    margin: 0 0 20px;
-    letter-spacing: 0.5px;
-    position: relative;
-    padding-bottom: 10px;
-}
-.footer-heading::after {
-    content: "";
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 30px;
-    height: 2px;
-    background: #e31c61;
-}
-.footer-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.footer-links li {
-    margin-bottom: 10px;
-}
-.footer-links a {
-    color: #a89ba9;
-    text-decoration: none;
-    transition: color 0.2s, padding-left 0.2s;
-    display: inline-block;
-}
-.footer-links a:hover {
-    color: #fff;
-    padding-left: 5px;
-}
-.footer-contact-info {
-    color: #a89ba9;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.footer-contact-info i {
-    color: #e31c61;
-}
-.btn-footer-contact {
-    display: inline-block;
-    background: #e31c61;
-    color: #fff;
-    padding: 9px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.85rem;
-    margin-top: 10px;
-    transition: background 0.2s;
-}
-.btn-footer-contact:hover {
-    background: #b5144b;
-    color: #fff;
-}
-.footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.08);
-    padding-top: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    font-size: 0.85rem;
-    color: #7d6f7e;
-}
-.footer-bottom strong {
-    color: #bbb;
-}
-.footer-madeby {
-    color: #e31c61;
-    font-weight: 600;
-}
-
-/* ESTILOS DO BLOCO DE MAIS LIDOS */
+/* BLOCO 6: MAIS LIDOS DE TODOS OS TEMPOS (ANTES DO RODAPÉ) */
 .me-most-read-section {
     background: #fbfbfd;
     border-radius: 20px;
@@ -1319,6 +1192,150 @@ startSlideTimer();
     color: #888;
 }
 
+/* RODAPÉ MODERNO */
+.me-footer {
+    background: #0d0612;
+    color: #d1c7d4;
+    padding: 60px 20px 25px;
+    border-top: 3px solid #e31c61;
+    font-size: 0.92rem;
+}
+.footer-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1.2fr 1.2fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+@media (max-width: 991px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 576px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+.footer-logo-img {
+    max-height: 55px;
+    width: auto;
+    margin-bottom: 18px;
+    filter: brightness(0) invert(1);
+}
+.footer-bio {
+    color: #a89ba9;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+.footer-social-links {
+    display: flex;
+    gap: 12px;
+}
+.social-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.social-icon:hover {
+    background: #e31c61;
+    color: #fff;
+    transform: translateY(-3px);
+    border-color: #e31c61;
+}
+.footer-heading {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0 0 20px;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-bottom: 10px;
+}
+.footer-heading::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 30px;
+    height: 2px;
+    background: #e31c61;
+}
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.footer-links li {
+    margin-bottom: 10px;
+}
+.footer-links a {
+    color: #a89ba9;
+    text-decoration: none;
+    transition: color 0.2s, padding-left 0.2s;
+    display: inline-block;
+}
+.footer-links a:hover {
+    color: #fff;
+    padding-left: 5px;
+}
+.footer-contact-info {
+    color: #a89ba9;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.footer-contact-info i {
+    color: #e31c61;
+}
+.btn-footer-contact {
+    display: inline-block;
+    background: #e31c61;
+    color: #fff;
+    padding: 9px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.btn-footer-contact:hover {
+    background: #b5144b;
+    color: #fff;
+}
+.footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #7d6f7e;
+}
+.footer-bottom strong {
+    color: #bbb;
+}
+.footer-madeby {
+    color: #e31c61;
+    font-weight: 600;
+}
 </style>
 
 <?php get_footer(); ?>
