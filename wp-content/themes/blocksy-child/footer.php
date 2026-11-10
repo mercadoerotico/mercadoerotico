@@ -2,6 +2,8 @@
 /**
  * Universal Footer for Blocksy Child - Portal Mercado Erótico
  */
+blocksy_after_current_template();
+do_action('blocksy:content:bottom');
 ?>
     </main>
 </div><!-- #main-container -->
@@ -29,21 +31,22 @@
                 <ul class="footer-links">
                     <li><a href="<?php echo home_url('/'); ?>">Início</a></li>
                     <li><a href="<?php echo home_url('/sobre/'); ?>">Sobre Nós</a></li>
+                    <li><a href="<?php echo home_url('/colunistas/'); ?>">Colunistas Oficiais</a></li>
                     <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo Histórico (Desde 2018)</a></li>
                     <li><a href="<?php echo home_url('/livraria/'); ?>">Livraria Digital</a></li>
-                    <li><a href="<?php echo home_url('/contato/'); ?>">Contatos</a></li>
+                    <li><a href="<?php echo home_url('/contato/'); ?>">Contatos & Redação</a></li>
                 </ul>
             </div>
 
-            <!-- Coluna 3: Especialidades & Mercado -->
+            <!-- Coluna 3: Especialidades & Profissionais -->
             <div class="footer-col">
-                <h4 class="footer-heading">Editorias & Destaques</h4>
+                <h4 class="footer-heading">Especialidades & Guia</h4>
                 <ul class="footer-links">
+                    <li><a href="<?php echo home_url('/profissionais-especialistas-em-sexualidade/'); ?>"><i class="fas fa-user-md" style="color:#e31c61; margin-right:5px;"></i> <strong>Guia de Profissionais</strong></a></li>
                     <li><a href="<?php echo home_url('/categoria/negocios/'); ?>">Negócios & SexShop</a></li>
                     <li><a href="<?php echo home_url('/categoria/sexologia/'); ?>">Sexologia & Saúde</a></li>
                     <li><a href="<?php echo home_url('/categoria/eventos/'); ?>">Eventos & Feiras</a></li>
-                    <li><a href="<?php echo home_url('/profissionais-especialistas-em-sexualidade/'); ?>">Guia de Profissionais</a></li>
-                    <li><a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener">Guia de Sex Shop</a></li>
+                    <li><a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener">Guia de Sex Shop <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></li>
                 </ul>
             </div>
 

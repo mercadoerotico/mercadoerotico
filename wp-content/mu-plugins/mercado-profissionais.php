@@ -12,7 +12,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Alyne Meirelles',
             'specialty' => 'Sexóloga & Educadora Sexual',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-04-07-at-16.51.19-1-300x293.jpeg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-04-07-at-16.51.19-1-300x293.jpeg',
             'bio' => 'Mestranda em Sexualidade Humana, Pós-graduada em Terapia Sexual e palestrante das principais feiras do setor. Presta consultoria a sex shops, consultores e atendimento clínico individual.',
             'instagram' => 'https://www.instagram.com/alyne.meirelles',
             'insta_label' => '@alyne.meirelles',
@@ -21,7 +21,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Andreia Salustiano',
             'specialty' => 'Pompoarismo & Terapia Breve (PNL)',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/IMG-20200403-WA0028-293x300.jpg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/IMG-20200403-WA0028-293x300.jpg',
             'bio' => 'Ajuda mulheres a desenvolverem prazer, libido e autoestima através de (Re)Educação Sexual, Ginástica Íntima e PNL. Atendimentos com sigilo, ética e sensibilidade.',
             'instagram' => 'https://www.instagram.com/andreia_mulherliderdesi',
             'insta_label' => '@andreia_mulherliderdesi'
@@ -29,7 +29,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Diego Zahori (Diego Sampaio)',
             'specialty' => 'Psicólogo & Terapeuta Tântrico',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-03-22-at-15.36.16-300x300.jpeg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-03-22-at-15.36.16-300x300.jpeg',
             'bio' => 'Psicólogo com pós-graduação em Sexualidade Humana Aplicada e Terapia Tântrica. Atua auxiliando pessoas a superarem bloqueios e julgamentos para vivenciarem relações plenas e saudáveis.',
             'instagram' => 'https://www.instagram.com/psi_diegosampaio',
             'insta_label' => '@psi_diegosampaio',
@@ -38,7 +38,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Fátima Mourah',
             'specialty' => 'Eventos Femininos & Consultoria Sensual',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/20952916_1478934835506474_442912303442649816_n.jpg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/20952916_1478934835506474_442912303442649816_n.jpg',
             'bio' => 'Pioneira em palestras e encontros femininos, fundadora da Chá de Lingerie Oficial. Especialista em empoderamento, dinâmicas de casal e eventos sensuais corporativos.',
             'instagram' => 'https://www.instagram.com/chadelingerie_oficial',
             'insta_label' => '@chadelingerie_oficial',
@@ -56,7 +56,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Kátia Arruda',
             'specialty' => 'Especialista em Sexualidade (Abrasex)',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-12-07-at-12.51.34-225x300.jpeg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/WhatsApp-Image-2020-12-07-at-12.51.34-225x300.jpeg',
             'bio' => 'Filiada à Abrasex, atua no desenvolvimento pessoal e conjugal com workshops, cursos e atendimentos para autoconhecimento íntimo e quebra de tabus.',
             'instagram' => 'https://www.instagram.com/katiaarrudaoficial',
             'insta_label' => '@katiaarrudaoficial',
@@ -65,7 +65,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Lucimara Siqueira (Lu Pompoar)',
             'specialty' => 'Fisioterapia Pélvica & Pompoarismo',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/06/lu-pompoar.jpg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/06/lu-pompoar.jpg',
             'bio' => 'Referência internacional em pompoarismo e ginástica íntima. Pós-graduada em Terapia Sexual e Saúde da Mulher, criadora de método exclusivo com milhares de alunas formadas.',
             'instagram' => 'https://www.instagram.com/lupompoar/',
             'insta_label' => '@lupompoar',
@@ -74,7 +74,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Pablo Cruz (Pablito)',
             'specialty' => 'Expressão Corporal & Stiletto Dance',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/06/WhatsApp-Image-2021-06-19-at-15.45.04-1024x1024.jpeg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/06/WhatsApp-Image-2021-06-19-at-15.45.04-1024x1024.jpeg',
             'bio' => 'Bailarino profissional e professor de dança no salto (Stiletto) e jazz musical. Conduz vivências corporais voltadas para sensualidade, postura e autoconfiança.',
             'instagram' => 'https://www.instagram.com/pablituou',
             'insta_label' => '@pablituou',
@@ -92,7 +92,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Thiago Souza',
             'specialty' => 'Personal Dancer & Sexy Dance',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/thiago-souza-personal-dancer-quarentena.png',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2020/04/thiago-souza-personal-dancer-quarentena.png',
             'bio' => 'Criador de metodologia de dança sensual voltada para mulheres reais. Ensina a liberar a sensualidade natural e elevar a autoestima através da dança e do movimento.',
             'instagram' => 'https://www.instagram.com/thiagosouza_academy/',
             'insta_label' => '@thiagosouza_academy',
@@ -101,7 +101,7 @@ function mercado_profissionais_shortcode() {
         array(
             'name' => 'Dra. Vivian Santana',
             'specialty' => 'Fisioterapeuta Pélvica & Menopausa',
-            'image' => 'https://www.mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/07/WhatsApp-Image-2021-07-10-at-19.32.06.jpeg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/07/WhatsApp-Image-2021-07-10-at-19.32.06.jpeg',
             'bio' => 'Especialista em reabilitação do assoalho pélvico e sexualidade feminina há mais de 10 anos. Conscientiza mulheres sobre climatério, menopausa e prevenção de disfunções sexuais.',
             'instagram' => 'https://www.instagram.com/dra_vivian_santana',
             'insta_label' => '@dra_vivian_santana',
