@@ -1,0 +1,17 @@
+# WordPress Core
+wp-admin/
+wp-includes/
+*.php
+!wp-content/**
+
+# Uploads and Caches
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/wpvividbackups/
+
+# System and logs
+*.log
+.htaccess
+.DS_Store
+Thumbs.db

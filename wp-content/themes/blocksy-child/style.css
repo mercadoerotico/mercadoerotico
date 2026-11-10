@@ -1,0 +1,72 @@
+/*
+Theme Name: Blocksy Child - Mercado Erótico
+Theme URI: https://mercadoerotico.org
+Description: Tema editorial moderno de alta performance para o Portal Mercado Erótico.
+Author: Mercado Erótico
+Template: blocksy
+Version: 1.0.0
+*/
+
+/* Header & Logo Modern Styling */
+.site-branding .site-logo-container img {
+    max-height: 52px !important;
+    width: auto !important;
+    object-fit: contain !important;
+}
+
+.site-title-container {
+    display: none !important; /* Hide redundant text next to logo */
+}
+
+/* Header Navbar Links */
+.header-menu-1 .menu > li > a {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    padding: 10px 14px !important;
+    transition: color 0.2s ease !important;
+}
+.header-menu-1 .menu > li > a:hover {
+    color: #e31c61 !important;
+}
+
+/* Special Pill Buttons for Acervo & Livraria */
+.header-menu-1 .menu > li#menu-item-13624 > a {
+    background: #111 !important;
+    color: #fff !important;
+    border-radius: 20px !important;
+    padding: 7px 16px !important;
+    margin-left: 8px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    transition: all 0.2s ease !important;
+}
+.header-menu-1 .menu > li#menu-item-13624 > a:hover {
+    background: #e31c61 !important;
+    border-color: #e31c61 !important;
+    color: #fff !important;
+}
+
+.header-menu-1 .menu > li#menu-item-11150 > a {
+    background: linear-gradient(135deg, #e31c61, #9c1543) !important;
+    color: #fff !important;
+    border-radius: 20px !important;
+    padding: 7px 16px !important;
+    margin-left: 8px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(227, 28, 97, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+.header-menu-1 .menu > li#menu-item-11150 > a:hover {
+    opacity: 0.9 !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Page Spacing for transparent/standard blocksy layout */
+.page-id-13623 #main-container,
+.page-id-3918 #main-container {
+    padding-top: 30px !important;
+}
