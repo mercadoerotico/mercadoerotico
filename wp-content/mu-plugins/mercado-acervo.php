@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mercado Erótico - Acervo Histórico & Pesquisa
  * Description: Sistema de busca e filtragem histórica por tempo e tema do portal Mercado Erótico.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Antigravity
  */
 
@@ -17,14 +17,28 @@ add_action('rest_api_init', function() {
     ]);
 });
 
+// Also register Admin AJAX fallback for 100% reliability
+add_action('wp_ajax_mercado_acervo_ajax', 'mercado_acervo_ajax_callback');
+add_action('wp_ajax_nopriv_mercado_acervo_ajax', 'mercado_acervo_ajax_callback');
+
+function mercado_acervo_ajax_callback() {
+    $year  = isset($_GET['year']) ? sanitize_text_field($_GET['year']) : 'all';
+    $theme = isset($_GET['theme']) ? sanitize_text_field($_GET['theme']) : 'all';
+    $q     = isset($_GET['q']) ? sanitize_text_field($_GET['q']) : '';
+    $page  = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+
+    $result = mercado_acervo_get_posts($year, $theme, $q, $page);
+    wp_send_json($result);
+}
+
 function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page = 1, $per_page = 12) {
     $args = [
-        'post_type' => 'post',
-        'post_status' => 'publish',
+        'post_type'      => 'post',
+        'post_status'    => 'publish',
         'posts_per_page' => $per_page,
-        'paged' => $page,
-        'orderby' => 'date',
-        'order' => 'DESC'
+        'paged'          => $page,
+        'orderby'        => 'date',
+        'order'          => 'DESC'
     ];
 
     if ($year && is_numeric($year)) {
@@ -33,7 +47,7 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
         ];
     }
 
-    if ($q) {
+    if (!empty($q)) {
         $args['s'] = $q;
     }
 
@@ -44,22 +58,22 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
                 $category_slugs = ['negocios', 'hot-news', 'coluna-empresarios-sex'];
                 break;
             case 'pesquisas':
-                $category_slugs = ['pesquisas'];
+                $category_slugs = ['pesquisas', 'dados-e-estatisticas', 'pesquisa'];
                 break;
             case 'sexologia':
-                $category_slugs = ['sexologia', 'saude', 'sexo-na-pratica'];
+                $category_slugs = ['sexologia', 'saude', 'sexo-na-pratica', 'sexual-wellness'];
                 break;
             case 'eventos':
-                $category_slugs = ['eventos', 'calendario-erotico'];
+                $category_slugs = ['eventos', 'calendario-erotico', 'feiras'];
                 break;
             case 'colunas':
-                $category_slugs = ['colunas', 'coluna-ka-entre-nos', 'cartas-sexo-diversao', 'dona-do-proprio-poder', 'coluna-sexativar', 'marlene-sexy'];
+                $category_slugs = ['colunas', 'coluna-ka-entre-nos', 'cartas-sexo-diversao', 'dona-do-proprio-poder', 'coluna-sexativar', 'coluna-de-pernas-pro-ar-com-erica-rambalde', 'marlene-sexy'];
                 break;
             case 'lancamentos':
-                $category_slugs = ['lancamentos'];
+                $category_slugs = ['lancamentos', 'produtos', 'novidades'];
                 break;
             case 'iasex':
-                $category_slugs = ['iasex'];
+                $category_slugs = ['iasex', 'tecnologia', 'sextech'];
                 break;
             default:
                 $category_slugs = [$theme];
@@ -68,9 +82,10 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
 
         $args['tax_query'] = [
             [
-                'taxonomy' => 'category',
-                'field' => 'slug',
-                'terms' => $category_slugs
+                'taxonomy'         => 'category',
+                'field'            => 'slug',
+                'terms'            => $category_slugs,
+                'include_children' => true
             ]
         ];
     }
@@ -87,38 +102,38 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
             $thumb_url = get_the_post_thumbnail_url($post->ID, 'medium');
         }
         if (!$thumb_url) {
-            $thumb_url = 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png';
+            $thumb_url = 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/colunista_padrao_logo.png';
         }
 
         $excerpt = wp_strip_all_tags($post->post_excerpt ?: wp_trim_words($post->post_content, 20, '...'));
 
         $posts_data[] = [
-            'id' => $post->ID,
-            'title' => html_entity_decode(get_the_title($post->ID)),
-            'link' => get_permalink($post->ID),
-            'date' => get_the_date('d/m/Y', $post->ID),
-            'year' => get_the_date('Y', $post->ID),
-            'author' => get_the_author_meta('display_name', $post->post_author),
-            'category' => $primary_cat,
+            'id'        => $post->ID,
+            'title'     => html_entity_decode(get_the_title($post->ID)),
+            'link'      => get_permalink($post->ID),
+            'date'      => get_the_date('d/m/Y', $post->ID),
+            'year'      => get_the_date('Y', $post->ID),
+            'author'    => get_the_author_meta('display_name', $post->post_author),
+            'category'  => $primary_cat,
             'thumbnail' => $thumb_url,
-            'excerpt' => $excerpt
+            'excerpt'   => $excerpt
         ];
     }
 
     return [
-        'posts' => $posts_data,
-        'total_posts' => $query->found_posts,
-        'total_pages' => $query->max_num_pages,
+        'posts'        => $posts_data,
+        'total_posts'  => $query->found_posts,
+        'total_pages'  => $query->max_num_pages,
         'current_page' => $page,
-        'has_more' => $page < $query->max_num_pages
+        'has_more'     => $page < $query->max_num_pages
     ];
 }
 
 function mercado_acervo_api_callback($request) {
-    $year = sanitize_text_field($request->get_param('year'));
+    $year  = sanitize_text_field($request->get_param('year'));
     $theme = sanitize_text_field($request->get_param('theme'));
-    $q = sanitize_text_field($request->get_param('q'));
-    $page = max(1, intval($request->get_param('page')));
+    $q     = sanitize_text_field($request->get_param('q'));
+    $page  = max(1, intval($request->get_param('page')));
 
     return mercado_acervo_get_posts($year, $theme, $q, $page);
 }
@@ -129,6 +144,8 @@ add_shortcode('mercado_acervo', 'mercado_acervo_shortcode');
 function mercado_acervo_shortcode() {
     // Initial fetch in PHP
     $initial_data = mercado_acervo_get_posts('all', 'all', '', 1, 12);
+    $rest_endpoint = esc_url_raw(rest_url('mercado/v1/acervo'));
+    $ajax_endpoint = esc_url_raw(admin_url('admin-ajax.php'));
     ob_start();
     ?>
     <div id="mercado-acervo-app" class="mercado-acervo-wrapper">
@@ -147,11 +164,11 @@ function mercado_acervo_shortcode() {
             </div>
 
             <!-- Search Bar -->
-            <div class="acervo-search-box">
+            <form id="acervo-search-form" class="acervo-search-box" onsubmit="return false;">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="acervo-search-input" placeholder="Pesquisar por tema, marca, lei, produto ou especialista (ex: ECA digital, vibrador, censo, feira)...">
-                <button type="button" id="acervo-search-btn" class="acervo-btn-search">Buscar</button>
-            </div>
+                <input type="text" id="acervo-search-input" placeholder="Pesquisar por tema, marca, lei, produto ou especialista (ex: ECA digital, vibrador, censo, feira)..." autocomplete="off">
+                <button type="submit" id="acervo-search-btn" class="acervo-btn-search">Buscar</button>
+            </form>
         </div>
 
         <!-- Themes Filter -->
@@ -160,21 +177,21 @@ function mercado_acervo_shortcode() {
                 <span class="filter-label"><i class="fas fa-tags"></i> Grandes Eixos Temáticos:</span>
             </div>
             <div class="themes-pill-wrap" id="themes-filter-container">
-                <button class="theme-pill active" data-theme="all">🌐 Todos os Temas</button>
-                <button class="theme-pill" data-theme="negocios">🏢 Negócios & Mercado</button>
-                <button class="theme-pill" data-theme="pesquisas">📊 Pesquisas & Censos</button>
-                <button class="theme-pill" data-theme="sexologia">🔬 Sexologia & Saúde</button>
-                <button class="theme-pill" data-theme="colunas">✍️ Colunas de Especialistas</button>
-                <button class="theme-pill" data-theme="eventos">🎟️ Eventos & Feiras</button>
-                <button class="theme-pill" data-theme="lancamentos">✨ Lançamentos</button>
-                <button class="theme-pill" data-theme="iasex">🤖 IA & Tecnologia Sexual</button>
+                <button type="button" class="theme-pill active" data-theme="all">🌐 Todos os Temas</button>
+                <button type="button" class="theme-pill" data-theme="negocios">🏢 Negócios &amp; Mercado</button>
+                <button type="button" class="theme-pill" data-theme="pesquisas">📊 Pesquisas &amp; Censos</button>
+                <button type="button" class="theme-pill" data-theme="sexologia">🔬 Sexologia &amp; Saúde</button>
+                <button type="button" class="theme-pill" data-theme="colunas">✍️ Colunas de Especialistas</button>
+                <button type="button" class="theme-pill" data-theme="eventos">🎟️ Eventos &amp; Feiras</button>
+                <button type="button" class="theme-pill" data-theme="lancamentos">✨ Lançamentos</button>
+                <button type="button" class="theme-pill" data-theme="iasex">🤖 IA &amp; Tecnologia Sexual</button>
             </div>
         </div>
 
         <!-- Active Filter Indicator & Results Count -->
         <div class="acervo-results-bar">
             <div id="results-count" class="results-count"><strong><?php echo intval($initial_data['total_posts']); ?></strong> artigos encontrados no acervo</div>
-            <button id="clear-filters-btn" class="clear-filters-btn" style="display:none;"><i class="fas fa-times"></i> Limpar Filtros</button>
+            <button type="button" id="clear-filters-btn" class="clear-filters-btn" style="display:none;"><i class="fas fa-times"></i> Limpar Filtros</button>
         </div>
 
         <!-- Grid of Cards (Preloaded with first 12) -->
@@ -209,15 +226,16 @@ function mercado_acervo_shortcode() {
 
         <!-- Load More Button -->
         <div class="acervo-actions">
-            <button id="acervo-load-more" class="btn-load-more" <?php if (!$initial_data['has_more']) echo 'style="display:none;"'; ?>>Carregar mais artigos</button>
+            <button type="button" id="acervo-load-more" class="btn-load-more" <?php if (!$initial_data['has_more']) echo 'style="display:none;"'; ?>>Carregar mais artigos</button>
         </div>
     </div>
 
     <style>
     /* ACERVO HISTORICO - MODERN EDITORIAL CSS */
     .page-id-13623 .page-title-section { display: none !important; }
-    .mercado-acervo-wrapper { clear: both; margin-top: 50px !important;
-        max-width: 1240px;
+    .mercado-acervo-wrapper {
+        clear: both;
+        max-width: 1200px;
         margin: 25px auto 60px;
         padding: 0 15px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -231,6 +249,7 @@ function mercado_acervo_shortcode() {
         text-align: center;
         margin-bottom: 25px;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        border: 1px solid rgba(227, 28, 97, 0.2);
     }
     .acervo-badge {
         display: inline-block;
@@ -295,7 +314,7 @@ function mercado_acervo_shortcode() {
         display: flex;
         background: #ffffff;
         border-radius: 50px;
-        padding: 4px;
+        padding: 5px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.25);
     }
     .acervo-search-box .search-icon {
@@ -305,6 +324,7 @@ function mercado_acervo_shortcode() {
         transform: translateY(-50%);
         color: #94a3b8;
         font-size: 16px;
+        pointer-events: none;
     }
     .acervo-search-box input {
         flex: 1;
@@ -318,28 +338,29 @@ function mercado_acervo_shortcode() {
         box-shadow: none !important;
     }
     .acervo-btn-search {
-        background: #dd3333;
+        background: #e31c61;
         color: #ffffff;
         border: none;
         border-radius: 50px;
         padding: 0 28px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 14px;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: background 0.2s ease, transform 0.2s ease;
     }
     .acervo-btn-search:hover {
-        background: #b91c1c;
+        background: #c4124e;
+        transform: scale(1.02);
     }
     .acervo-filter-section {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 14px;
-        padding: 16px 20px;
-        margin-bottom: 14px;
+        padding: 18px 22px;
+        margin-bottom: 20px;
     }
     .filter-header {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     .filter-label {
         font-size: 13px;
@@ -348,76 +369,41 @@ function mercado_acervo_shortcode() {
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    .years-pill-scroll {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 4px;
-    }
-    .pill-btn {
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 50px;
-        padding: 7px 16px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #334155;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .pill-btn:hover {
-        border-color: #dd3333;
-        color: #dd3333;
-    }
-    .pill-btn.active {
-        background: #dd3333;
-        color: #ffffff;
-        border-color: #dd3333;
-    }
-    .pill-count {
-        font-size: 11px;
-        background: rgba(0,0,0,0.08);
-        padding: 2px 6px;
-        border-radius: 10px;
-    }
-    .pill-btn.active .pill-count {
-        background: rgba(255,255,255,0.25);
-        color: #fff;
-    }
     .themes-pill-wrap {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
     }
     .theme-pill {
         background: #ffffff;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
-        padding: 7px 14px;
-        font-size: 13px;
+        padding: 8px 16px;
+        font-size: 13.5px;
         font-weight: 600;
         color: #334155;
         cursor: pointer;
+        position: relative;
+        z-index: 5;
         transition: all 0.2s ease;
+        user-select: none;
     }
     .theme-pill:hover {
-        border-color: #dd3333;
-        color: #dd3333;
+        border-color: #e31c61;
+        color: #e31c61;
+        background: #fff5f8;
     }
     .theme-pill.active {
-        background: #1e293b;
-        color: #ffffff;
-        border-color: #1e293b;
+        background: #e31c61 !important;
+        color: #ffffff !important;
+        border-color: #e31c61 !important;
+        box-shadow: 0 4px 10px rgba(227, 28, 97, 0.3);
     }
     .acervo-results-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 24px 0 16px;
+        margin: 20px 0 16px;
         padding: 0 4px;
     }
     .results-count {
@@ -427,11 +413,18 @@ function mercado_acervo_shortcode() {
     }
     .clear-filters-btn {
         background: none;
-        border: none;
-        color: #dd3333;
-        font-weight: 600;
-        font-size: 13px;
+        border: 1px solid #e2e8f0;
+        padding: 5px 12px;
+        border-radius: 20px;
+        color: #e31c61;
+        font-weight: 700;
+        font-size: 12.5px;
         cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .clear-filters-btn:hover {
+        background: #e31c61;
+        color: #fff;
     }
     .acervo-grid {
         display: grid;
@@ -450,12 +443,12 @@ function mercado_acervo_shortcode() {
     .acervo-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-        border-color: #cbd5e1;
+        border-color: rgba(227, 28, 97, 0.3);
     }
     .card-thumb-wrap {
         position: relative;
         height: 180px;
-        background: #f1f5f9;
+        background: #0f172a;
         overflow: hidden;
     }
     .card-thumb {
@@ -486,7 +479,7 @@ function mercado_acervo_shortcode() {
         position: absolute;
         top: 12px;
         right: 12px;
-        background: #dd3333;
+        background: #e31c61;
         color: #fff;
         font-size: 11px;
         font-weight: 800;
@@ -518,7 +511,7 @@ function mercado_acervo_shortcode() {
         transition: color 0.2s;
     }
     .card-title a:hover {
-        color: #dd3333;
+        color: #e31c61;
     }
     .card-excerpt {
         font-size: 13px;
@@ -542,7 +535,7 @@ function mercado_acervo_shortcode() {
     .card-read-link {
         font-size: 12px;
         font-weight: 700;
-        color: #dd3333;
+        color: #e31c61;
         text-decoration: none;
     }
     .card-read-link:hover {
@@ -557,7 +550,7 @@ function mercado_acervo_shortcode() {
         width: 36px;
         height: 36px;
         border: 4px solid #e2e8f0;
-        border-top-color: #dd3333;
+        border-top-color: #e31c61;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 12px;
@@ -570,18 +563,19 @@ function mercado_acervo_shortcode() {
         margin-top: 35px;
     }
     .btn-load-more {
-        background: #1e293b;
+        background: #0f172a;
         color: #ffffff;
         border: none;
         padding: 13px 32px;
         border-radius: 50px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s;
     }
     .btn-load-more:hover {
-        background: #dd3333;
+        background: #e31c61;
+        transform: translateY(-2px);
     }
     @media (max-width: 991px) {
         .acervo-grid { grid-template-columns: repeat(2, 1fr); }
@@ -603,141 +597,188 @@ function mercado_acervo_shortcode() {
         let currentQuery = '';
         let currentPage = 1;
         let isLoading = false;
+        let searchDebounceTimer = null;
 
-        const grid = document.getElementById('acervo-grid');
-        const countEl = document.getElementById('results-count');
-        const loadingEl = document.getElementById('acervo-loading');
-        const loadMoreBtn = document.getElementById('acervo-load-more');
-        const clearBtn = document.getElementById('clear-filters-btn');
-        const searchInput = document.getElementById('acervo-search-input');
-        const searchBtn = document.getElementById('acervo-search-btn');
+        const restUrl = '<?php echo $rest_endpoint; ?>';
+        const ajaxUrl = '<?php echo $ajax_endpoint; ?>';
 
-        async function fetchPosts(append = false) {
-            if (isLoading) return;
-            isLoading = true;
-            loadingEl.style.display = 'block';
-            if (!append) {
-                grid.innerHTML = '';
-                loadMoreBtn.style.display = 'none';
-            }
+        function initAcervo() {
+            const grid = document.getElementById('acervo-grid');
+            const countEl = document.getElementById('results-count');
+            const loadingEl = document.getElementById('acervo-loading');
+            const loadMoreBtn = document.getElementById('acervo-load-more');
+            const clearBtn = document.getElementById('clear-filters-btn');
+            const searchInput = document.getElementById('acervo-search-input');
+            const searchForm = document.getElementById('acervo-search-form');
+            const themeContainer = document.getElementById('themes-filter-container');
 
-            const url = `/wp-json/mercado/v1/acervo?year=${currentYear}&theme=${currentTheme}&q=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+            if (!grid || !themeContainer) return;
 
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                
-                countEl.innerHTML = `<strong>${data.total_posts}</strong> artigos encontrados no acervo`;
-                
-                if (currentYear !== 'all' || currentTheme !== 'all' || currentQuery !== '') {
-                    clearBtn.style.display = 'inline-block';
-                } else {
-                    clearBtn.style.display = 'none';
+            async function fetchPosts(append = false) {
+                if (isLoading) return;
+                isLoading = true;
+                if (loadingEl) loadingEl.style.display = 'block';
+                if (!append) {
+                    grid.innerHTML = '';
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+                }
+
+                // Try REST API first, fallback to Admin AJAX
+                let requestUrl = `${restUrl}?year=${currentYear}&theme=${currentTheme}&q=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+                let data = null;
+
+                try {
+                    const res = await fetch(requestUrl);
+                    if (res.ok) {
+                        data = await res.json();
+                    } else {
+                        throw new Error('REST returned ' + res.status);
+                    }
+                } catch (err) {
+                    console.warn('REST API failed, trying Admin AJAX fallback:', err);
+                    try {
+                        const ajaxReqUrl = `${ajaxUrl}?action=mercado_acervo_ajax&year=${currentYear}&theme=${currentTheme}&q=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+                        const ajaxRes = await fetch(ajaxReqUrl);
+                        data = await ajaxRes.json();
+                    } catch (ajaxErr) {
+                        console.error('AJAX fallback also failed:', ajaxErr);
+                    }
+                }
+
+                isLoading = false;
+                if (loadingEl) loadingEl.style.display = 'none';
+
+                if (!data || !data.posts) {
+                    if (countEl) countEl.innerText = 'Não foi possível carregar os artigos. Tente novamente.';
+                    return;
+                }
+
+                if (countEl) {
+                    countEl.innerHTML = `<strong>${data.total_posts}</strong> artigos encontrados no acervo`;
+                }
+
+                if (clearBtn) {
+                    if (currentTheme !== 'all' || currentQuery !== '') {
+                        clearBtn.style.display = 'inline-block';
+                    } else {
+                        clearBtn.style.display = 'none';
+                    }
                 }
 
                 if (data.posts && data.posts.length > 0) {
                     renderCards(data.posts, append);
-                    if (data.has_more) {
-                        loadMoreBtn.style.display = 'inline-block';
-                    } else {
-                        loadMoreBtn.style.display = 'none';
+                    if (loadMoreBtn) {
+                        loadMoreBtn.style.display = data.has_more ? 'inline-block' : 'none';
                     }
                 } else {
                     if (!append) {
-                        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; color: #64748b;">
+                        grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; color: #64748b; background:#f8fafc; border-radius:12px; margin:20px 0;">
                             <i class="fas fa-search" style="font-size: 32px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
-                            Nenhum artigo encontrado com esses critérios. Tente buscar por outros termos ou anos.
+                            <strong>Nenhum artigo encontrado com esses critérios.</strong><br>
+                            <span style="font-size:13px;">Tente pesquisar por outros termos ou selecionar outro eixo temático.</span>
                         </div>`;
                     }
-                    loadMoreBtn.style.display = 'none';
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
                 }
-            } catch (err) {
-                console.error("Erro ao buscar no acervo:", err);
-                countEl.innerText = "Erro ao carregar dados do acervo.";
-            } finally {
-                isLoading = false;
-                loadingEl.style.display = 'none';
             }
-        }
 
-        function renderCards(posts, append) {
-            let html = '';
-            posts.forEach(p => {
-                html += `
-                <article class="acervo-card">
-                    <div class="card-thumb-wrap">
-                        <img src="${p.thumbnail}" alt="${p.title}" class="card-thumb" loading="lazy">
-                        <span class="card-category-badge">${p.category}</span>
-                        <span class="card-year-badge">${p.year}</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-meta">
-                            <span><i class="far fa-calendar-alt"></i> ${p.date}</span>
+            function renderCards(posts, append) {
+                let html = '';
+                posts.forEach(p => {
+                    html += `
+                    <article class="acervo-card">
+                        <div class="card-thumb-wrap">
+                            <img src="${p.thumbnail}" alt="${p.title}" class="card-thumb" loading="lazy">
+                            <span class="card-category-badge">${p.category}</span>
+                            <span class="card-year-badge">${p.year}</span>
                         </div>
-                        <h3 class="card-title"><a href="${p.link}">${p.title}</a></h3>
-                        <p class="card-excerpt">${p.excerpt}</p>
-                        <div class="card-footer">
-                            <span class="card-author"><i class="far fa-user"></i> ${p.author}</span>
-                            <a href="${p.link}" class="card-read-link">Ler artigo ➔</a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span><i class="far fa-calendar-alt"></i> ${p.date}</span>
+                            </div>
+                            <h3 class="card-title"><a href="${p.link}">${p.title}</a></h3>
+                            <p class="card-excerpt">${p.excerpt}</p>
+                            <div class="card-footer">
+                                <span class="card-author"><i class="far fa-user"></i> ${p.author}</span>
+                                <a href="${p.link}" class="card-read-link">Ler artigo ➔</a>
+                            </div>
                         </div>
-                    </div>
-                </article>`;
+                    </article>`;
+                });
+                if (append) {
+                    grid.insertAdjacentHTML('beforeend', html);
+                } else {
+                    grid.innerHTML = html;
+                }
+            }
+
+            // Theme click with both direct listeners and container delegation
+            const themeButtons = themeContainer.querySelectorAll('.theme-pill');
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTheme = this.getAttribute('data-theme') || 'all';
+                    currentPage = 1;
+                    fetchPosts(false);
+                });
             });
-            if (append) {
-                grid.insertAdjacentHTML('beforeend', html);
-            } else {
-                grid.innerHTML = html;
+
+            // Search Trigger
+            function doSearch() {
+                if (!searchInput) return;
+                currentQuery = searchInput.value.trim();
+                currentPage = 1;
+                fetchPosts(false);
+            }
+
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    doSearch();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchDebounceTimer);
+                    searchDebounceTimer = setTimeout(() => {
+                        doSearch();
+                    }, 400);
+                });
+            }
+
+            // Load More
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function() {
+                    currentPage++;
+                    fetchPosts(true);
+                });
+            }
+
+            // Clear Filters
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    currentYear = 'all';
+                    currentTheme = 'all';
+                    currentQuery = '';
+                    currentPage = 1;
+                    if (searchInput) searchInput.value = '';
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    const allBtn = themeContainer.querySelector('.theme-pill[data-theme="all"]');
+                    if (allBtn) allBtn.classList.add('active');
+                    fetchPosts(false);
+                });
             }
         }
 
-        // Years filter click
-        // year selector listener removed
-
-        // Theme filter click
-        document.getElementById('themes-filter-container').addEventListener('click', function(e) {
-            const btn = e.target.closest('.theme-pill');
-            if (!btn) return;
-            document.querySelectorAll('.theme-pill').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentTheme = btn.dataset.theme;
-            currentPage = 1;
-            fetchPosts(false);
-        });
-
-        // Search trigger
-        function doSearch() {
-            currentQuery = searchInput.value.trim();
-            currentPage = 1;
-            fetchPosts(false);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAcervo);
+        } else {
+            initAcervo();
         }
-
-        searchBtn.addEventListener('click', doSearch);
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                doSearch();
-            }
-        });
-
-        // Load More
-        loadMoreBtn.addEventListener('click', function() {
-            currentPage++;
-            fetchPosts(true);
-        });
-
-        // Clear Filters
-        clearBtn.addEventListener('click', function() {
-            currentYear = 'all';
-            currentTheme = 'all';
-            currentQuery = '';
-            currentPage = 1;
-            searchInput.value = '';
-            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.pill-btn[data-year="all"]').classList.add('active');
-            document.querySelectorAll('.theme-pill').forEach(b => b.classList.remove('active'));
-            document.querySelector('.theme-pill[data-theme="all"]').classList.add('active');
-            fetchPosts(false);
-        });
     })();
     </script>
     <?php

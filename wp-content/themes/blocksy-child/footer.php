@@ -20,8 +20,8 @@ do_action('blocksy:content:bottom');
                 <div class="footer-social-links">
                     <a href="https://www.instagram.com/mercadoerotico/" target="_blank" rel="noopener" class="social-icon instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="https://www.facebook.com/mercadoerotico/" target="_blank" rel="noopener" class="social-icon facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.youtube.com/@mercadoerotico" target="_blank" rel="noopener" class="social-icon youtube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    <a href="https://api.whatsapp.com/send?phone=5511999999999" target="_blank" rel="noopener" class="social-icon whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.youtube.com/@canalmercadoerotico4514" target="_blank" rel="noopener" class="social-icon youtube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://api.whatsapp.com/send?phone=5562982763039" target="_blank" rel="noopener" class="social-icon whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
 
@@ -55,7 +55,8 @@ do_action('blocksy:content:bottom');
             <!-- Coluna 4: Canais & Atendimento -->
             <div class="footer-col">
                 <h4 class="footer-heading">Imprensa & Contato</h4>
-                <p class="footer-contact-info"><i class="fas fa-envelope"></i> redacao@mercadoerotico.org</p>
+                <p class="footer-contact-info"><i class="fas fa-envelope"></i> contato@mercadoerotico.org</p>
+                <p class="footer-contact-info"><i class="fab fa-whatsapp"></i> +55 62 98276-3039</p>
                 <p class="footer-contact-info"><i class="fas fa-shield-alt"></i> Portal Seguro & Auditado</p>
                 <a href="<?php echo home_url('/contato/'); ?>" class="btn-footer-contact">Fale com a Redação</a>
             </div>

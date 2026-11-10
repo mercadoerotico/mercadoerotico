@@ -24,7 +24,7 @@ function mercado_colunistas_shortcode() {
             'column_title' => 'Coluna De Pernas pro Ar',
             'author_name' => 'Érica Rambalde',
             'role' => 'Bióloga, Sexóloga & Educadora Sexual',
-            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2018/10/19511142_1395083410567444_7865756656818642480_n.jpg',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/erica_rambalde_oficial_v2.png',
             'bio' => 'Fundadora da Sexy Delícia há duas décadas no mercado de Sexual Wellness. Idealizadora do programa De Pernas pro Ar, voltado à formação de profissionais e desenvolvimento íntimo.',
             'badge' => 'Formação & Saúde',
             'tag' => 'Pompoarismo & Prazer',
@@ -90,7 +90,8 @@ function mercado_colunistas_shortcode() {
             'column_title' => 'Coluna SexAtivar',
             'author_name' => 'SexAtivação Editorial',
             'role' => 'Guia de Prazer & Sexual Wellness',
-            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/logo_colunista_padrao_v2.jpg',
+            'is_logo' => true,
             'bio' => 'Coluna dedicada a explorar novas formas de prazer, testes de cosméticos sensuais, técnicas de estimulação e novidades do universo dos toys com linguagem direta e inclusiva.',
             'badge' => '37 Artigos',
             'tag' => 'Prazer & Toys',
@@ -101,7 +102,8 @@ function mercado_colunistas_shortcode() {
             'column_title' => 'Coluna Cartas, Sexo e Diversão',
             'author_name' => 'Equipe Editorial & Correspondentes',
             'role' => 'Crônicas & Vivências Cotidianas',
-            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/logo_colunista_padrao_v2.jpg',
+            'is_logo' => true,
             'bio' => 'Histórias da vida real, crônicas afetivas, debates sobre novos modelos de relação e o lado bem-humorado da sexualidade humana.',
             'badge' => '37 Crônicas',
             'tag' => 'Crônicas & Vivências',
@@ -112,7 +114,8 @@ function mercado_colunistas_shortcode() {
             'column_title' => 'Coluna IASex (Inteligência & Sextechs)',
             'author_name' => 'Observatório Tecnológico',
             'role' => 'Inovação, IA & Futuro da Intimidade',
-            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/logo_colunista_padrao_v2.jpg',
+            'is_logo' => true,
             'bio' => 'Acompanhamento sistemático das inovações de ponta que estão transformando o bem-estar íntimo: inteligência artificial, realidade virtual, robótica e sextechs globais.',
             'badge' => '57 Relatórios',
             'tag' => 'Tecnologia & Sextech',
@@ -162,7 +165,8 @@ function mercado_colunistas_shortcode() {
 
                 <div class="colunista-profile">
                     <div class="col-avatar-wrap">
-                        <img src="<?php echo esc_url($col['image']); ?>" alt="<?php echo esc_attr($col['author_name']); ?>" class="col-avatar" loading="lazy">
+                        <?php $is_logo = !empty($col['is_logo']) || strpos($col['image'], 'colunista_padrao_logo') !== false; ?>
+                        <img src="<?php echo esc_url($col['image']); ?>" alt="<?php echo esc_attr($col['author_name']); ?>" class="col-avatar <?php echo $is_logo ? 'is-logo' : ''; ?>" loading="lazy">
                     </div>
                     <div class="col-profile-info">
                         <span class="col-tag-label"><?php echo esc_html($col['tag']); ?></span>
@@ -278,6 +282,11 @@ function mercado_colunistas_shortcode() {
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+    .col-avatar.is-logo {
+        object-fit: contain !important;
+        background: #ffffff !important;
+        padding: 12px !important;
     }
     .col-tag-label {
         font-size: 0.72rem;
