@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Mercado Erótico - Livraria Digital
- * Description: Vitrine moderna e catálogo digital de livros, manuais e cursos do Mercado Erótico.
- * Version: 1.2.0
+ * Description: Vitrine moderna e catálogo digital de livros, manuais e cursos do Mercado Erótico com links diretos Hotmart e canais oficiais.
+ * Version: 1.3.0
  * Author: Equipe Mercado Erótico
  */
 
@@ -111,7 +111,7 @@ function mercado_livraria_shortcode() {
             </div>
         </div>
 
-        <!-- Category Filter Tabs (With direct inline onclick for universal compatibility) -->
+        <!-- Category Filter Tabs -->
         <div class="livraria-filter-section">
             <div class="filter-header">
                 <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias &amp; Formatos:</span>
@@ -153,12 +153,14 @@ function mercado_livraria_shortcode() {
                 $slug_str = esc_attr($p['slug_str']);
                 $pfree = !empty($p['is_free']) ? '1' : '0';
                 $pimg = !empty($p['image']) ? esc_url($p['image']) : '';
+                $buy_type = !empty($p['buy_type']) ? $p['buy_type'] : 'whatsapp';
                 ?>
                 <div class="book-card" 
                      data-id="<?php echo $pid; ?>" 
                      data-name="<?php echo strtolower($pname); ?>"
                      data-slugs="<?php echo $slug_str; ?>"
-                     data-free="<?php echo $pfree; ?>">
+                     data-free="<?php echo $pfree; ?>"
+                     data-buytype="<?php echo esc_attr($buy_type); ?>">
                     <div class="book-cover-wrap" onclick="openBookModal(<?php echo $pid; ?>)">
                         <?php if ($pimg): ?>
                             <img src="<?php echo $pimg; ?>" alt="<?php echo $pname; ?>" class="book-cover-img" loading="lazy">
@@ -168,6 +170,8 @@ function mercado_livraria_shortcode() {
                         
                         <?php if (!empty($p['is_free'])): ?>
                             <span class="badge-free" onclick="event.stopPropagation(); selectLivrariaTab('gratuito');">GRATUITO</span>
+                        <?php elseif ($buy_type === 'hotmart'): ?>
+                            <span class="badge-platform hotmart">HOTMART</span>
                         <?php endif; ?>
 
                         <div class="book-hover-overlay">
@@ -233,7 +237,6 @@ function mercado_livraria_shortcode() {
     window.selectLivrariaTab = function(slug, btn) {
         window.currentLivrariaSlug = slug || 'all';
 
-        // Update tab buttons
         const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
         tabs.forEach(function(t) {
             if (t.getAttribute('data-slug') === slug) {
@@ -557,6 +560,19 @@ function mercado_livraria_shortcode() {
         box-shadow: 0 2px 8px rgba(16,185,129,0.3);
         cursor: pointer;
     }
+    .badge-platform.hotmart {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #F04E23;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 4px 9px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(240,78,35,0.3);
+    }
     .book-hover-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -763,12 +779,71 @@ function mercado_livraria_shortcode() {
     .modal-desc p {
         margin-bottom: 12px;
     }
+
+    /* PAYMENT CTA BUTTONS */
     .modal-btn-group {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
         align-items: center;
         margin-top: 20px;
+    }
+    .modal-btn-hotmart {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #F04E23 0%, #d4380d 100%);
+        color: #fff !important;
+        font-size: 1.05rem;
+        font-weight: 800;
+        padding: 14px 28px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 20px rgba(240, 78, 35, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modal-btn-hotmart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(240, 78, 35, 0.55);
+        color: #fff !important;
+    }
+    .modal-btn-external {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #fff !important;
+        font-size: 1rem;
+        font-weight: 800;
+        padding: 14px 26px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modal-btn-external:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(2, 132, 199, 0.5);
+        color: #fff !important;
+    }
+    .modal-btn-free {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff !important;
+        font-size: 1rem;
+        font-weight: 800;
+        padding: 14px 26px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modal-btn-free:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.45);
+        color: #fff !important;
     }
     .modal-btn-whatsapp {
         display: inline-flex;
@@ -789,15 +864,33 @@ function mercado_livraria_shortcode() {
         box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45);
         color: #fff !important;
     }
+    .modal-btn-whatsapp-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        color: #128C7E !important;
+        font-size: 0.92rem;
+        font-weight: 700;
+        padding: 13px 18px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        text-decoration: none !important;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .modal-btn-whatsapp-secondary:hover {
+        background: #e2e8f0;
+        border-color: #94a3b8;
+    }
     .modal-btn-email {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         background: #f1f5f9;
-        color: #334155 !important;
+        color: #475569 !important;
         font-size: 0.92rem;
         font-weight: 700;
-        padding: 13px 20px;
+        padding: 13px 18px;
         border-radius: 8px;
         text-decoration: none !important;
         transition: background 0.2s;
@@ -887,11 +980,13 @@ function mercado_livraria_footer_scripts() {
             if (!body) return;
 
             const isFree = !!p.is_free;
+            const buyType = p.buy_type || 'whatsapp';
+            const buyUrl = p.buy_url || '';
             const waPhone = '5562982763039';
-            const actionText = isFree ? 'Receber Gratuitamente' : 'Adquirir / Comprar';
+
             const waMsg = isFree
                 ? 'Olá! Gostaria de receber o material gratuito "' + p.name + '" (ID ' + p.id + ') do Portal Mercado Erótico.'
-                : 'Olá! Gostaria de adquirir o material "' + p.name + '" (ID ' + p.id + ') do Portal Mercado Erótico.';
+                : 'Olá! Tenho dúvidas sobre o material "' + p.name + '" (ID ' + p.id + ') do Portal Mercado Erótico.';
 
             const waUrl = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg);
             const mailUrl = 'mailto:contato@mercadoerotico.org?subject=' + encodeURIComponent('Interesse: ' + p.name) + '&body=' + encodeURIComponent(waMsg);
@@ -910,6 +1005,43 @@ function mercado_livraria_footer_scripts() {
             const priceClass = isFree ? 'modal-price free' : 'modal-price';
             const fullDesc = (p.description || p.short_description || p.excerpt || 'Sem descrição detalhada.').replace(/`/g, "'").replace(/\${/g, '{');
 
+            // Construct Buttons based on Product Checkout Destination
+            let actionButtonsHtml = '';
+            if (buyType === 'hotmart') {
+                actionButtonsHtml = `
+                    <a href="${buyUrl}" target="_blank" rel="noopener sponsored" class="modal-btn-hotmart">
+                        <i class="fas fa-fire" style="font-size:1.15rem;"></i> Comprar Agora no Hotmart <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp-secondary">
+                        <i class="fab fa-whatsapp"></i> Dúvidas no WhatsApp
+                    </a>
+                `;
+            } else if (buyType === 'external') {
+                actionButtonsHtml = `
+                    <a href="${buyUrl}" target="_blank" rel="noopener" class="modal-btn-external">
+                        <i class="fas fa-external-link-alt"></i> Acessar / Comprar no Site Oficial
+                    </a>
+                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp-secondary">
+                        <i class="fab fa-whatsapp"></i> Dúvidas
+                    </a>
+                `;
+            } else if (isFree) {
+                actionButtonsHtml = `
+                    <a href="${buyUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-free">
+                        <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Receber Gratuitamente via WhatsApp
+                    </a>
+                `;
+            } else {
+                actionButtonsHtml = `
+                    <a href="${buyUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp">
+                        <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Adquirir via WhatsApp / PIX
+                    </a>
+                    <a href="${mailUrl}" class="modal-btn-email">
+                        <i class="fas fa-envelope"></i> Pedir por E-mail
+                    </a>
+                `;
+            }
+
             body.innerHTML = `
                 <div class="modal-grid">
                     <div class="modal-cover-wrap">
@@ -925,12 +1057,7 @@ function mercado_livraria_footer_scripts() {
                             ${fullDesc}
                         </div>
                         <div class="modal-btn-group">
-                            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="modal-btn-whatsapp">
-                                <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> ${actionText} via WhatsApp
-                            </a>
-                            <a href="${mailUrl}" class="modal-btn-email">
-                                <i class="fas fa-envelope"></i> Pedir por E-mail
-                            </a>
+                            ${actionButtonsHtml}
                         </div>
                     </div>
                 </div>
