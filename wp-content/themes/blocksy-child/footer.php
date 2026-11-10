@@ -56,7 +56,7 @@ do_action('blocksy:content:bottom');
             <div class="footer-col">
                 <h4 class="footer-heading">Imprensa & Contato</h4>
                 <p class="footer-contact-info"><i class="fas fa-envelope"></i> contato@mercadoerotico.org</p>
-                <p class="footer-contact-info"><i class="fab fa-whatsapp"></i> +55 62 98276-3039</p>
+                <p class="footer-contact-info"><a href="https://api.whatsapp.com/send?phone=5562982763039" target="_blank" rel="noopener" style="color:inherit; text-decoration:none;"><i class="fab fa-whatsapp"></i> WhatsApp Comercial</a></p>
                 <p class="footer-contact-info"><i class="fas fa-shield-alt"></i> Portal Seguro & Auditado</p>
                 <a href="<?php echo home_url('/contato/'); ?>" class="btn-footer-contact">Fale com a Redação</a>
             </div>
