@@ -28,12 +28,15 @@ $negocios_posts = get_posts(array('category_name' => 'negocios', 'numberposts' =
 $sexologia_posts = get_posts(array('category_name' => 'sexologia', 'numberposts' => 3, 'post_status' => 'publish'));
 $eventos_posts = get_posts(array('category_name' => 'eventos', 'numberposts' => 3, 'post_status' => 'publish'));
 
-// 3. Livraria Featured Items
+// 3. Livraria Featured Items (Mix com destaques pagos e material gratuito em evidência)
 $livraria_items = array();
 $livraria_file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
 if (file_exists($livraria_file)) {
     $all_books = json_decode(file_get_contents($livraria_file), true) ?: array();
-    $livraria_items = array_slice($all_books, 0, 4);
+    $paid_sample = array_values(array_filter($all_books, function($b) { return empty($b['is_free']); }));
+    $free_sample = array_values(array_filter($all_books, function($b) { return !empty($b['is_free']); }));
+    // 3 primeiros cursos/formações em destaque + 1 material gratuito oficial
+    $livraria_items = array_merge(array_slice($paid_sample, 0, 3), array_slice($free_sample, 0, 1));
 }
 
 // 4. Recent Feed Posts (offset 8)
@@ -248,30 +251,54 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
     <section class="me-livraria-showcase">
         <div class="showcase-header">
             <div class="showcase-titles">
-                <span class="showcase-badge">VITRINE DIGITAL</span>
+                <div class="showcase-badges-wrap">
+                    <span class="showcase-badge">VITRINE DIGITAL</span>
+                    <span class="showcase-free-badge"><i class="fas fa-gift"></i> Conteúdos Pagos e Gratuitos</span>
+                </div>
                 <h2 class="showcase-main-title">Livraria & Formação Profissional</h2>
-                <p class="showcase-sub">E-books, manuais técnicos e treinamentos exclusivos para potencializar suas vendas e profissionalizar sua atuação no mercado íntimo.</p>
+                <p class="showcase-sub">E-books, manuais técnicos e treinamentos exclusivos para potencializar sua atuação no mercado íntimo. <strong>Acesso imediato com materiais 100% gratuitos disponíveis!</strong></p>
             </div>
-            <a href="<?php echo home_url('/livraria/'); ?>" class="btn-view-all-livraria">
-                Ver todos os 54 títulos <i class="fas fa-arrow-right"></i>
+            <div class="showcase-header-actions">
+                <a href="<?php echo home_url('/livraria/#gratuito'); ?>" class="btn-free-filter-cta">
+                    <i class="fas fa-gift"></i> Ver Materiais Gratuitos
+                </a>
+                <a href="<?php echo home_url('/livraria/'); ?>" class="btn-view-all-livraria">
+                    Ver todos os 54 títulos <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- AVISO DE MATERIAIS GRATUITOS NA VITRINE -->
+        <div class="showcase-free-notice-card">
+            <div class="free-notice-left">
+                <div class="free-notice-icon-circle">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="free-notice-content">
+                    <strong class="free-notice-headline">Você sabia? Temos materiais 100% gratuitos para download!</strong>
+                    <span class="free-notice-subline">Acesse agora manuais práticos de atendimento para sex shop, cartilhas de consultoria sensual e guias de negócios sem nenhum custo.</span>
+                </div>
+            </div>
+            <a href="<?php echo home_url('/livraria/#gratuito'); ?>" class="free-notice-action-btn">
+                Baixar Gratuitamente <i class="fas fa-arrow-right"></i>
             </a>
         </div>
 
         <div class="showcase-grid">
             <?php foreach ($livraria_items as $b): ?>
-                <div class="showcase-book-card">
-                    <a href="<?php echo home_url('/livraria/'); ?>" class="book-link">
+                <div class="showcase-book-card <?php echo !empty($b['is_free']) ? 'is-free-card' : ''; ?>">
+                    <a href="<?php echo home_url('/livraria/' . (!empty($b['is_free']) ? '#gratuito' : '')); ?>" class="book-link">
                         <div class="book-img-box">
                             <img src="<?php echo esc_url($b['image']); ?>" alt="<?php echo esc_attr($b['name']); ?>" loading="lazy">
-                            <?php if ($b['is_free']): ?>
-                                <span class="badge-free-mini">GRATUITO</span>
+                            <?php if (!empty($b['is_free'])): ?>
+                                <span class="badge-free-mini">🎁 100% GRATUITO</span>
                             <?php endif; ?>
                         </div>
                         <div class="book-mini-info">
                             <h4 class="book-mini-title"><?php echo esc_html($b['name']); ?></h4>
                             <div class="book-mini-bottom">
-                                <span class="book-mini-price"><?php echo esc_html($b['price_formatted']); ?></span>
-                                <span class="book-btn-mini">Detalhes</span>
+                                <span class="book-mini-price <?php echo !empty($b['is_free']) ? 'free-accent' : ''; ?>"><?php echo esc_html($b['price_formatted']); ?></span>
+                                <span class="book-btn-mini"><?php echo !empty($b['is_free']) ? 'Acessar Grátis' : 'Detalhes'; ?></span>
                             </div>
                         </div>
                     </a>
@@ -887,9 +914,16 @@ if (totalAds > 1) {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 25px;
+    margin-bottom: 22px;
     flex-wrap: wrap;
     gap: 15px;
+}
+.showcase-badges-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
 }
 .showcase-badge {
     display: inline-block;
@@ -900,13 +934,135 @@ if (totalAds > 1) {
     letter-spacing: 1px;
     padding: 4px 12px;
     border-radius: 4px;
-    margin-bottom: 8px;
+}
+.showcase-free-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.showcase-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.btn-free-filter-cta {
+    background: #10b981;
+    color: #fff;
+    border: 1px solid #10b981;
+    padding: 10px 18px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+.btn-free-filter-cta:hover {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
 }
 .showcase-main-title { font-size: 1.85rem; font-weight: 900; color: #fff; margin: 0 0 6px; }
 @media (max-width: 768px) {
     .showcase-main-title { font-size: 1.35rem; }
 }
 .showcase-sub { font-size: 0.95rem; color: #c9bed0; margin: 0; max-width: 650px; }
+
+/* AVISO DE MATERIAIS GRATUITOS */
+.showcase-free-notice-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.28) 100%);
+    border: 1px solid rgba(52, 211, 153, 0.38);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.free-notice-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 280px;
+}
+.free-notice-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.25);
+    border: 1px solid rgba(52, 211, 153, 0.5);
+    color: #34d399;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.free-notice-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.free-notice-headline {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+}
+.free-notice-subline {
+    color: #d1fae5;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+.free-notice-action-btn {
+    background: #10b981;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.84rem;
+    padding: 9px 18px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.free-notice-action-btn:hover {
+    background: #34d399;
+    color: #064e3b;
+    transform: translateY(-2px);
+}
+.showcase-book-card.is-free-card {
+    border-color: rgba(52, 211, 153, 0.5);
+    background: rgba(16, 185, 129, 0.08);
+}
+.showcase-book-card.is-free-card:hover {
+    border-color: #10b981;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+}
+.book-mini-price.free-accent {
+    color: #34d399;
+}
 .btn-view-all-livraria {
     background: rgba(255,255,255,0.12);
     color: #fff;

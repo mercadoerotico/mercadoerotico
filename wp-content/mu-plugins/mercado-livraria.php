@@ -316,6 +316,20 @@ function mercado_livraria_shortcode() {
 
         window.applyLivrariaFilter();
     };
+
+    // Auto-ativar aba via hash da URL (ex: #gratuito)
+    function checkLivrariaHash() {
+        const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+        if (hash === 'gratuito' || hash === 'gratuitos' || hash === 'free') {
+            window.selectLivrariaTab('gratuito');
+        } else if (hash && ['negocios', 'manuais', 'cursos', 'sexualidade'].indexOf(hash) !== -1) {
+            window.selectLivrariaTab(hash);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', checkLivrariaHash);
+    window.addEventListener('hashchange', checkLivrariaHash);
+    setTimeout(checkLivrariaHash, 300);
+    setTimeout(checkLivrariaHash, 800);
     </script>
 
     <style>
