@@ -1124,3 +1124,319 @@ function mercado_livraria_footer_scripts() {
     <?php
 }
 add_action('wp_footer', 'mercado_livraria_footer_scripts', 99);
+
+
+
+/**
+ * ============================================================================
+ * PAINEL DE GESTÃO DO ACERVO DIGITAL & ENVIO DE E-MAILS (PIX / MERCADO PAGO)
+ * ============================================================================
+ */
+
+function mercado_livraria_admin_menu() {
+    add_menu_page(
+        'Acervo & Envios',
+        'Acervo & Envios',
+        'manage_options',
+        'mercado-acervo-digital',
+        'mercado_livraria_admin_page',
+        'dashicons-book-alt',
+        26
+    );
+}
+add_action('admin_menu', 'mercado_livraria_admin_menu');
+
+function mercado_livraria_handle_pdf_upload() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Acesso não autorizado.');
+    }
+    check_admin_referer('mercado_upload_acervo_action', 'mercado_upload_nonce');
+
+    $book_id = isset($_POST['book_id']) ? intval($_POST['book_id']) : 0;
+    $book_name = isset($_POST['book_name']) ? sanitize_text_field($_POST['book_name']) : 'ebook';
+
+    if ($book_id <= 0 || empty($_FILES['pdf_file']['name'])) {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_invalid'));
+        exit;
+    }
+
+    $file = $_FILES['pdf_file'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if ($ext !== 'pdf') {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_not_pdf'));
+        exit;
+    }
+
+    $dir = WP_CONTENT_DIR . '/uploads/acervo-digital';
+    if (!file_exists($dir)) {
+        wp_mkdir_p($dir);
+        file_put_contents($dir . '/index.php', '<?php // Silence is golden.');
+    }
+
+    $clean_slug = sanitize_title($book_name);
+    $target_name = $book_id . '-' . $clean_slug . '.pdf';
+    $target_path = $dir . '/' . $target_name;
+
+    if (move_uploaded_file($file['tmp_name'], $target_path)) {
+        chmod($target_path, 0644);
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=success_upload&book_id=' . $book_id));
+        exit;
+    } else {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_upload'));
+        exit;
+    }
+}
+add_action('admin_post_mercado_upload_acervo_pdf', 'mercado_livraria_handle_pdf_upload');
+
+function mercado_livraria_find_acervo_file($book_id, $book_slug) {
+    $dir = WP_CONTENT_DIR . '/uploads/acervo-digital';
+    if (!is_dir($dir)) return null;
+
+    $files = scandir($dir);
+    foreach ($files as $f) {
+        if ($f === '.' || $f === '..' || $f === 'index.php') continue;
+        if (strpos($f, (string)$book_id . '-') === 0 && substr($f, -4) === '.pdf') {
+            return $f;
+        }
+    }
+    return null;
+}
+
+function mercado_livraria_admin_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $products = mercado_livraria_get_data();
+    $target_products = array_filter($products, function($p) {
+        $bt = $p['buy_type'] ?? '';
+        return ($bt === 'whatsapp' || !empty($p['is_free']) || $bt === 'free' || $bt === 'download');
+    });
+
+    $acervo_url = content_url('uploads/acervo-digital');
+    $status = $_GET['status'] ?? '';
+    ?>
+    <div class="wrap" style="max-width:1200px; margin-top:20px;">
+        <h1 style="font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:10px;">
+            <span class="dashicons dashicons-book-alt" style="font-size:2rem; width:2rem; height:2rem; color:#e31c61;"></span>
+            Livraria Digital — Acervo & Envio de E-books (PIX / Mercado Pago)
+        </h1>
+        <p style="font-size:1rem; color:#555; margin-bottom:25px;">
+            Este painel permite consultar o arquivo PDF de cada e-book, copiar os links de download direto ou preparar na hora o e-mail de entrega para o comprador após a confirmação do pagamento.
+        </p>
+
+        <?php if ($status === 'success_upload'): ?>
+            <div class="notice notice-success is-dismissible" style="padding:12px; font-weight:600;">
+                ✅ Arquivo PDF enviado com sucesso e arquivado no acervo!
+            </div>
+        <?php elseif ($status === 'error_not_pdf'): ?>
+            <div class="notice notice-error is-dismissible" style="padding:12px; font-weight:600;">
+                ❌ Erro: O arquivo enviado precisa ser no formato .PDF.
+            </div>
+        <?php elseif ($status === 'error_upload'): ?>
+            <div class="notice notice-error is-dismissible" style="padding:12px; font-weight:600;">
+                ❌ Houve uma falha ao mover o arquivo. Verifique as permissões de pasta.
+            </div>
+        <?php endif; ?>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
+            <div style="background:#fff; border-left:4px solid #10b981; padding:18px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                <div style="font-size:0.85rem; color:#64748b; font-weight:700; text-transform:uppercase;">Entrega por E-mail</div>
+                <div style="font-size:1.4rem; font-weight:800; color:#1e293b; margin-top:5px;">Pronto para Envio</div>
+                <p style="margin:5px 0 0; font-size:0.85rem; color:#64748b;">Gere a mensagem de entrega do comprador com 1 clique.</p>
+            </div>
+            <div style="background:#fff; border-left:4px solid #e31c61; padding:18px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                <div style="font-size:0.85rem; color:#64748b; font-weight:700; text-transform:uppercase;">Local do Acervo Seguro</div>
+                <div style="font-size:1.1rem; font-weight:700; color:#1e293b; margin-top:5px; word-break:break-all;">wp-content/uploads/acervo-digital/</div>
+                <p style="margin:5px 0 0; font-size:0.85rem; color:#64748b;">Protegido contra listagem de diretório.</p>
+            </div>
+        </div>
+
+        <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden;">
+            <table class="wp-list-table widefat fixed striped" style="border:none;">
+                <thead>
+                    <tr style="background:#f8fafc;">
+                        <th style="width:70px; font-weight:700; padding:12px 16px;">Capa</th>
+                        <th style="font-weight:700; padding:12px 16px;">Livro / Material</th>
+                        <th style="width:110px; font-weight:700; padding:12px 16px;">Preço</th>
+                        <th style="width:170px; font-weight:700; padding:12px 16px;">Status no Acervo</th>
+                        <th style="width:340px; font-weight:700; padding:12px 16px; text-align:right;">Ações de Envio & Gestão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($target_products as $p): 
+                        $pid = $p['id'];
+                        $title = $p['name'];
+                        $slug = $p['slug'] ?? sanitize_title($title);
+                        $price = $p['price_formatted'];
+                        $is_free = !empty($p['is_free']);
+                        $img = $p['image'] ?? '';
+                        $acervo_file = mercado_livraria_find_acervo_file($pid, $slug);
+                        $file_url = $acervo_file ? $acervo_url . '/' . $acervo_file : ($p['buy_url'] ?? '');
+                        $has_file = !empty($acervo_file) || (strpos($file_url, '.pdf') !== false);
+                    ?>
+                    <tr>
+                        <td style="padding:12px 16px; vertical-align:middle;">
+                            <?php if ($img): ?>
+                                <img src="<?php echo esc_url($img); ?>" style="width:48px; height:64px; object-fit:cover; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">
+                            <?php else: ?>
+                                <div style="width:48px; height:64px; background:#f1f5f9; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#94a3b8;"><span class="dashicons dashicons-book"></span></div>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:12px 16px; vertical-align:middle;">
+                            <div style="font-weight:700; color:#1e293b; font-size:0.95rem; margin-bottom:4px;"><?php echo esc_html($title); ?></div>
+                            <div style="font-size:0.8rem; color:#64748b;">ID: <?php echo $pid; ?> • <?php echo $is_free ? '<span style="color:#10b981; font-weight:700;">Material Gratuito</span>' : 'Venda Direta (PIX / MP)'; ?></div>
+                            <?php if ($has_file): ?>
+                                <div style="font-size:0.75rem; color:#059669; margin-top:4px; font-family:monospace; word-break:break-all;">
+                                    📁 <?php echo esc_html($acervo_file ?: basename($file_url)); ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:12px 16px; vertical-align:middle; font-weight:700; color:<?php echo $is_free ? '#10b981' : '#e31c61'; ?>;">
+                            <?php echo esc_html($price); ?>
+                        </td>
+                        <td style="padding:12px 16px; vertical-align:middle;">
+                            <?php if ($has_file): ?>
+                                <span style="display:inline-flex; align-items:center; gap:5px; background:#ecfdf5; color:#065f46; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                                    <span class="dashicons dashicons-yes-alt" style="font-size:16px; width:16px; height:16px;"></span> PDF Arquivado
+                                </span>
+                            <?php else: ?>
+                                <span style="display:inline-flex; align-items:center; gap:5px; background:#fffbeb; color:#92400e; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                                    <span class="dashicons dashicons-warning" style="font-size:16px; width:16px; height:16px;"></span> PDF Pendente
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:12px 16px; vertical-align:middle; text-align:right;">
+                            <div style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; align-items:center;">
+                                <?php if ($has_file): ?>
+                                    <button type="button" class="button button-primary" style="background:#e31c61; border-color:#e31c61; font-weight:600;" onclick="openEmailModal(<?php echo htmlspecialchars(json_encode(array(
+                                        'id' => $pid,
+                                        'title' => $title,
+                                        'file_url' => $file_url,
+                                        'price' => $price
+                                    )), ENT_QUOTES, 'UTF-8'); ?>)">
+                                        ✉️ Enviar p/ Comprador
+                                    </button>
+                                    <a href="<?php echo esc_url($file_url); ?>" target="_blank" download class="button button-secondary" title="Baixar arquivo agora">
+                                        📥 Baixar
+                                    </a>
+                                    <button type="button" class="button button-secondary" onclick="copyToClipboard('<?php echo esc_js($file_url); ?>', 'Link do PDF copiado!')" title="Copiar link direto do PDF">
+                                        🔗 Copiar Link
+                                    </button>
+                                <?php else: ?>
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px; align-items:center;">
+                                        <?php wp_nonce_field('mercado_upload_acervo_action', 'mercado_upload_nonce'); ?>
+                                        <input type="hidden" name="action" value="mercado_upload_acervo_pdf">
+                                        <input type="hidden" name="book_id" value="<?php echo $pid; ?>">
+                                        <input type="hidden" name="book_name" value="<?php echo esc_attr($title); ?>">
+                                        <input type="file" name="pdf_file" accept=".pdf" required style="font-size:0.75rem; max-width:140px;">
+                                        <button type="submit" class="button button-secondary" style="font-size:0.75rem;">
+                                            ⬆️ Subir PDF
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Envio de E-mail -->
+    <div id="email-helper-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:12px; width:100%; max-width:650px; box-shadow:0 20px 40px rgba(0,0,0,0.25); overflow:hidden;">
+            <div style="background:#1e293b; color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:1.15rem; color:#fff; font-weight:700;">✉️ Preparar E-mail de Entrega do Livro</h3>
+                <button type="button" onclick="closeEmailModal()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <div style="padding:24px;">
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-weight:700; margin-bottom:5px; font-size:0.85rem; color:#334155;">E-mail do Comprador (opcional para abrir cliente de e-mail):</label>
+                    <input type="email" id="modal-buyer-email" placeholder="comprador@email.com" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;" oninput="updateMailtoLink()">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-weight:700; margin-bottom:5px; font-size:0.85rem; color:#334155;">Assunto do E-mail:</label>
+                    <input type="text" id="modal-email-subject" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;" readonly>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-weight:700; margin-bottom:5px; font-size:0.85rem; color:#334155;">Mensagem Pronta para Envio:</label>
+                    <textarea id="modal-email-body" rows="9" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; line-height:1.5; font-family:monospace; background:#f8fafc;"></textarea>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; border-top:1px solid #f1f5f9; padding-top:18px;">
+                    <button type="button" class="button button-secondary" onclick="closeEmailModal()">Fechar</button>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="button" onclick="copyEmailContent()" style="background:#f1f5f9; font-weight:600;">
+                            📋 Copiar Mensagem
+                        </button>
+                        <a id="modal-mailto-btn" href="#" class="button button-primary" style="background:#10b981; border-color:#10b981; font-weight:700;">
+                            🚀 Abrir no Meu E-mail
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentModalBook = null;
+
+    function openEmailModal(book) {
+        currentModalBook = book;
+        const subject = '[Mercado Erótico] Seu E-book: ' + book.title + ' - Acesso Liberado! 📚';
+        const body = `Olá! Tudo bem?
+
+Confirmamos com sucesso o recebimento do seu pagamento referente ao e-book:
+"${book.title}".
+
+Você já pode acessar e baixar o seu exemplar digital diretamente no link seguro abaixo:
+` + book.file_url + `
+
+(Recomendamos salvar o arquivo em seu computador, tablet ou celular para ler sempre que desejar).
+
+Se precisar de qualquer suporte ou preferir receber o arquivo anexado diretamente nesta conversa, basta responder a este e-mail.
+
+Desejamos uma excelente leitura e muito sucesso!
+
+Atenciosamente,
+Equipe Mercado Erótico
+contato@mercadoerotico.org | mercadoerotico.org`;
+
+        document.getElementById('modal-buyer-email').value = '';
+        document.getElementById('modal-email-subject').value = subject;
+        document.getElementById('modal-email-body').value = body;
+
+        updateMailtoLink();
+        document.getElementById('email-helper-modal').style.display = 'flex';
+    }
+
+    function updateMailtoLink() {
+        if (!currentModalBook) return;
+        const buyerEmail = document.getElementById('modal-buyer-email').value.trim();
+        const subject = document.getElementById('modal-email-subject').value;
+        const body = document.getElementById('modal-email-body').value;
+        const mailto = 'mailto:' + encodeURIComponent(buyerEmail) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        document.getElementById('modal-mailto-btn').href = mailto;
+    }
+
+    function closeEmailModal() {
+        document.getElementById('email-helper-modal').style.display = 'none';
+        currentModalBook = null;
+    }
+
+    function copyToClipboard(text, msg) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert(msg || 'Copiado para a área de transferência!');
+        });
+    }
+
+    function copyEmailContent() {
+        const body = document.getElementById('modal-email-body').value;
+        navigator.clipboard.writeText(body).then(function() {
+            alert('Mensagem copiada com sucesso! Agora é só colar no seu e-mail.');
+        });
+    }
+    </script>
+    <?php
+}
