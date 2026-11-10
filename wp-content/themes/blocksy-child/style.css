@@ -4,69 +4,82 @@ Theme URI: https://mercadoerotico.org
 Description: Tema editorial moderno de alta performance para o Portal Mercado Erótico.
 Author: Mercado Erótico
 Template: blocksy
-Version: 1.0.0
+Version: 1.1.0
 */
 
-/* Header & Logo Modern Styling */
+/* 1. LOGO EM DESTAQUE E OCULTAÇÃO TOTAL DO TEXTO DO SITE */
 .site-branding .site-logo-container img {
-    max-height: 52px !important;
+    max-height: 64px !important;
     width: auto !important;
-    object-fit: contain !important;
+    height: auto !important;
+    display: block !important;
+    transition: transform 0.25s ease !important;
+}
+.site-branding .site-logo-container:hover img {
+    transform: scale(1.03) !important;
+}
+.site-title-container,
+.site-title,
+.site-description {
+    display: none !important;
 }
 
-.site-title-container {
-    display: none !important; /* Hide redundant text next to logo */
-}
-
-/* Header Navbar Links */
+/* 2. MENU SUPERIOR */
 .header-menu-1 .menu > li > a {
     font-size: 13.5px !important;
     font-weight: 600 !important;
     color: #1a1a1a !important;
-    padding: 10px 14px !important;
+    padding: 10px 12px !important;
     transition: color 0.2s ease !important;
 }
 .header-menu-1 .menu > li > a:hover {
     color: #e31c61 !important;
 }
 
-/* Special Pill Buttons for Acervo & Livraria */
-.header-menu-1 .menu > li#menu-item-13624 > a {
+/* DESTAQUE BOTÕES DO MENU (Acervo e Livraria) */
+.header-menu-1 .menu > li.menu-item-acervo > a {
     background: #111 !important;
     color: #fff !important;
     border-radius: 20px !important;
-    padding: 7px 16px !important;
-    margin-left: 8px !important;
+    padding: 6px 14px !important;
+    margin: 0 4px !important;
     font-size: 12.5px !important;
     font-weight: 700 !important;
     border: 1px solid rgba(255,255,255,0.2) !important;
     transition: all 0.2s ease !important;
 }
-.header-menu-1 .menu > li#menu-item-13624 > a:hover {
+.header-menu-1 .menu > li.menu-item-acervo > a:hover {
     background: #e31c61 !important;
     border-color: #e31c61 !important;
     color: #fff !important;
 }
 
-.header-menu-1 .menu > li#menu-item-11150 > a {
+.header-menu-1 .menu > li.menu-item-livraria > a {
     background: linear-gradient(135deg, #e31c61, #9c1543) !important;
     color: #fff !important;
     border-radius: 20px !important;
-    padding: 7px 16px !important;
-    margin-left: 8px !important;
+    padding: 6px 14px !important;
+    margin: 0 4px !important;
     font-size: 12.5px !important;
     font-weight: 700 !important;
     box-shadow: 0 4px 12px rgba(227, 28, 97, 0.3) !important;
     transition: all 0.2s ease !important;
 }
-.header-menu-1 .menu > li#menu-item-11150 > a:hover {
+.header-menu-1 .menu > li.menu-item-livraria > a:hover {
     opacity: 0.9 !important;
     color: #fff !important;
     transform: translateY(-1px) !important;
 }
 
-/* Page Spacing for transparent/standard blocksy layout */
+/* 3. ESPAÇAMENTOS E MOBILE */
+@media (max-width: 991px) {
+    .site-branding .site-logo-container img {
+        max-height: 48px !important;
+    }
+}
+
 .page-id-13623 #main-container,
-.page-id-3918 #main-container {
+.page-id-3918 #main-container,
+.page-id-8889 #main-container {
     padding-top: 30px !important;
 }
