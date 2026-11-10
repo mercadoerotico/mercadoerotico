@@ -74,7 +74,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
             <!-- Banner Destaque 1: Anuário Grandes Marcas 2026 -->
             <div class="ad-standard-slide active">
                 <a href="<?php echo home_url('/anuario-grandes-marcas-do-mercado-erotico-2026/'); ?>" title="Anuário Grandes Marcas do Mercado Erótico - Baixe Grátis">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_top.jpg" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1024" height="254">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_clean.png" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1200" height="300">
                 </a>
             </div>
 
@@ -1377,7 +1377,7 @@ if (totalAds > 1) {
 
 /* ESPAÇO DE PUBLICIDADE - BANNER PADRÃO IAB */
 .me-ad-standard-container {
-    max-width: 1024px;
+    max-width: 1200px;
     margin: 15px auto 25px;
     position: relative;
 }
@@ -1436,9 +1436,9 @@ if (totalAds > 1) {
 }
 .ad-img-standard {
     width: 100%;
-    max-width: 1024px;
+    max-width: 1200px;
     height: auto;
-    max-height: 260px;
+    max-height: 300px;
     object-fit: contain;
     display: block;
     margin: 0 auto;
