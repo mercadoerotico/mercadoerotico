@@ -256,20 +256,20 @@ function me_midiakit_render_shortcode() {
                     </div>
                 </div>
 
-                <!-- FORMATO 5: PATROCÍNIO DE DOSSIÊ -->
+                <!-- FORMATO 5: PATROCÍNIO DE EDITORIA TEMÁTICA -->
                 <div class="me-mk-format-card">
                     <div class="me-mk-format-badge" style="background:#10b981;">COTA MASTER</div>
                     <div class="me-mk-format-media">
                         <i class="fas fa-bookmark"></i>
-                        <span class="me-mk-format-dim">Patrocínio Anual de Linha Estratégica</span>
+                        <span class="me-mk-format-dim">Patrocínio Anual de Linha Editorial</span>
                     </div>
                     <div class="me-mk-format-body">
-                        <h3>Patrocínio Exclusivo de Dossiê Temático</h3>
-                        <p>Sua marca como patrocinadora master permanente de um dos 7 Dossiês Estratégicos do Acervo (ex: Cosméticos Sensuais, Legislação, Sextech).</p>
+                        <h3>Patrocínio Exclusivo de Editoria Temática</h3>
+                        <p>Sua marca como patrocinadora master permanente de uma das principais editorias do portal (ex: Negócios &amp; Indústria, Saúde &amp; Bem-Estar, Sextech &amp; Inovação).</p>
                         <ul class="me-mk-format-feats">
                             <li><i class="fas fa-check"></i> Selo 'Oferecimento Especial' no topo de todos os artigos</li>
                             <li><i class="fas fa-check"></i> Exclusividade de categoria contra concorrentes diretos</li>
-                            <li><i class="fas fa-check"></i> Citação em estudos e compilações setoriais</li>
+                            <li><i class="fas fa-check"></i> Associação direta da sua marca a temas de alto prestígio setorial</li>
                         </ul>
                     </div>
                 </div>
@@ -337,7 +337,7 @@ function me_midiakit_render_shortcode() {
                             <li><i class="fas fa-check"></i> <strong>Retângulo Lateral 300x250</strong> em matérias</li>
                             <li><i class="fas fa-check"></i> <strong>1 Publieditorial Mensal</strong> com link DoFollow</li>
                             <li><i class="fas fa-check"></i> Destaque especial na <strong>Agenda de Eventos</strong></li>
-                            <li><i class="fas fa-check"></i> Disparo de informe para rede de contatos B2B</li>
+                            <li><i class="fas fa-check"></i> Divulgação nos <strong>canais oficiais e redes B2B</strong> da redação</li>
                         </ul>
                     </div>
                     <div class="me-mk-price-footer">
@@ -355,7 +355,7 @@ function me_midiakit_render_shortcode() {
                     </div>
                     <div class="me-mk-price-features">
                         <ul>
-                            <li><i class="fas fa-check"></i> <strong>Patrocínio Exclusivo</strong> de 1 Dossiê Temático</li>
+                            <li><i class="fas fa-check"></i> <strong>Patrocínio Exclusivo</strong> de 1 Editoria Temática</li>
                             <li><i class="fas fa-check"></i> <strong>Super Billboard + Leaderboard</strong> permanentes</li>
                             <li><i class="fas fa-check"></i> <strong>Entrevista de Capa</strong> com Fundador/CEO</li>
                             <li><i class="fas fa-check"></i> <strong>Publieditoriais Ilimitados</strong> de lançamentos</li>
@@ -476,7 +476,7 @@ function me_midiakit_render_shortcode() {
                                     <option value="Super Billboard Home (970x250)">Super Billboard Home (970x250)</option>
                                     <option value="Leaderboard em Todas as Páginas (728x90)">Leaderboard em Todas as Páginas (728x90)</option>
                                     <option value="Branded Content / Publieditorial">Branded Content / Publieditorial com SEO</option>
-                                    <option value="Patrocínio de Dossiê Temático">Patrocínio de Dossiê Temático</option>
+                                    <option value="Patrocínio de Editoria Temática">Patrocínio de Editoria Temática</option>
                                     <option value="Pacote Completo Personalizado">Pacote Completo Personalizado</option>
                                 </select>
                             </div>
