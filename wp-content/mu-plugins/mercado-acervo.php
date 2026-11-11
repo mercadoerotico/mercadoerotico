@@ -170,10 +170,18 @@ function mercado_acervo_shortcode() {
 
             <!-- Search Bar -->
             <div class="acervo-search-box">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="acervo-search-input" placeholder="Pesquisar por tema, marca, lei, produto ou especialista (ex: ECA digital, vibrador, censo, feira)..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doAcervoSearch();}">
-                <button type="button" id="acervo-search-btn" class="acervo-btn-search" onclick="doAcervoSearch()">Buscar</button>
+                <div class="acervo-input-wrap">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="acervo-search-input" placeholder="Pesquisar por tema, marca, produto ou termo..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doAcervoSearch();}">
+                    <button type="button" id="acervo-clear-input-btn" class="acervo-clear-btn" title="Limpar busca" onclick="clearSearchInput()"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <button type="button" id="acervo-search-btn" class="acervo-btn-search" onclick="doAcervoSearch()">
+                    <span class="btn-text">Buscar</span>
+                </button>
             </div>
+
+            <!-- Instant Search Feedback in Hero -->
+            <div id="acervo-hero-feedback" class="acervo-hero-feedback" style="display:none;"></div>
         </div>
 
         <!-- Themes Filter -->
@@ -317,30 +325,58 @@ function mercado_acervo_shortcode() {
         margin: 0 auto;
         position: relative;
         display: flex;
+        align-items: center;
         background: #ffffff;
         border-radius: 50px;
         padding: 5px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.25);
     }
-    .acervo-search-box .search-icon {
+    .acervo-input-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+    .acervo-input-wrap .search-icon {
         position: absolute;
-        left: 20px;
+        left: 18px;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
         font-size: 16px;
         pointer-events: none;
+        z-index: 2;
     }
-    .acervo-search-box input {
-        flex: 1;
+    .acervo-input-wrap input {
+        width: 100%;
         border: none !important;
         outline: none !important;
-        padding: 12px 16px 12px 46px !important;
+        padding: 12px 38px 12px 48px !important;
         font-size: 15px !important;
         color: #1e293b !important;
         border-radius: 50px !important;
         background: transparent !important;
         box-shadow: none !important;
+    }
+    .acervo-clear-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        display: none;
+        z-index: 2;
+        transition: color 0.2s ease;
+    }
+    .acervo-clear-btn:hover {
+        color: #e31c61;
     }
     .acervo-btn-search {
         background: #e31c61;
@@ -348,13 +384,76 @@ function mercado_acervo_shortcode() {
         border: none;
         border-radius: 50px;
         padding: 0 28px;
+        height: 44px;
         font-weight: 700;
         font-size: 14px;
         cursor: pointer;
         transition: background 0.2s ease, transform 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-shrink: 0;
     }
     .acervo-btn-search:hover {
         background: #c4124e;
+        transform: scale(1.02);
+    }
+    .acervo-hero-feedback {
+        margin-top: 16px;
+        padding: 8px 18px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff;
+        backdrop-filter: blur(8px);
+        animation: acervoFadeIn 0.25s ease;
+        max-width: 95%;
+        flex-wrap: wrap;
+    }
+    @keyframes acervoFadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .acervo-hero-feedback.has-results {
+        background: rgba(16, 185, 129, 0.25);
+        border-color: rgba(16, 185, 129, 0.45);
+        color: #a7f3d0;
+    }
+    .acervo-hero-feedback.no-results {
+        background: rgba(244, 63, 94, 0.25);
+        border-color: rgba(244, 63, 94, 0.45);
+        color: #fecdd3;
+    }
+    .acervo-hero-feedback.is-loading {
+        background: rgba(227, 28, 97, 0.25);
+        border-color: rgba(227, 28, 97, 0.45);
+        color: #fbcfe8;
+    }
+    .acervo-hero-feedback .feedback-btn {
+        background: #ffffff;
+        color: #0f172a;
+        border: none;
+        border-radius: 20px;
+        padding: 3px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+    .acervo-hero-feedback .feedback-btn:hover {
+        transform: scale(1.05);
+    }
         transform: scale(1.02);
     }
     .acervo-filter-section {
@@ -589,11 +688,47 @@ function mercado_acervo_shortcode() {
         .acervo-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 768px) {
-        .acervo-hero { padding: 30px 18px; }
-        .acervo-title { font-size: 26px; }
-        .acervo-search-box { flex-direction: column; background: transparent; box-shadow: none; padding: 0; }
-        .acervo-search-box input { background: #fff !important; margin-bottom: 8px; border-radius: 8px !important; padding-left: 42px !important; }
-        .acervo-btn-search { padding: 12px; border-radius: 8px; }
+        .acervo-hero { padding: 24px 14px; }
+        .acervo-title { font-size: 24px; }
+        .acervo-subtitle { font-size: 13.5px; margin-bottom: 18px; }
+        .acervo-stats-bar { padding: 8px 12px; gap: 8px; margin-bottom: 20px; }
+        .stat-item { gap: 4px; }
+        .stat-num { font-size: 13.5px; }
+        .stat-lbl { font-size: 11.5px; }
+        .acervo-search-box {
+            display: flex;
+            flex-direction: row;
+            background: #ffffff;
+            border-radius: 50px;
+            padding: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            width: 100%;
+        }
+        .acervo-input-wrap .search-icon {
+            left: 14px;
+            font-size: 14px;
+        }
+        .acervo-input-wrap input {
+            font-size: 13.5px !important;
+            padding: 9px 30px 9px 36px !important;
+            border-radius: 50px !important;
+        }
+        .acervo-clear-btn {
+            right: 8px;
+            font-size: 15px;
+        }
+        .acervo-btn-search {
+            height: 38px;
+            padding: 0 16px;
+            font-size: 13px;
+            border-radius: 50px;
+            flex-shrink: 0;
+        }
+        .acervo-hero-feedback {
+            font-size: 12.5px;
+            padding: 8px 14px;
+            width: 100%;
+        }
         .acervo-grid { grid-template-columns: 1fr; }
     }
     </style>
@@ -621,6 +756,37 @@ function mercado_acervo_footer_scripts() {
 
         const restUrl = '<?php echo $rest_endpoint; ?>';
         const ajaxUrl = '<?php echo $ajax_endpoint; ?>';
+
+        window.scrollToAcervoResults = function() {
+            const target = document.getElementById('acervo-results-bar') || document.getElementById('acervo-grid');
+            if (target) {
+                const y = target.getBoundingClientRect().top + window.pageYOffset - 85;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        };
+
+        window.clearSearchInput = function() {
+            const input = document.getElementById('acervo-search-input');
+            const clearBtn = document.getElementById('acervo-clear-input-btn');
+            const feedbackBox = document.getElementById('acervo-hero-feedback');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            if (clearBtn) clearBtn.style.display = 'none';
+            if (feedbackBox) feedbackBox.style.display = 'none';
+            window.doAcervoSearch();
+        };
+
+        const searchInput = document.getElementById('acervo-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const clearBtn = document.getElementById('acervo-clear-input-btn');
+                if (clearBtn) {
+                    clearBtn.style.display = this.value.trim() ? 'block' : 'none';
+                }
+            });
+        }
 
         window.selectAcervoTheme = function(theme, btn) {
             window.currentAcervoTheme = theme || 'all';
@@ -652,6 +818,11 @@ function mercado_acervo_footer_scripts() {
 
             const input = document.getElementById('acervo-search-input');
             if (input) input.value = '';
+            const clearInputBtn = document.getElementById('acervo-clear-input-btn');
+            if (clearInputBtn) clearInputBtn.style.display = 'none';
+
+            const feedbackBox = document.getElementById('acervo-hero-feedback');
+            if (feedbackBox) feedbackBox.style.display = 'none';
 
             const pills = document.querySelectorAll('#themes-filter-container .theme-pill');
             pills.forEach(function(p) {
@@ -679,16 +850,29 @@ function mercado_acervo_footer_scripts() {
             const loadingEl = document.getElementById('acervo-loading');
             const loadMoreBtn = document.getElementById('acervo-load-more');
             const clearBtn = document.getElementById('clear-filters-btn');
+            const searchBtn = document.getElementById('acervo-search-btn');
+            const feedbackBox = document.getElementById('acervo-hero-feedback');
+
+            const theme = window.currentAcervoTheme || 'all';
+            const q = window.currentAcervoQuery || '';
+            const page = window.currentAcervoPage || 1;
+
+            if (searchBtn && !append) {
+                searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="btn-text">Buscando...</span>';
+                searchBtn.disabled = true;
+            }
+
+            if (feedbackBox && q !== '' && !append) {
+                feedbackBox.style.display = 'inline-flex';
+                feedbackBox.className = 'acervo-hero-feedback is-loading';
+                feedbackBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando artigos sobre "<strong>' + q.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</strong>"...';
+            }
 
             if (loadingEl) loadingEl.style.display = 'block';
             if (!append && grid) {
                 grid.innerHTML = '';
                 if (loadMoreBtn) loadMoreBtn.style.display = 'none';
             }
-
-            const theme = window.currentAcervoTheme || 'all';
-            const q = window.currentAcervoQuery || '';
-            const page = window.currentAcervoPage || 1;
 
             let data = null;
 
@@ -716,13 +900,46 @@ function mercado_acervo_footer_scripts() {
             window.isAcervoLoading = false;
             if (loadingEl) loadingEl.style.display = 'none';
 
+            if (searchBtn) {
+                searchBtn.innerHTML = '<span class="btn-text">Buscar</span>';
+                searchBtn.disabled = false;
+            }
+
             if (!data || !Array.isArray(data.posts)) {
                 if (countEl) countEl.innerText = 'Não foi possível carregar os artigos. Tente novamente.';
+                if (feedbackBox && q !== '') {
+                    feedbackBox.className = 'acervo-hero-feedback no-results';
+                    feedbackBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> Erro ao buscar artigos. Tente novamente.';
+                }
                 return;
             }
 
+            const totalPosts = parseInt(data.total_posts || 0, 10);
+            const safeQ = q.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
             if (countEl) {
-                countEl.innerHTML = '<strong>' + data.total_posts + '</strong> artigos encontrados no acervo';
+                countEl.innerHTML = '<strong>' + totalPosts + '</strong> artigos encontrados no acervo';
+            }
+
+            // Update instant feedback in Hero
+            if (feedbackBox) {
+                if (q !== '') {
+                    feedbackBox.style.display = 'inline-flex';
+                    if (totalPosts > 0) {
+                        feedbackBox.className = 'acervo-hero-feedback has-results';
+                        feedbackBox.innerHTML = '<span><i class="fas fa-check-circle"></i> <strong>' + totalPosts + '</strong> ' + (totalPosts === 1 ? 'artigo encontrado' : 'artigos encontrados') + ' para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="scrollToAcervoResults()">Ver artigos ↓</button>';
+                    } else {
+                        feedbackBox.className = 'acervo-hero-feedback no-results';
+                        feedbackBox.innerHTML = '<span><i class="fas fa-exclamation-triangle"></i> Nenhum artigo encontrado para "<strong>' + safeQ + '</strong>"</span>';
+                    }
+                } else {
+                    feedbackBox.style.display = 'none';
+                }
+            }
+
+            // Auto-scroll on mobile when a search query is submitted
+            if (q !== '' && !append && window.innerWidth <= 768) {
+                setTimeout(scrollToAcervoResults, 280);
             }
 
             if (clearBtn) {
