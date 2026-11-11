@@ -33,7 +33,7 @@ do_action('blocksy:content:bottom');
                     <li><a href="<?php echo home_url('/sobre/'); ?>">Sobre Nós</a></li>
                     <li><a href="<?php echo home_url('/colunistas/'); ?>">Colunistas Oficiais</a></li>
                     <li><a href="<?php echo home_url('/agenda/'); ?>"><strong style="color:#e31c61;">Agenda do Mercado Erótico</strong></a></li>
-                    <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo Histórico (Desde 2018)</a></li>
+                    <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo de Notícias (Desde 2018)</a></li>
                     <li><a href="<?php echo home_url('/livraria/'); ?>">Livraria Digital</a></li>
                     <li><a href="<?php echo home_url('/contato/'); ?>">Contatos & Redação</a></li>
                 </ul>

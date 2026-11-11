@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Mercado Erótico - Acervo Histórico & Pesquisa
+ * Plugin Name: Mercado Erótico - Acervo de Notícias & Pesquisa
  * Description: Sistema de busca e filtragem histórica por tempo e tema do portal Mercado Erótico.
  * Version: 2.0.0
  * Author: Antigravity
@@ -156,8 +156,8 @@ function mercado_acervo_shortcode() {
     <div id="mercado-acervo-app" class="mercado-acervo-wrapper">
         <!-- Hero Header -->
         <div class="acervo-hero">
-            <div class="acervo-badge">★ ACERVO HISTÓRICO • COBERTURA ESPECIALIZADA DESDE 2018</div>
-            <h1 class="acervo-title">Acervo Histórico Mercado Erótico</h1>
+            <div class="acervo-badge">★ ACERVO DE NOTÍCIAS • COBERTURA ESPECIALIZADA DESDE 2018</div>
+            <h1 class="acervo-title">Acervo de Notícias Mercado Erótico</h1>
             <p class="acervo-subtitle">Explore o mais completo arquivo histórico, jornalístico e analítico sobre o mercado erótico e a saúde sexual no Brasil, documentado continuamente desde 2018.</p>
             
             <div class="acervo-stats-bar">
@@ -226,7 +226,7 @@ function mercado_acervo_shortcode() {
         <!-- Loading Spinner -->
         <div id="acervo-loading" class="acervo-loading" style="display:none;">
             <div class="spinner"></div>
-            <span>Buscando no acervo histórico...</span>
+            <span>Buscando no acervo de notícias...</span>
         </div>
 
         <!-- Load More Button -->

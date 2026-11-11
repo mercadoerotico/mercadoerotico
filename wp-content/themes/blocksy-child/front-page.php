@@ -144,7 +144,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         </div>
     </section>
 
-    <!-- BLOCO 2: ACERVO HISTÓRICO -->
+    <!-- BLOCO 2: ACERVO DE NOTÍCIAS -->
     <section class="me-acervo-callout">
         <div class="acervo-callout-inner">
             <div class="acervo-callout-left">
@@ -160,7 +160,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
             </div>
             <div class="acervo-callout-right">
                 <a href="<?php echo home_url('/acervo/'); ?>" class="btn-acervo-cta">
-                    <i class="fas fa-search"></i> Acessar Acervo Histórico
+                    <i class="fas fa-search"></i> Acessar Acervo de Notícias
                 </a>
             </div>
         </div>
