@@ -313,7 +313,7 @@ function me_midiakit_render_shortcode() {
                         <ul>
                             <li><i class="fas fa-check"></i> <strong>Leaderboard 728x90</strong> em todas as páginas</li>
                             <li><i class="fas fa-check"></i> <strong>1 Publieditorial Bimestral</strong> com SEO</li>
-                            <li><i class="fas fa-check"></i> Inclusão no <strong>Guia de Fornecedores</strong></li>
+                            <li><i class="fas fa-check"></i> Inclusão no <strong>Anuário de Fornecedores</strong></li>
                             <li><i class="fas fa-check"></i> Relatório bimestral de métricas</li>
                         </ul>
                     </div>
