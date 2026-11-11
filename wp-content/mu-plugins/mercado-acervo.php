@@ -364,11 +364,11 @@ function mercado_acervo_shortcode() {
         ?>
         <div class="acervo-hero">
             <?php if ($is_pesquisas_filter): ?>
-                <div class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> PESQUISAS CATALOGADAS</div>
+                <div id="acervo-hero-badge" class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> PESQUISAS CATALOGADAS</div>
             <?php elseif ($has_active_filter): ?>
-                <div class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> ARTIGOS ENCONTRADOS</div>
+                <div id="acervo-hero-badge" class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> ARTIGOS ENCONTRADOS</div>
             <?php else: ?>
-                <div class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)</div>
+                <div id="acervo-hero-badge" class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)</div>
             <?php endif; ?>
 
             <h1 class="acervo-title">Arquivo Histórico &amp; Ferramenta de Pesquisa</h1>
@@ -376,15 +376,15 @@ function mercado_acervo_shortcode() {
             
             <div class="acervo-stats-bar">
                 <?php if ($is_pesquisas_filter): ?>
-                    <div class="stat-item"><span class="stat-num" style="color:#ff3b7e;">153</span><span class="stat-lbl">Pesquisas neste Recorte</span></div>
+                    <div class="stat-item"><span class="stat-num" id="acervo-stat-posts" style="color:#ff3b7e;">153</span><span class="stat-lbl" id="acervo-stat-lbl">Pesquisas neste Recorte</span></div>
                     <div class="stat-sep">•</div>
                     <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Total no Acervo Geral</span></div>
                 <?php elseif ($has_active_filter): ?>
-                    <div class="stat-item"><span class="stat-num" style="color:#ff3b7e;"><?php echo intval($initial_data['total_posts']); ?></span><span class="stat-lbl">Artigos neste Recorte</span></div>
+                    <div class="stat-item"><span class="stat-num" id="acervo-stat-posts" style="color:#ff3b7e;"><?php echo intval($initial_data['total_posts']); ?></span><span class="stat-lbl" id="acervo-stat-lbl">Artigos neste Recorte</span></div>
                     <div class="stat-sep">•</div>
                     <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Total no Acervo Geral</span></div>
                 <?php else: ?>
-                    <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Artigos Documentados</span></div>
+                    <div class="stat-item"><span class="stat-num" id="acervo-stat-posts"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl" id="acervo-stat-lbl">Artigos Documentados</span></div>
                     <div class="stat-sep">•</div>
                     <div class="stat-item"><span class="stat-num">8+ Anos</span><span class="stat-lbl">Memória Contínua</span></div>
                 <?php endif; ?>
@@ -436,6 +436,7 @@ function mercado_acervo_shortcode() {
             </div>
             <div class="themes-pill-wrap" id="themes-filter-container">
                 <button type="button" class="theme-pill <?php echo ($init_theme === 'all' && empty($init_dossie)) ? 'active' : ''; ?>" data-theme="all" onclick="selectAcervoTheme('all', this)">🌐 Todas as Editorias</button>
+                <button type="button" class="theme-pill theme-pill-dossies" onclick="scrollToDossiersSection()" style="border-color:#e31c61; color:#e31c61; font-weight:800; background:rgba(227,28,97,0.06);"><i class="fas fa-bookmark"></i> 🏛️ 7 Dossiês Temáticos ▾</button>
                 <button type="button" class="theme-pill <?php echo ($init_theme === 'negocios') ? 'active' : ''; ?>" data-theme="negocios" onclick="selectAcervoTheme('negocios', this)">🏢 Negócios &amp; Mercado</button>
                 <button type="button" class="theme-pill <?php echo ($init_theme === 'pesquisas') ? 'active' : ''; ?>" data-theme="pesquisas" onclick="selectAcervoTheme('pesquisas', this)">📊 Pesquisas &amp; Censos</button>
                 <button type="button" class="theme-pill <?php echo ($init_theme === 'sexologia') ? 'active' : ''; ?>" data-theme="sexologia" onclick="selectAcervoTheme('sexologia', this)">🔬 Sexologia &amp; Saúde</button>
@@ -1460,10 +1461,22 @@ function mercado_acervo_footer_scripts() {
         const ajaxUrl = '<?php echo $ajax_endpoint; ?>';
         const dossiersMap = <?php echo $dossiers_json; ?>;
 
-        window.scrollToAcervoResults = function() {
-            const target = document.getElementById('acervo-results-bar') || document.getElementById('acervo-grid');
+        window.scrollToAcervoResults = function(targetId) {
+            let target = null;
+            if (targetId) {
+                target = document.getElementById(targetId);
+            }
+            if (!target) {
+                // Se o banner de dossiê estiver visível, rola para ele para contextualizar o usuário!
+                const banner = document.getElementById('active-dossier-banner');
+                if (banner && banner.style.display !== 'none') {
+                    target = banner;
+                } else {
+                    target = document.getElementById('acervo-recorte') || document.getElementById('acervo-results-bar') || document.getElementById('acervo-grid');
+                }
+            }
             if (target) {
-                const y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+                const y = target.getBoundingClientRect().top + window.pageYOffset - 110;
                 window.scrollTo({ top: y, behavior: 'smooth' });
             }
         };
@@ -1502,6 +1515,9 @@ function mercado_acervo_footer_scripts() {
             const bBadge = document.getElementById('dossier-badge-text');
             const bTitle = document.getElementById('dossier-title-text');
             const bDesc = document.getElementById('dossier-desc-text');
+            const heroBadge = document.getElementById('acervo-hero-badge');
+            const statPosts = document.getElementById('acervo-stat-posts');
+            const statLbl = document.getElementById('acervo-stat-lbl');
 
             if (dossieSlug && dossiersMap[dossieSlug]) {
                 const d = dossiersMap[dossieSlug];
@@ -1509,8 +1525,23 @@ function mercado_acervo_footer_scripts() {
                 if (bTitle) bTitle.innerText = d.icon + ' ' + d.title;
                 if (bDesc) bDesc.innerText = d.description;
                 if (banner) banner.style.display = 'flex';
+
+                if (heroBadge) {
+                    heroBadge.style.background = '#e31c61';
+                    heroBadge.style.color = '#ffffff';
+                    heroBadge.innerHTML = '★ RECORTE ATIVO • DOSSIÊ: ' + d.title.toUpperCase();
+                }
+                if (statPosts && statLbl) {
+                    statPosts.style.color = '#ff3b7e';
+                    statLbl.textContent = 'Artigos no Dossiê ' + d.title;
+                }
             } else if (banner) {
                 banner.style.display = 'none';
+                if (heroBadge) {
+                    heroBadge.style.background = '';
+                    heroBadge.style.color = '';
+                    heroBadge.innerHTML = '★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)';
+                }
             }
 
             // Atualiza classe ativa nos cards de dossiê
@@ -1529,7 +1560,19 @@ function mercado_acervo_footer_scripts() {
 
             window.updateAcervoUrl();
             window.fetchAcervoPosts(false);
-            window.scrollToAcervoResults();
+
+            // Rola com foco no Banner Ativo do Dossiê para visualização imediata!
+            setTimeout(function() {
+                window.scrollToAcervoResults('active-dossier-banner');
+            }, 100);
+        };
+
+        window.scrollToDossiersSection = function() {
+            const sec = document.getElementById('dossies-estrategicos');
+            if (sec) {
+                const y = sec.getBoundingClientRect().top + window.pageYOffset - 90;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
         };
 
         // 2. Selecionar Tema Topo
@@ -1783,6 +1826,58 @@ function mercado_acervo_footer_scripts() {
 
             if (countEl) {
                 countEl.innerHTML = '<strong>' + totalPosts + '</strong> artigos catalogados neste recorte de pesquisa';
+            }
+
+            // Atualiza Hero Badge e Métricas em tempo real
+            const heroBadge = document.getElementById('acervo-hero-badge');
+            const statPosts = document.getElementById('acervo-stat-posts');
+            const statLbl = document.getElementById('acervo-stat-lbl');
+
+            if (dossie && dossiersMap[dossie]) {
+                const d = dossiersMap[dossie];
+                if (heroBadge) {
+                    heroBadge.style.background = '#e31c61';
+                    heroBadge.style.color = '#ffffff';
+                    heroBadge.innerHTML = '★ RECORTE ATIVO • DOSSIÊ: ' + d.title.toUpperCase() + ' (' + totalPosts + ' ARTIGOS)';
+                }
+                if (statPosts && statLbl) {
+                    statPosts.style.color = '#ff3b7e';
+                    statPosts.textContent = totalPosts;
+                    statLbl.textContent = 'Artigos no Dossiê ' + d.title;
+                }
+            } else if (theme === 'pesquisas') {
+                if (heroBadge) {
+                    heroBadge.style.background = '#e31c61';
+                    heroBadge.style.color = '#ffffff';
+                    heroBadge.innerHTML = '★ RECORTE ATIVO • ' + totalPosts + ' PESQUISAS CATALOGADAS';
+                }
+                if (statPosts && statLbl) {
+                    statPosts.style.color = '#ff3b7e';
+                    statPosts.textContent = totalPosts;
+                    statLbl.textContent = 'Pesquisas neste Recorte';
+                }
+            } else if (q !== '' || year !== 'all' || theme !== 'all' || geo !== 'all') {
+                if (heroBadge) {
+                    heroBadge.style.background = '#e31c61';
+                    heroBadge.style.color = '#ffffff';
+                    heroBadge.innerHTML = '★ RECORTE ATIVO • ' + totalPosts + ' ARTIGOS ENCONTRADOS';
+                }
+                if (statPosts && statLbl) {
+                    statPosts.style.color = '#ff3b7e';
+                    statPosts.textContent = totalPosts;
+                    statLbl.textContent = 'Artigos neste Recorte';
+                }
+            } else {
+                if (heroBadge) {
+                    heroBadge.style.background = '';
+                    heroBadge.style.color = '';
+                    heroBadge.innerHTML = '★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)';
+                }
+                if (statPosts && statLbl) {
+                    statPosts.style.color = '';
+                    statPosts.textContent = '2.116+';
+                    statLbl.textContent = 'Artigos Documentados';
+                }
             }
 
             // Update instant feedback in Hero
