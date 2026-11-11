@@ -139,10 +139,10 @@ add_action('template_redirect', function() {
     $request_uri = untrailingslashit(strtok($_SERVER['REQUEST_URI'] ?? '', '?'));
 
     $redirects = array(
-        '/guia-de-compras-sex-shop-quarentena-sexy' => 'https://www.guiadesexshop.com.br/',
+        '/guia-de-compras-sex-shop-quarentena-sexy' => home_url('/acervo/'),
         '/vibrador-o-livro-download-gratis' => home_url('/livraria/'),
         '/category/sexyfair2018' => home_url('/category/eventos/'),
-        '/catalogo-de-lancamentos-para-o-dia-dos-namorados-e-pesquisa-mercado-erotico-na-quarentena' => home_url('/'),
+        '/catalogo-de-lancamentos-para-o-dia-dos-namorados-e-pesquisa-mercado-erotico-na-quarentena' => home_url('/acervo/'),
         '/novembro-azul-pesquisa-sobre-consumo-masculino-em-sex-shop-e-ebook-de-masturbacao' => home_url('/livraria/'),
         '/category/premio-2020' => home_url('/category/noticias/'),
         '/category/testadora-de-produtos' => home_url('/category/produtos/'),
@@ -153,5 +153,59 @@ add_action('template_redirect', function() {
         wp_redirect($redirects[$request_uri], 301);
         exit;
     }
+
+    // Prevenção inteligente de 404: links antigos de materiais, downloads e pesquisas redirecionam para o Acervo
+    if (is_404()) {
+        $raw_uri = strtolower($_SERVER['REQUEST_URI'] ?? '');
+        $acervo_keywords = array('download', 'ebook', 'e-book', 'pesquisa', 'anuario', 'guia', 'manual', 'relatorio', 'livro', 'acervo');
+        foreach ($acervo_keywords as $kw) {
+            if (strpos($raw_uri, $kw) !== false) {
+                wp_redirect(home_url('/acervo/'), 301);
+                exit;
+            }
+        }
+    }
 });
+
+/**
+ * Filtro de Segurança em the_content:
+ * Substitui links externos quebrados conhecidos diretamente pela página de Acervo/Livraria
+ */
+add_filter('the_content', function($content) {
+    static $broken_map = null;
+    if ($broken_map === null) {
+        $acervo_url = home_url('/acervo/');
+        $livraria_url = home_url('/livraria/');
+
+        $broken_map = array(
+            'http://bit.ly/vibrador-ebook' => $livraria_url,
+            'https://bit.ly/vibrador-ebook' => $livraria_url,
+            'https://issuu.com/realestudio/docs/cat_logo_spiceup' => $acervo_url,
+            'http://bit.ly/melhoresdomercadofinal' => $acervo_url,
+            'https://drive.google.com/open?id=1cdHgTJwt9bBvIwe6GILOG8IAHLq9Bxr9' => $acervo_url,
+            'http://aula.kpages.online/ebookdeumatch#section-4273723' => $acervo_url,
+            'http://mercado-erotico.coursify.me/courses/como-publicar-um-livro' => $acervo_url,
+            'https://mercado-erotico.coursify.me/courses/como-publicar-um-livro' => $acervo_url,
+            'http://www.facebook/vibracaopositiva17' => $acervo_url,
+            'https://bit.ly/2VSUxAh' => $acervo_url,
+            'https://drive.google.com/drive/folders/1EJr7S7eD2E4JmcbNdHZXYgn0QlUw8Lta?usp=sharing' => $acervo_url,
+            'https://go.hotmart.com/D59035149W' => $acervo_url,
+            'https://go.hotmart.com/D59035149W?dp=1' => $acervo_url,
+            'https://bit.ly/3tIFgAg' => $acervo_url,
+            'https://drive.google.com/file/d/1DqvYzf43S48Pzc4yPt3MnQm7Koi_tQtw/view?usp=sharing' => $acervo_url,
+            'https://drive.google.com/file/d/1T50PPX6QX9_4BJ_PQBCeIbuONmPlevQ1/view?usp=sharing' => $acervo_url,
+            'https://www.loja.luzdaserraeditora.com.br/livros/manifesto-da-autoestima--p' => $acervo_url,
+            'https://bit.ly/ebook-mrx-black-friday' => $acervo_url,
+            'https://bit.ly/ebook-mrx-black-friday.' => $acervo_url,
+            'https://go.hotmart.com/V63979941W' => $acervo_url,
+            'https://hotmart.com/pt-br/marketplace/produtos/sexpompoar/F73063847K' => $acervo_url,
+            'https://drive.google.com/drive/folders/1zJNHiCwsls_8rOov3sHTQ2v9JZMhNdmX?usp=sharing' => $acervo_url,
+            'https://www.al.rs.gov.br/procuradoriadamulher/Portals/Procuradoriadamulher/Relatorio_lesbocenso%202022.pdf' => $acervo_url,
+            'https://go.hotmart.com/P92659595B?dp=1' => $acervo_url,
+        );
+    }
+
+    return str_replace(array_keys($broken_map), array_values($broken_map), $content);
+}, 20);
+
 
