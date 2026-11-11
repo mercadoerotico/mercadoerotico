@@ -79,7 +79,7 @@ function mercado_get_default_banners() {
             'id'           => 'banner_guia_sexshop',
             'title'        => 'Guia de Sexshop',
             'slot'         => 'home_top',
-            'image'        => home_url('/wp-content/uploads/2026/11/banner_guia_de_sexshop_1200x300.webp'),
+            'image'        => home_url('/wp-content/uploads/2026/11/banner_guia_de_sexshop_oficial_1200x300.webp'),
             'image_mobile' => '',
             'link'         => 'https://www.guiadesexshop.com.br/',
             'alt'          => 'Guia de Sexshop - O maior buscador de sexshops do Brasil',
