@@ -172,6 +172,10 @@ function mercado_livraria_shortcode() {
                             <span class="badge-free" onclick="event.stopPropagation(); selectLivrariaTab('gratuito');">GRATUITO</span>
                         <?php elseif ($buy_type === 'hotmart'): ?>
                             <span class="badge-platform hotmart">HOTMART</span>
+                        <?php elseif ($buy_type === 'mercadopago' || (!empty($p['buy_url']) && strpos($p['buy_url'], 'mpago.la') !== false)): ?>
+                            <span class="badge-platform mercadopago">MERCADO PAGO</span>
+                        <?php elseif ($buy_type === 'loja_propria' || (!empty($p['buy_url']) && strpos($p['buy_url'], 'malasecreta.com.br') !== false) || (!empty($p['id']) && $p['id'] == 2673)): ?>
+                            <span class="badge-platform loja-propria">LOJA PRÓPRIA</span>
                         <?php endif; ?>
 
                         <div class="book-hover-overlay">
@@ -219,6 +223,14 @@ function mercado_livraria_shortcode() {
                                     $btn_text = 'Comprar';
                                     $btn_icon = 'fa-shopping-cart';
                                     $btn_cls = 'btn-action-mp';
+                                } elseif ($buy_type === 'hotmart') {
+                                    $btn_text = 'Hotmart';
+                                    $btn_icon = 'fa-fire';
+                                    $btn_cls = 'btn-action-hotmart';
+                                } elseif ($buy_type === 'loja_propria' || (!empty($p['buy_url']) && strpos($p['buy_url'], 'malasecreta.com.br') !== false) || (!empty($p['id']) && $p['id'] == 2673)) {
+                                    $btn_text = 'Loja própria';
+                                    $btn_icon = 'fa-store';
+                                    $btn_cls = 'btn-action-loja';
                                 }
                             ?>
                             <button type="button" class="btn-action <?php echo esc_attr($btn_cls); ?>" onclick="openBookModal(<?php echo $pid; ?>)">
@@ -593,18 +605,31 @@ function mercado_livraria_shortcode() {
         box-shadow: 0 2px 8px rgba(16,185,129,0.3);
         cursor: pointer;
     }
-    .badge-platform.hotmart {
+    .badge-platform {
         position: absolute;
         top: 15px;
         left: 15px;
-        background: #F04E23;
         color: #fff;
         font-size: 0.68rem;
         font-weight: 800;
         padding: 4px 9px;
         border-radius: 20px;
         letter-spacing: 0.5px;
+        z-index: 2;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
+    .badge-platform.hotmart {
+        background: #F04E23;
         box-shadow: 0 2px 8px rgba(240,78,35,0.3);
+    }
+    .badge-platform.mercadopago {
+        background: #009ee3;
+        box-shadow: 0 2px 8px rgba(0,158,227,0.35);
+    }
+    .badge-platform.loja-propria {
+        background: linear-gradient(135deg, #e31c61 0%, #be123c 100%);
+        box-shadow: 0 2px 8px rgba(227,28,97,0.35);
     }
     .book-hover-overlay {
         position: absolute;
@@ -720,6 +745,18 @@ function mercado_livraria_shortcode() {
     }
     .btn-action-mp:hover {
         background: #0081bb;
+    }
+    .btn-action-hotmart {
+        background: #F04E23;
+    }
+    .btn-action-hotmart:hover {
+        background: #d4380d;
+    }
+    .btn-action-loja {
+        background: linear-gradient(135deg, #e31c61 0%, #be123c 100%);
+    }
+    .btn-action-loja:hover {
+        background: #9f1239;
     }
 
     .livraria-no-results {
@@ -869,6 +906,25 @@ function mercado_livraria_shortcode() {
     .modal-btn-external:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(2, 132, 199, 0.5);
+        color: #fff !important;
+    }
+    .modal-btn-loja {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #e31c61 0%, #be123c 100%);
+        color: #fff !important;
+        font-size: 1.05rem;
+        font-weight: 800;
+        padding: 14px 28px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        box-shadow: 0 6px 20px rgba(227, 28, 97, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modal-btn-loja:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(227, 28, 97, 0.55);
         color: #fff !important;
     }
     .modal-btn-mp {
@@ -1077,6 +1133,17 @@ function mercado_livraria_footer_scripts() {
                         <i class="fas fa-fire" style="font-size:1.15rem;"></i> Comprar Agora no Hotmart <i class="fas fa-arrow-right"></i>
                     </a>
                 `;
+            } else if (buyType === 'loja_propria' || (buyUrl && buyUrl.includes('malasecreta.com.br')) || (p.id == 2673)) {
+                actionButtonsHtml = `
+                    <div style="width:100%;">
+                        <a href="${buyUrl}" target="_blank" rel="noopener" class="modal-btn-loja">
+                            <i class="fas fa-store" style="font-size:1.15rem;"></i> Comprar na Loja Própria <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <div style="margin-top:10px; font-size:0.85rem; color:#64748b; text-align:center;">
+                            🛍️ Produto oficial com envio físico para sua casa pela nossa Loja Própria (Mala Secreta).
+                        </div>
+                    </div>
+                `;
             } else if (buyType === 'external') {
                 actionButtonsHtml = `
                     <a href="${buyUrl}" target="_blank" rel="noopener" class="modal-btn-external">
@@ -1252,7 +1319,7 @@ function mercado_livraria_admin_page() {
     $products = mercado_livraria_get_data();
     $target_products = array_filter($products, function($p) {
         $bt = $p['buy_type'] ?? '';
-        return ($bt === 'whatsapp' || !empty($p['is_free']) || $bt === 'free' || $bt === 'download');
+        return ($bt === 'whatsapp' || !empty($p['is_free']) || $bt === 'free' || $bt === 'download' || $bt === 'mercadopago');
     });
 
     $acervo_url = content_url('uploads/acervo-digital');
