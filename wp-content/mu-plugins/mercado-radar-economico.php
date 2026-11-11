@@ -199,193 +199,184 @@ function me_radar_home_callout_render() {
         color: #10b981;
     }
 
-    /* Dynamic Articles Feed */
-    .radar-feed-section {
-        background: #f8fafc;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        padding: 40px 30px;
-        margin-bottom: 50px;
-        position: relative;
+        /* Editorial News Section (Sleek Magazine Standard) */
+    .radar-news-section {
+        margin: 60px 0 50px;
+        padding-top: 35px;
+        border-top: 1px solid #e2e8f0;
     }
-    .radar-feed-header {
-        text-align: center;
-        max-width: 800px;
-        margin: 0 auto 35px;
+    .radar-news-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
     }
-    .radar-feed-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(227, 28, 97, 0.1);
-        color: #e31c61;
-        border: 1px solid rgba(227, 28, 97, 0.25);
-        padding: 6px 16px;
-        border-radius: 50px;
-        font-size: 0.76rem;
+    .radar-news-overline {
+        display: block;
+        font-size: 0.74rem;
         font-weight: 800;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
+        letter-spacing: 1.5px;
+        color: #e31c61;
+        margin-bottom: 6px;
+        text-transform: uppercase;
     }
-    .radar-pulse-dot {
-        width: 8px;
-        height: 8px;
-        background: #10b981;
-        border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 0 rgba(16, 185, 129, 0.6);
-        animation: radarPulse 2s infinite;
-    }
-    @keyframes radarPulse {
-        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-    .radar-feed-title {
+    .radar-news-heading {
         font-size: 1.85rem;
         font-weight: 900;
         color: #0f172a;
-        margin: 0 0 10px;
+        margin: 0 0 6px;
         letter-spacing: -0.5px;
+        line-height: 1.25;
     }
-    .radar-feed-sub {
-        font-size: 0.96rem;
+    .radar-news-sub {
+        font-size: 0.95rem;
         color: #64748b;
-        line-height: 1.5;
         margin: 0;
+        line-height: 1.5;
     }
-    .radar-articles-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
-        margin-bottom: 30px;
-    }
-    .radar-article-card {
-        background: #fff;
-        border-radius: 14px;
-        overflow: hidden;
+    .radar-news-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+        white-space: nowrap;
+    }
+    .radar-news-counter i {
+        color: #e31c61;
+    }
+    .radar-news-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 25px;
+        margin-bottom: 35px;
+    }
+    .radar-news-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
-    .radar-article-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    .radar-news-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border-color: #cbd5e1;
     }
-    .radar-article-thumb-wrap {
+    .news-card-media {
         position: relative;
         display: block;
         width: 100%;
-        height: 190px;
+        aspect-ratio: 16 / 9;
         overflow: hidden;
-        background: #0f172a;
+        background: #f8fafc;
     }
-    .radar-article-img {
+    .news-card-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
-    .radar-article-card:hover .radar-article-img {
-        transform: scale(1.04);
+    .radar-news-card:hover .news-card-img {
+        transform: scale(1.03);
     }
-    .radar-article-cat-tag {
+    .news-card-tag {
         position: absolute;
-        top: 12px;
-        left: 12px;
-        background: #e31c61;
+        top: 10px;
+        left: 10px;
+        background: rgba(15, 23, 42, 0.85);
         color: #fff;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        padding: 4px 10px;
-        border-radius: 6px;
+        letter-spacing: 0.6px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        backdrop-filter: blur(4px);
     }
-    .radar-article-info {
-        padding: 20px;
+    .news-card-content {
+        padding: 18px 20px 20px;
         display: flex;
         flex-direction: column;
         flex: 1;
     }
-    .radar-article-meta {
+    .news-card-meta {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         font-size: 0.78rem;
         color: #94a3b8;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
-    .radar-article-meta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
+    .news-card-meta .meta-dot {
+        opacity: 0.5;
     }
-    .radar-article-title {
-        font-size: 1.1rem;
+    .news-card-title {
+        font-size: 1.05rem;
         font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 10px;
         line-height: 1.4;
+        margin: 0 0 8px;
     }
-    .radar-article-title a {
+    .news-card-title a {
         color: #0f172a !important;
         text-decoration: none !important;
         transition: color 0.2s ease;
     }
-    .radar-article-title a:hover {
+    .news-card-title a:hover {
         color: #e31c61 !important;
     }
-    .radar-article-excerpt {
+    .news-card-excerpt {
         font-size: 0.88rem;
         color: #64748b;
         line-height: 1.5;
-        margin-bottom: 18px;
+        margin: 0 0 16px;
         flex: 1;
     }
-    .radar-article-btn {
+    .news-card-link {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         font-size: 0.85rem;
         font-weight: 700;
         color: #e31c61 !important;
         text-decoration: none !important;
+        margin-top: auto;
         transition: gap 0.2s ease;
     }
-    .radar-article-btn:hover {
-        gap: 12px;
+    .news-card-link:hover {
+        gap: 10px;
     }
-    .radar-feed-footer-bar {
+    .radar-news-footer {
         text-align: center;
-        margin-top: 10px;
     }
-    .btn-radar-acervo-link {
+    .btn-radar-news-more {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        background: #0f172a;
-        color: #fff !important;
-        padding: 13px 26px;
-        border-radius: 50px;
-        font-size: 0.92rem;
+        gap: 8px;
+        background: #fff;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1;
+        padding: 10px 22px;
+        border-radius: 25px;
+        font-size: 0.88rem;
         font-weight: 700;
         text-decoration: none !important;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
     }
-    .btn-radar-acervo-link:hover {
+    .btn-radar-news-more:hover {
         background: #e31c61;
+        color: #fff !important;
+        border-color: #e31c61;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(227, 28, 97, 0.35);
-    }
-    .btn-radar-acervo-link i:first-child {
-        color: #e31c61;
-    }
-    .btn-radar-acervo-link:hover i:first-child {
-        color: #fff;
+        box-shadow: 0 4px 12px rgba(227, 28, 97, 0.25);
     }
 
     @media (max-width: 768px) {
@@ -800,6 +791,7 @@ function me_pesquisas_mercado_render() {
         </div>
 
         <!-- SEÇÃO DINÂMICA: ÚLTIMAS PESQUISAS & ESTUDOS PUBLICADOS PELA REDAÇÃO -->
+                <!-- SEÇÃO EDITORIAL: PESQUISAS & ESTUDOS DA REDAÇÃO -->
         <?php
         $pesquisas_query = new WP_Query(array(
             'post_type'      => 'post',
@@ -811,40 +803,45 @@ function me_pesquisas_mercado_render() {
         ));
         if ($pesquisas_query->have_posts()):
         ?>
-        <div class="radar-feed-section">
-            <div class="radar-feed-header">
-                <div class="radar-feed-badge">
-                    <span class="radar-pulse-dot"></span>
-                    FEED DINÂMICO DA REDAÇÃO • ATUALIZAÇÃO AUTOMÁTICA
+        <section class="radar-news-section">
+            <div class="radar-news-header">
+                <div class="radar-news-titles">
+                    <span class="radar-news-overline">COBERTURA &amp; INTELIGÊNCIA EDITORIAL</span>
+                    <h2 class="radar-news-heading">Reportagens &amp; Pesquisas Recentes</h2>
+                    <p class="radar-news-sub">Estudos comportamentais, censos setoriais e investigações jornalísticas apuradas pelo Mercado Erótico.</p>
                 </div>
-                <h2 class="radar-feed-title">Últimas Pesquisas &amp; Estudos Publicados</h2>
-                <p class="radar-feed-sub">Acompanhe as reportagens investigativas, análises de comportamento e pesquisas setoriais divulgadas em primeira mão pelo Mercado Erótico.</p>
+                <div class="radar-news-counter">
+                    <i class="fas fa-layer-group"></i> <strong><?php echo $pesquisas_count; ?></strong> estudos catalogados
+                </div>
             </div>
 
-            <div class="radar-articles-grid">
+            <div class="radar-news-grid">
                 <?php while ($pesquisas_query->have_posts()): $pesquisas_query->the_post(); 
-                    $post_thumb = get_the_post_thumbnail_url(get_the_ID(), 'medium_large') ?: home_url('/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png');
-                    $post_date = get_the_date('d \d\e F, Y');
+                    $post_thumb = get_the_post_thumbnail_url(get_the_ID(), 'medium_large');
+                    if (empty($post_thumb)) {
+                        $post_thumb = 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_livraria_vitrine_digital.webp';
+                    }
+                    $post_date = get_the_date('d/m/Y');
                     $post_author = get_the_author();
                 ?>
-                    <article class="radar-article-card">
-                        <a href="<?php the_permalink(); ?>" class="radar-article-thumb-wrap">
-                            <img src="<?php echo esc_url($post_thumb); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy" class="radar-article-img">
-                            <span class="radar-article-cat-tag">Pesquisa</span>
+                    <article class="radar-news-card">
+                        <a href="<?php the_permalink(); ?>" class="news-card-media" tabindex="-1" aria-hidden="true">
+                            <img src="<?php echo esc_url($post_thumb); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy" class="news-card-img">
+                            <span class="news-card-tag">Pesquisa</span>
                         </a>
-                        <div class="radar-article-info">
-                            <div class="radar-article-meta">
+                        <div class="news-card-content">
+                            <div class="news-card-meta">
                                 <span><i class="far fa-calendar-alt"></i> <?php echo esc_html($post_date); ?></span>
-                                <span>•</span>
+                                <span class="meta-dot">•</span>
                                 <span><i class="far fa-user"></i> <?php echo esc_html($post_author); ?></span>
                             </div>
-                            <h3 class="radar-article-title">
+                            <h3 class="news-card-title">
                                 <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                             </h3>
-                            <p class="radar-article-excerpt">
-                                <?php echo esc_html(wp_trim_words(get_the_excerpt(), 18, '...')); ?>
+                            <p class="news-card-excerpt">
+                                <?php echo esc_html(wp_trim_words(get_the_excerpt(), 15, '...')); ?>
                             </p>
-                            <a href="<?php the_permalink(); ?>" class="radar-article-btn">
+                            <a href="<?php the_permalink(); ?>" class="news-card-link">
                                 <span>Ler pesquisa completa</span>
                                 <i class="fas fa-arrow-right"></i>
                             </a>
@@ -853,14 +850,13 @@ function me_pesquisas_mercado_render() {
                 <?php endwhile; wp_reset_postdata(); ?>
             </div>
 
-            <div class="radar-feed-footer-bar">
-                <a href="<?php echo home_url('/acervo/?tema=pesquisas'); ?>" class="btn-radar-acervo-link">
-                    <i class="fas fa-archive"></i>
-                    <span>Explorar Todas as <?php echo $pesquisas_count; ?> Pesquisas no Acervo Histórico</span>
+            <div class="radar-news-footer">
+                <a href="<?php echo home_url('/acervo/?tema=pesquisas'); ?>" class="btn-radar-news-more">
+                    <span>Ver todas as <?php echo $pesquisas_count; ?> pesquisas no Acervo Histórico</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-        </div>
+        </section>
         <?php endif; ?>
 
         <!-- Editorial Banner & Contact Box -->
