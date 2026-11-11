@@ -36,7 +36,7 @@ function mercado_colunistas_shortcode() {
             'author_name' => 'Paula Aguiar',
             'role' => 'Publicitária, Consultora & Autora',
             'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2023/09/pa.png',
-            'bio' => 'Presidente da ABIPEA, ex-presidente da ABEME e pioneira do setor erótico desde o ano 2000. Autora de 28 livros de negócios e idealizadora do prestigiado Prêmio Mercado Erótico.',
+            'bio' => 'Ex-presidente da ABEME e pioneira do setor erótico desde o ano 2000. Autora de 28 livros de negócios e idealizadora do prestigiado Prêmio Mercado Erótico.',
             'badge' => '552 Análises',
             'tag' => 'Business & Varejo',
             'url' => home_url('/author/paula-aguiar/'),
