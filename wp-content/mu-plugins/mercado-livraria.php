@@ -211,7 +211,10 @@ function mercado_livraria_shortcode() {
                                 $btn_icon = 'fa-arrow-right';
                                 $btn_cls = '';
                                 if (!empty($p['is_free'])) {
-                                    if (!empty($p['buy_type']) && $p['buy_type'] === 'download') {
+                                    if (!empty($p['download_pptx']) && (empty($p['buy_url']) || strpos($p['buy_url'], '.pdf') === false)) {
+                                        $btn_text = 'Baixar PPTX';
+                                        $btn_icon = 'fa-file-powerpoint';
+                                    } elseif (!empty($p['buy_type']) && $p['buy_type'] === 'download') {
                                         $btn_text = 'Baixar PDF';
                                         $btn_icon = 'fa-download';
                                     } else {
@@ -1162,24 +1165,30 @@ function mercado_livraria_footer_scripts() {
                     </div>
                 `;
             } else if (isFree || buyType === 'download') {
-                const isPdf = buyUrl && (buyUrl.toLowerCase().endsWith('.pdf') || buyType === 'download');
-                if (isPdf) {
-                    actionButtonsHtml = `
+                const hasPdf = Boolean(buyUrl && buyUrl.toLowerCase().endsWith('.pdf'));
+                const hasPptx = Boolean(p.download_pptx);
+
+                actionButtonsHtml = '';
+                if (hasPdf) {
+                    actionButtonsHtml += `
                         <a href="${buyUrl}" target="_blank" download rel="noopener" class="modal-btn-free">
                             <i class="fas fa-file-pdf" style="font-size:1.25rem;"></i> Baixar PDF Agora (Gratuito) <i class="fas fa-download"></i>
                         </a>
                     `;
-                } else {
-                    actionButtonsHtml = `
-                        <a href="${mailUrl}" class="modal-btn-free">
-                            <i class="fas fa-envelope" style="font-size:1.15rem;"></i> Solicitar Envio do PDF por E-mail <i class="fas fa-arrow-right"></i>
+                }
+
+                if (hasPptx) {
+                    actionButtonsHtml += `
+                        <a href="${p.download_pptx}" target="_blank" download rel="noopener" class="modal-btn-free" style="background:#b7410e; border-color:#b7410e; ${hasPdf ? 'margin-top:10px;' : ''}">
+                            <i class="fas fa-file-powerpoint" style="font-size:1.25rem;"></i> Baixar Apresentação Slides (.PPTX) <i class="fas fa-download"></i>
                         </a>
                     `;
                 }
-                if (p.download_pptx) {
-                    actionButtonsHtml += `
-                        <a href="${p.download_pptx}" target="_blank" download rel="noopener" class="modal-btn-free" style="background:#b7410e; border-color:#b7410e; margin-top:10px;">
-                            <i class="fas fa-file-powerpoint" style="font-size:1.25rem;"></i> Baixar Apresentação Slides (.PPTX) <i class="fas fa-download"></i>
+
+                if (!hasPdf && !hasPptx) {
+                    actionButtonsHtml = `
+                        <a href="${mailUrl}" class="modal-btn-free">
+                            <i class="fas fa-envelope" style="font-size:1.15rem;"></i> Solicitar Envio do Material por E-mail <i class="fas fa-arrow-right"></i>
                         </a>
                     `;
                 }
