@@ -980,3 +980,337 @@ function mercado_banners_render_admin_page() {
     </style>
     <?php
 }
+
+/**
+ * ============================================================================
+ * ESPAÇOS PUBLICITÁRIOS: LEADERBOARD GLOBAL (728x90) & RETÂNGULO MATÉRIAS (300x250)
+ * ============================================================================
+ */
+
+/**
+ * Renderiza o Leaderboard Global (728x90) antes do rodapé em todas as páginas
+ */
+function mercado_render_global_leaderboard() {
+    $banners = function_exists('mercado_get_banners_by_slot') ? mercado_get_banners_by_slot('footer') : array();
+    if (empty($banners)) {
+        $banners = function_exists('mercado_get_banners_by_slot') ? mercado_get_banners_by_slot('in_content') : array();
+    }
+    
+    $has_real_banner = !empty($banners);
+    ?>
+    <aside class="me-global-leaderboard-wrap" aria-label="Espaço Publicitário">
+        <div class="me-global-leaderboard-inner">
+            <div class="me-ad-overline"><i class="fas fa-bullhorn"></i> ESPAÇO PUBLICITÁRIO</div>
+            <?php if ($has_real_banner):
+                $b = reset($banners);
+                if (function_exists('mercado_increment_banner_view')) {
+                    mercado_increment_banner_view($b['id']);
+                }
+                $target = !empty($b['target_blank']) ? 'target="_blank"' : '';
+                $rel = !empty($b['rel_attr']) && $b['rel_attr'] === 'sponsored' ? 'sponsored noopener' : 'nofollow noopener';
+            ?>
+                <div class="me-leaderboard-slot">
+                    <a href="<?php echo esc_url($b['link']); ?>" <?php echo $target; ?> rel="<?php echo esc_attr($rel); ?>" title="<?php echo esc_attr($b['title']); ?>" onclick="mercadoTrackAdClick('<?php echo esc_js($b['id']); ?>')">
+                        <img src="<?php echo esc_url($b['image']); ?>" alt="<?php echo esc_attr($b['title']); ?>" width="728" height="90" loading="lazy" class="me-leaderboard-img">
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="me-leaderboard-placeholder">
+                    <a href="<?php echo esc_url(home_url('/midiakit/')); ?>" class="me-placeholder-link" title="Anuncie sua marca aqui • Mídia Kit Mercado Erótico">
+                        <div class="me-placeholder-content">
+                            <span class="me-placeholder-badge">728x90</span>
+                            <span class="me-placeholder-title">Espaço Publicitário Disponível</span>
+                            <span class="me-placeholder-cta">Anuncie sua marca aqui <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </aside>
+    <?php
+}
+
+/**
+ * Renderiza o Retângulo Médio (300x250) nas matérias
+ */
+function mercado_render_article_rectangle() {
+    $banners = function_exists('mercado_get_banners_by_slot') ? mercado_get_banners_by_slot('sidebar') : array();
+    $has_real_banner = !empty($banners);
+
+    ob_start();
+    ?>
+    <aside class="me-article-rect-wrap" aria-label="Espaço Publicitário">
+        <div class="me-ad-overline"><i class="fas fa-bullhorn"></i> ESPAÇO PUBLICITÁRIO • 300x250</div>
+        <?php if ($has_real_banner):
+            $b = reset($banners);
+            if (function_exists('mercado_increment_banner_view')) {
+                mercado_increment_banner_view($b['id']);
+            }
+            $target = !empty($b['target_blank']) ? 'target="_blank"' : '';
+            $rel = !empty($b['rel_attr']) && $b['rel_attr'] === 'sponsored' ? 'sponsored noopener' : 'nofollow noopener';
+        ?>
+            <div class="me-rect-slot">
+                <a href="<?php echo esc_url($b['link']); ?>" <?php echo $target; ?> rel="<?php echo esc_attr($rel); ?>" title="<?php echo esc_attr($b['title']); ?>" onclick="mercadoTrackAdClick('<?php echo esc_js($b['id']); ?>')">
+                    <img src="<?php echo esc_url($b['image']); ?>" alt="<?php echo esc_attr($b['title']); ?>" width="300" height="250" loading="lazy" class="me-rect-img">
+                </a>
+            </div>
+        <?php else: ?>
+            <div class="me-rect-placeholder">
+                <a href="<?php echo esc_url(home_url('/midiakit/')); ?>" class="me-rect-placeholder-link" title="Anuncie sua marca aqui • Mídia Kit Mercado Erótico">
+                    <div class="me-rect-placeholder-inner">
+                        <div class="me-rect-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div class="me-rect-title">Espaço Publicitário</div>
+                        <div class="me-rect-sub">Retângulo IAB 300x250</div>
+                        <span class="me-rect-btn">Ver Mídia Kit <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
+        <?php endif; ?>
+    </aside>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Injeta o Retângulo após o 3º parágrafo nas matérias
+ */
+add_filter('the_content', 'mercado_inject_article_ad', 20);
+function mercado_inject_article_ad($content) {
+    if (!is_single() || is_admin() || wp_doing_ajax()) {
+        return $content;
+    }
+    
+    // Evita injeção duplicada
+    if (strpos($content, 'me-article-rect-wrap') !== false) {
+        return $content;
+    }
+    
+    $ad_html = mercado_render_article_rectangle();
+    if (empty($ad_html)) return $content;
+
+    $p_count = 0;
+    $offset = 0;
+    while (($pos = stripos($content, '</p>', $offset)) !== false) {
+        $p_count++;
+        $offset = $pos + 4;
+        if ($p_count === 3) {
+            return substr($content, 0, $offset) . "\n" . $ad_html . "\n" . substr($content, $offset);
+        }
+    }
+    
+    // Se tiver menos de 3 parágrafos mas pelo menos 1, insere após o primeiro
+    if ($p_count > 0 && ($first_pos = stripos($content, '</p>')) !== false) {
+        $offset = $first_pos + 4;
+        return substr($content, 0, $offset) . "\n" . $ad_html . "\n" . substr($content, $offset);
+    }
+    
+    return $content . "\n" . $ad_html;
+}
+
+add_action('wp_head', 'mercado_banners_frontend_css');
+function mercado_banners_frontend_css() {
+    ?>
+    <style id="me-banners-custom-css">
+    /* Overline Label */
+    .me-ad-overline {
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .me-ad-overline i {
+        font-size: 0.58rem;
+        color: #cbd5e1;
+    }
+
+    /* 1. Leaderboard Global (728x90) */
+    .me-global-leaderboard-wrap {
+        width: 100%;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 22px 20px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+    .me-global-leaderboard-inner {
+        max-width: 728px;
+        margin: 0 auto;
+    }
+    .me-leaderboard-slot {
+        max-width: 728px;
+        width: 100%;
+        margin: 0 auto;
+    }
+    .me-leaderboard-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        display: block;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .me-leaderboard-placeholder {
+        max-width: 728px;
+        min-height: 84px;
+        margin: 0 auto;
+        background: #f1f5f9;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        transition: all 0.25s ease;
+    }
+    .me-leaderboard-placeholder:hover {
+        border-color: #e31c61;
+        background: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(227, 28, 97, 0.06);
+    }
+    .me-placeholder-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 24px;
+        text-decoration: none;
+        min-height: 84px;
+        box-sizing: border-box;
+        gap: 16px;
+    }
+    .me-placeholder-badge {
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+    .me-placeholder-title {
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 600;
+        flex: 1;
+        text-align: left;
+    }
+    .me-placeholder-cta {
+        color: #e31c61;
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    @media (max-width: 640px) {
+        .me-global-leaderboard-wrap {
+            padding: 16px 12px;
+        }
+        .me-placeholder-link {
+            flex-direction: column;
+            text-align: center;
+            gap: 6px;
+            padding: 12px;
+        }
+        .me-placeholder-title {
+            text-align: center;
+            font-size: 0.82rem;
+        }
+    }
+
+    /* 2. Retângulo 300x250 em Matérias */
+    .me-article-rect-wrap {
+        max-width: 300px;
+        margin: 36px auto;
+        text-align: center;
+        clear: both;
+    }
+    .me-rect-slot {
+        width: 300px;
+        height: 250px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .me-rect-img {
+        width: 300px;
+        height: 250px;
+        object-fit: cover;
+        display: block;
+    }
+    .me-rect-placeholder {
+        width: 300px;
+        height: 250px;
+        margin: 0 auto;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s ease;
+    }
+    .me-rect-placeholder:hover {
+        border-color: #e31c61;
+        background: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(227, 28, 97, 0.08);
+    }
+    .me-rect-placeholder-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+    .me-rect-icon {
+        font-size: 1.8rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+        transition: transform 0.2s;
+    }
+    .me-rect-placeholder:hover .me-rect-icon {
+        color: #e31c61;
+        transform: scale(1.1);
+    }
+    .me-rect-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 4px;
+    }
+    .me-rect-sub {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .me-rect-btn {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: #0f172a;
+        padding: 7px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+    }
+    .me-rect-placeholder:hover .me-rect-btn {
+        background: #e31c61;
+    }
+    </style>
+    <?php
+}

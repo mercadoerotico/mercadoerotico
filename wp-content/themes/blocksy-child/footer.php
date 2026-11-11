@@ -8,6 +8,13 @@ do_action('blocksy:content:bottom');
     </main>
 </div><!-- #main-container -->
 
+<?php
+// Leaderboard 728x90 Global em todas as páginas
+if (function_exists('mercado_render_global_leaderboard')) {
+    mercado_render_global_leaderboard();
+}
+?>
+
 <footer class="me-footer">
     <div class="footer-inner">
         <div class="footer-grid">
