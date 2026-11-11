@@ -9,20 +9,33 @@ get_header();
 $count_posts = wp_count_posts('post');
 $total_published_count = !empty($count_posts->publish) ? number_format($count_posts->publish, 0, ',', '.') : '2.115';
 
-// 1. Featured Posts for Bento Hero
-// Post #1 mais recente fixo no card principal
-$main_posts_query = get_posts(array(
-    'numberposts' => 1,
-    'post_status' => 'publish'
-));
-$main_post = !empty($main_posts_query) ? $main_posts_query[0] : null;
+// 1. Featured Posts for Bento Hero & Integrated News Feed
+$bento_data = function_exists('mercado_get_home_bento_data') ? mercado_get_home_bento_data() : null;
 
-// 4 Secondary stories on the right side of Bento Grid (Posts #2, #3, #4 e #5 sem pular)
-$side_posts = get_posts(array(
-    'numberposts' => 4,
-    'offset' => 1,
-    'post_status' => 'publish'
-));
+if ($bento_data) {
+    $main_post  = $bento_data['main_post'];
+    $side_posts = $bento_data['side_posts'];
+    $feed_posts = $bento_data['feed_posts'];
+} else {
+    // Fallback caso o plugin ainda não esteja ativo
+    $main_posts_query = get_posts(array(
+        'numberposts' => 1,
+        'post_status' => 'publish'
+    ));
+    $main_post = !empty($main_posts_query) ? $main_posts_query[0] : null;
+
+    $side_posts = get_posts(array(
+        'numberposts' => 4,
+        'offset'      => 1,
+        'post_status' => 'publish'
+    ));
+
+    $feed_posts = get_posts(array(
+        'numberposts' => 9,
+        'offset'      => 5,
+        'post_status' => 'publish'
+    ));
+}
 
 // 2. Curated Categories for Eixos
 $negocios_posts = get_posts(array('category_name' => 'negocios', 'numberposts' => 3, 'post_status' => 'publish'));
@@ -55,12 +68,7 @@ if (file_exists($livraria_file)) {
     $livraria_items = array_merge(array_slice($paid_sample, 0, 3), $highlighted_free);
 }
 
-// 4. Recent Feed Posts (offset 5 - continua a partir da 6ª matéria mais recente)
-$feed_posts = get_posts(array(
-    'numberposts' => 9,
-    'offset' => 5,
-    'post_status' => 'publish'
-));
+// 4. Feed Posts já resolvidos dinamicamente no topo (com exclusão garantida dos cards da Capa)
 
 // 5. Query All-Time Most Read Posts (Before Footer)
 global $wpdb;
