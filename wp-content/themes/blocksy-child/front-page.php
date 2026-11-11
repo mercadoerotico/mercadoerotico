@@ -86,10 +86,17 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
                     <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_livraria_vitrine_digital.webp" alt="Livraria Mercado Erótico - Vitrine Digital e Conteúdos Gratuitos" class="ad-img-standard" width="1200" height="300">
                 </a>
             </div>
+            <!-- Banner Destaque 3: Guia de Sexshop -->
+            <div class="ad-standard-slide">
+                <a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener noreferrer" title="Guia de Sexshop - O maior buscador de sexshops do Brasil">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_guia_de_sexshop.webp" alt="Guia de Sexshop - O maior buscador de sexshops do Brasil" class="ad-img-standard" width="1200" height="300">
+                </a>
+            </div>
         </div>
         <div class="ad-standard-dots" id="adStandardDots">
             <button type="button" class="ad-dot active" onclick="goToAdBanner(0)" aria-label="Banner 1"></button>
             <button type="button" class="ad-dot" onclick="goToAdBanner(1)" aria-label="Banner 2"></button>
+            <button type="button" class="ad-dot" onclick="goToAdBanner(2)" aria-label="Banner 3"></button>
         </div>
     </div>
 
