@@ -74,12 +74,22 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
             <a href="<?php echo home_url('/contato/'); ?>" class="ad-standard-mediakit">Anuncie no Portal <i class="fas fa-angle-right"></i></a>
         </div>
         <div class="ad-standard-track">
-            <!-- Banner Destaque: Anuário Grandes Marcas 2026 -->
+            <!-- Banner Destaque 1: Anuário Grandes Marcas 2026 -->
             <div class="ad-standard-slide active">
                 <a href="<?php echo home_url('/anuario-grandes-marcas-do-mercado-erotico-2026/'); ?>" title="Anuário Grandes Marcas do Mercado Erótico - Baixe Grátis">
                     <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_with_cover.png" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1200" height="300">
                 </a>
             </div>
+            <!-- Banner Destaque 2: Livraria & Formação Profissional -->
+            <div class="ad-standard-slide">
+                <a href="<?php echo home_url('/livraria/'); ?>" title="Livraria Mercado Erótico - E-books, Manuais e Treinamentos">
+                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_livraria_vitrine_digital.webp" alt="Livraria Mercado Erótico - Vitrine Digital e Conteúdos Gratuitos" class="ad-img-standard" width="1200" height="300">
+                </a>
+            </div>
+        </div>
+        <div class="ad-standard-dots" id="adStandardDots">
+            <button type="button" class="ad-dot active" onclick="goToAdBanner(0)" aria-label="Banner 1"></button>
+            <button type="button" class="ad-dot" onclick="goToAdBanner(1)" aria-label="Banner 2"></button>
         </div>
     </div>
 
@@ -427,12 +437,14 @@ if (bentoSliderElem) {
 
 startBentoTimer();
 
-// BANNER PADRÃO ROTATIVO (PADRÃO IAB)
-let curAdIdx = 0;
+// BANNER PADRÃO ROTATIVO & RANDOMIZADO (PADRÃO IAB)
 const adSlides = document.querySelectorAll('.ad-standard-slide');
 const adDots = document.querySelectorAll('#adStandardDots .ad-dot');
 const totalAds = adSlides.length;
 let adInterval = null;
+
+// Escolha aleatória inicial entre os banners
+let curAdIdx = totalAds > 0 ? Math.floor(Math.random() * totalAds) : 0;
 
 function showAdBanner(idx) {
     if (totalAds === 0) return;
@@ -451,6 +463,9 @@ function showAdBanner(idx) {
     });
 }
 
+// Inicializar banner selecionado aleatoriamente
+showAdBanner(curAdIdx);
+
 function goToAdBanner(idx) {
     clearInterval(adInterval);
     showAdBanner(idx);
@@ -458,6 +473,7 @@ function goToAdBanner(idx) {
 }
 
 function startAdTimer() {
+    if (totalAds <= 1) return;
     adInterval = setInterval(() => {
         showAdBanner(curAdIdx + 1);
     }, 6000);
