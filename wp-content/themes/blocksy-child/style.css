@@ -86,10 +86,11 @@ Version: 1.2.0
     }
 }
 .footer-logo-img {
-    max-height: 55px !important;
+    max-height: 52px !important;
     width: auto !important;
     margin-bottom: 18px !important;
-    filter: brightness(0) invert(1) !important;
+    display: block !important;
+    filter: none !important;
 }
 .footer-bio {
     color: #a89ba9 !important;

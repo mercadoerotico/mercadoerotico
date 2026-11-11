@@ -14,7 +14,7 @@ do_action('blocksy:content:bottom');
             <!-- Coluna 1: Logo e Bio -->
             <div class="footer-col footer-brand">
                 <a href="<?php echo home_url('/'); ?>" class="footer-logo-link">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png" alt="Mercado Erótico" class="footer-logo-img">
+                    <img src="<?php echo home_url('/wp-content/uploads/2026/11/logo-mercado-erotico-white-text.png'); ?>" alt="Mercado Erótico" class="footer-logo-img" width="408" height="175">
                 </a>
                 <p class="footer-bio">O principal portal de jornalismo, pesquisa e documentação sobre o mercado íntimo, saúde sexual e bem-estar no Brasil: inteligência setorial desde 2000 e acervo digital documentado desde 2018.</p>
                 <div class="footer-social-links">

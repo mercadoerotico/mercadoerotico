@@ -1340,10 +1340,11 @@ if (totalAds > 1) {
     }
 }
 .footer-logo-img {
-    max-height: 55px;
+    max-height: 52px;
     width: auto;
     margin-bottom: 18px;
-    filter: brightness(0) invert(1);
+    display: block;
+    filter: none;
 }
 .footer-bio {
     color: #a89ba9;

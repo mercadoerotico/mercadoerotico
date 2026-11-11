@@ -208,4 +208,28 @@ add_filter('the_content', function($content) {
     return str_replace(array_keys($broken_map), array_values($broken_map), $content);
 }, 20);
 
+// Custom WordPress Login Screen Logo
+add_action('login_enqueue_scripts', function() {
+    ?>
+    <style type="text/css">
+        #login h1 a, .login h1 a {
+            background-image: url('<?php echo home_url('/wp-content/uploads/2026/11/logo-mercado-erotico-modernizada-tight.png'); ?>') !important;
+            height: 75px !important;
+            width: 220px !important;
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            padding-bottom: 10px !important;
+        }
+    </style>
+    <?php
+});
+add_filter('login_headerurl', function() {
+    return home_url('/');
+});
+add_filter('login_headertext', function() {
+    return 'Mercado Erótico';
+});
+
+
 
