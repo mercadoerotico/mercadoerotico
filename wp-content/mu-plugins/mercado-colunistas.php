@@ -17,7 +17,8 @@ function mercado_colunistas_get_list() {
             'bio' => 'Psicóloga e sexóloga com o propósito de desmistificar tabus e preconceitos, abordando demandas sexuais e relacionamentos de forma divertida, científica, sensata e empática.',
             'badge' => '75 Artigos',
             'tag' => 'Comportamento & Emoções',
-            'url' => home_url('/category/coluna-ka-entre-nos/'),
+            'url' => home_url('/author/karina-brum/'),
+            'category_url' => home_url('/category/coluna-ka-entre-nos/'),
             'highlight' => 'Solidão masculina, intimidade emocional, relacionamentos contemporâneos e saúde sexual.'
         ),
         array(
@@ -28,7 +29,8 @@ function mercado_colunistas_get_list() {
             'bio' => 'Fundadora da Sexy Delícia há duas décadas no mercado de Sexual Wellness. Idealizadora do programa De Pernas pro Ar, voltado à formação de profissionais e desenvolvimento íntimo.',
             'badge' => 'Formação & Saúde',
             'tag' => 'Pompoarismo & Prazer',
-            'url' => home_url('/category/coluna-de-pernas-pro-ar-com-erica-rambalde/'),
+            'url' => home_url('/author/erica-rambalde/'),
+            'category_url' => home_url('/category/coluna-de-pernas-pro-ar-com-erica-rambalde/'),
             'highlight' => 'Exercícios pélvicos, ginástica íntima, empoderamento sexual e dinâmicas de casal.'
         ),
         array(
@@ -61,7 +63,8 @@ function mercado_colunistas_get_list() {
             'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2024/08/marianna-kiss.jpg',
             'badge' => '23 Artigos',
             'tag' => 'Empoderamento Feminino',
-            'url' => home_url('/category/dona-do-proprio-poder/'),
+            'url' => home_url('/author/marianna-kiss/'),
+            'category_url' => home_url('/category/dona-do-proprio-poder/'),
             'highlight' => 'Despertar sensorial, tantra taoísta, autocuidado e liberação de culpas íntimas.'
         ),
         array(
@@ -83,7 +86,8 @@ function mercado_colunistas_get_list() {
             'bio' => 'Coach de Relacionamento e dona da sex shop Queridinhas da Adri há 7 anos. Une visão prática de balcão e gestão estratégica para compartilhar lições de empreendedorismo íntimo.',
             'badge' => '11 Artigos',
             'tag' => 'Empreendedorismo',
-            'url' => home_url('/category/coluna-empresarios-sex/'),
+            'url' => home_url('/author/adriana-braga/'),
+            'category_url' => home_url('/category/coluna-empresarios-sex/'),
             'highlight' => 'Desafios do varejo, experiência do cliente, fluxo de caixa e rotina de sex shop.'
         ),
         array(

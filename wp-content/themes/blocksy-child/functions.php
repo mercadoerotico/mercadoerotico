@@ -146,6 +146,7 @@ add_action('template_redirect', function() {
         '/novembro-azul-pesquisa-sobre-consumo-masculino-em-sex-shop-e-ebook-de-masturbacao' => home_url('/livraria/'),
         '/category/premio-2020' => home_url('/category/noticias/'),
         '/category/testadora-de-produtos' => home_url('/category/produtos/'),
+        '/author/mariana-kiss' => home_url('/author/marianna-kiss/'),
     );
 
     if (isset($redirects[$request_uri])) {
