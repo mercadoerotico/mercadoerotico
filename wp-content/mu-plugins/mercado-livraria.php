@@ -1176,6 +1176,13 @@ function mercado_livraria_footer_scripts() {
                         </a>
                     `;
                 }
+                if (p.download_pptx) {
+                    actionButtonsHtml += `
+                        <a href="${p.download_pptx}" target="_blank" download rel="noopener" class="modal-btn-free" style="background:#b7410e; border-color:#b7410e; margin-top:10px;">
+                            <i class="fas fa-file-powerpoint" style="font-size:1.25rem;"></i> Baixar Apresentação Slides (.PPTX) <i class="fas fa-download"></i>
+                        </a>
+                    `;
+                }
             } else {
                 actionButtonsHtml = `
                     <a href="${mailUrl}" class="modal-btn-email">

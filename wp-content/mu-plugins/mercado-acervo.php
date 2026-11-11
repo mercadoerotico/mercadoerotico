@@ -454,8 +454,6 @@ function mercado_acervo_shortcode() {
     .acervo-hero-feedback .feedback-btn:hover {
         transform: scale(1.05);
     }
-        transform: scale(1.02);
-    }
     .acervo-filter-section {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
