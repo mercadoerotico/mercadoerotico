@@ -18,8 +18,8 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '🏛️',
             'tagline'     => 'Da clandestinidade aos shoppings: a evolução do varejo físico ao digital',
             'description' => 'Documentação histórica completa sobre o pioneirismo no Brasil, as primeiras lojas físicas, a migração para o e-commerce e as três décadas de transformação sociocultural do mercado erótico nacional.',
-            'terms'       => 'sexshop história mercado erótico varejo pioneiros',
-            'cats'        => ['negocios', 'hot-news', 'mundo-erotico']
+            'term'        => 'sexshop',
+            'cats'        => []
         ],
         'industria-brasileira' => [
             'slug'        => 'industria-brasileira',
@@ -28,8 +28,8 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '🏭',
             'tagline'     => 'Parque fabril, tecnologia em silicone, inovação de moldes e marcas nacionais',
             'description' => 'Mapeamento profundo da indústria nacional de sex toys e cosméticos sensuais: fabricação própria, polos industriais no Brasil, substituição de importações e certificações técnicas.',
-            'terms'       => 'indústria fábrica fabricante nacional produção marcas',
-            'cats'        => ['negocios', 'hot-news']
+            'term'        => 'indústria',
+            'cats'        => []
         ],
         'cosmeticos-sensuais' => [
             'slug'        => 'cosmeticos-sensuais',
@@ -38,8 +38,8 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '💄',
             'tagline'     => 'Lubrificantes, géis funcionais, óleos corporais e perfumaria íntima',
             'description' => 'O segmento com maior volume de vendas e giro do setor íntimo. Tendências farmacêuticas, vigilância sanitária, inovação sensorial, ingredientes naturais e aromaterapia aplicada ao bem-estar.',
-            'terms'       => 'cosmético lubrificante gel sensual óleo massagem',
-            'cats'        => ['lancamentos', 'negocios', 'saude']
+            'term'        => 'cosmético',
+            'cats'        => []
         ],
         'sexual-wellness' => [
             'slug'        => 'sexual-wellness',
@@ -48,7 +48,7 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '🩺',
             'tagline'     => 'A convergência entre prazer, medicina sexual, ginecologia e fisioterapia pélvica',
             'description' => 'A desmistificação do tabu pelo viés da saúde integrativa. Estudos médicos, saúde pélvica, tratamentos, menopausa, longevidade sexual e a integração entre profissionais de saúde e produtos íntimos.',
-            'terms'       => 'sexual wellness saúde íntima saúde sexual ginecologia pélvica',
+            'term'        => '',
             'cats'        => ['sexologia', 'saude', 'sexual-wellness', 'sexo-na-pratica']
         ],
         'legislacao' => [
@@ -58,8 +58,8 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '⚖️',
             'tagline'     => 'Normas ANVISA, enquadramento fiscal, compliance e projetos de lei',
             'description' => 'Guia analítico permanente sobre os marcos regulatórios no Brasil: exigências da ANVISA para cosméticos, tributação e classificação fiscal de produtos eróticos, direito do consumidor e regras de publicidade.',
-            'terms'       => 'lei legislação anvisa regulamentação imposto tributação jurídico',
-            'cats'        => ['negocios', 'hot-news']
+            'term'        => 'legislação',
+            'cats'        => []
         ],
         'tecnologia-ia' => [
             'slug'        => 'tecnologia-ia',
@@ -68,7 +68,7 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '🤖',
             'tagline'     => 'Dispositivos IoT conectados, realidade virtual, algoritmos e prazer digital',
             'description' => 'O ecossistema sextech em rápida aceleração: estimuladores controlados por aplicativo via Bluetooth/Wi-Fi, interfaces hápticas, inteligência artificial generativa e o futuro das relações mediadas por tecnologia.',
-            'terms'       => 'inteligência artificial iasex tecnologia sextech app iot',
+            'term'        => '',
             'cats'        => ['iasex', 'tecnologia', 'sextech']
         ],
         'america-latina' => [
@@ -78,8 +78,8 @@ function mercado_acervo_get_dossiers() {
             'icon'        => '🌎',
             'tagline'     => 'Expansão de marcas brasileiras, comportamento de consumo e dados na LATAM',
             'description' => 'Investigações sobre os mercados vizinhos: oportunidades de exportação para marcas nacionais, feiras latino-americanas, hábitos de consumo e barreiras alfandegárias na Colômbia, Argentina, Chile e México.',
-            'terms'       => 'américa latina latam colômbia argentina chile méxico',
-            'cats'        => ['negocios', 'pesquisas', 'eventos']
+            'term'        => 'América Latina',
+            'cats'        => []
         ]
     ];
 }
@@ -149,8 +149,8 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
     $dossiers = mercado_acervo_get_dossiers();
     if (!empty($dossie) && isset($dossiers[$dossie])) {
         $d_info = $dossiers[$dossie];
-        if (!empty($d_info['terms'])) {
-            $search_terms[] = $d_info['terms'];
+        if (!empty($d_info['term'])) {
+            $search_terms[] = $d_info['term'];
         }
         if (!empty($d_info['cats'])) {
             $args['tax_query'] = [
@@ -168,24 +168,25 @@ function mercado_acervo_get_posts($year = 'all', $theme = 'all', $q = '', $page 
     if ($geo && $geo !== 'all') {
         switch ($geo) {
             case 'brasil':
-                $search_terms[] = 'Brasil nacional brasileira';
+                $search_terms[] = 'Brasil';
                 break;
             case 'latam':
-                $search_terms[] = 'América Latina latam colômbia argentina chile';
+                $search_terms[] = 'América Latina';
                 break;
             case 'eua':
-                $search_terms[] = 'Estados Unidos EUA americano norte-americano';
+                $search_terms[] = 'Estados Unidos';
                 break;
             case 'europa':
-                $search_terms[] = 'Europa Alemanha EroFame Espanha Reino Unido';
+                $search_terms[] = 'Europa';
                 break;
             case 'global':
-                $search_terms[] = 'global mundial internacional';
+                $search_terms[] = 'global';
                 break;
         }
     }
 
     if (!empty($search_terms)) {
+        // Se houver busca explícita, usa o termo; se não, pega o primeiro termo temático
         $args['s'] = implode(' ', $search_terms);
     }
 
