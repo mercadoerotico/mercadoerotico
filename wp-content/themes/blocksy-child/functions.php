@@ -130,3 +130,27 @@ add_action('wp_footer', function() {
     </script>
     <?php
 }, 99);
+
+/**
+ * Redirecionamentos 301 Automáticos para Campanhas e URLs Antigas
+ * Elimina erros 404 provenientes de links internos em matérias históricas
+ */
+add_action('template_redirect', function() {
+    $request_uri = untrailingslashit(strtok($_SERVER['REQUEST_URI'] ?? '', '?'));
+
+    $redirects = array(
+        '/guia-de-compras-sex-shop-quarentena-sexy' => 'https://www.guiadesexshop.com.br/',
+        '/vibrador-o-livro-download-gratis' => home_url('/livraria/'),
+        '/category/sexyfair2018' => home_url('/category/eventos/'),
+        '/catalogo-de-lancamentos-para-o-dia-dos-namorados-e-pesquisa-mercado-erotico-na-quarentena' => home_url('/'),
+        '/novembro-azul-pesquisa-sobre-consumo-masculino-em-sex-shop-e-ebook-de-masturbacao' => home_url('/livraria/'),
+        '/category/premio-2020' => home_url('/category/noticias/'),
+        '/category/testadora-de-produtos' => home_url('/category/produtos/'),
+    );
+
+    if (isset($redirects[$request_uri])) {
+        wp_redirect($redirects[$request_uri], 301);
+        exit;
+    }
+});
+
