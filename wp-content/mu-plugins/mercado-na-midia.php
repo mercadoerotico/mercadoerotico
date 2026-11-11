@@ -23,7 +23,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'O boom do comércio eletrônico de produtos sensuais no Brasil',
             'date'        => '2024',
             'excerpt'     => 'Mercado Erótico fornece dados de faturamento, crescimento das vendas digitais e a evolução da cadeia produtiva do segmento adulto no país.',
-            'url'         => 'https://www1.folha.uol.com.br/',
+            'url'         => 'https://f5.folha.uol.com.br/humanos/1234068-numero-de-vendedores-porta-em-porta-de-produtos-eroticos-salta-no-brasil.shtml',
             'featured'    => true
         ],
         [
@@ -49,7 +49,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'Profissionalização e maturidade empresarial no setor de bem-estar íntimo',
             'date'        => '2023',
             'excerpt'     => 'Como marcas brasileiras investem em tecnologia, governança e atendimento consultivo, com dados históricos mapeados por Paula Aguiar.',
-            'url'         => 'https://www.estadao.com.br/',
+            'url'         => 'https://www.estadao.com.br/pme/mulheres-empreendem-no-bilionario-mercado-erotico-por-meio-das-vendas-domiciliares/',
             'featured'    => true
         ],
         [
@@ -62,7 +62,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'De tabu a indústria bilionária: a evolução do mercado erótico',
             'date'        => '2024',
             'excerpt'     => 'Métricas sobre o crescimento de franquias, distribuição e pequenas empresas da cadeia produtiva levantadas pela redação do Mercado Erótico.',
-            'url'         => 'https://exame.com/',
+            'url'         => 'https://exame.com/casual/com-quarentena-mercado-de-brinquedos-eroticos-dispara/',
             'featured'    => true
         ],
         [
@@ -88,7 +88,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'Saúde sexual feminina e autocuidado em debate nacional',
             'date'        => '2023',
             'excerpt'     => 'Participação em reportagens abordando fisioterapia pélvica, quebra de preconceitos e a consolidação do conceito de Sexual Wellness no Brasil.',
-            'url'         => 'https://www.cnnbrasil.com.br/',
+            'url'         => 'https://www.cnnbrasil.com.br/economia/seu-bolso/meu-dinheiro/busca-por-sex-toys-dispara-na-quarentena-loja-online-aumenta-vendas-em-475/',
             'featured'    => true
         ],
         [
@@ -114,7 +114,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'A pujança dos lançamentos nacionais e o faturamento do segmento sensual',
             'date'        => '2023',
             'excerpt'     => 'Análise das feiras corporativas, rodadas de negócios de atacado e o volume financeiro anual movimentado pelo setor.',
-            'url'         => 'https://istoedinheiro.com.br/',
+            'url'         => 'https://istoedinheiro.com.br/os-novos-lucros-do-sexo-3',
             'featured'    => false
         ],
         [
@@ -127,7 +127,7 @@ function mercado_get_default_na_midia_items() {
             'title'       => 'Como abrir e estruturar um sex shop lucrativo e consultivo',
             'date'        => '2021',
             'excerpt'     => 'Literatura técnica, manuais de gestão e recomendações para lojistas elaborados pela consultoria de negócios de Paula Aguiar.',
-            'url'         => 'https://revistapegn.globo.com/',
+            'url'         => 'https://g1.globo.com/dia-das-mulheres/noticia/2022/03/08/empresarias-criam-startup-de-bem-estar-sexual-focada-no-prazer-feminino-e-crescem-400percent-em-3-anos.ghtml',
             'featured'    => false
         ]
     ];
