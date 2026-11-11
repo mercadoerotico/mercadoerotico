@@ -199,23 +199,45 @@ function mercado_livraria_shortcode() {
     <div id="livraria-app" class="livraria-wrapper">
         <!-- Hero Header -->
         <div class="livraria-hero">
-            <div class="livraria-badge">★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO</div>
+            <div id="livraria-hero-badge" class="livraria-badge">★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO</div>
             <h1 class="livraria-title">Livraria Mercado Erótico</h1>
             <p class="livraria-subtitle">O mais completo acervo de e-books, cursos e guias sobre sexualidade humana, bem-estar íntimo, tantra e autoconhecimento para consumidores finais, além de manuais completos para profissionais do mercado íntimo.</p>
             
-            <div class="livraria-stats-bar">
-                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Títulos &amp; Obras</span></div>
+            <div id="livraria-hero-stats" class="livraria-stats-bar">
+                <div class="stat-item"><span class="stat-num" id="stat-total-books"><?php echo $total_count; ?></span><span class="stat-lbl" id="stat-lbl-books">Títulos &amp; Obras</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num"><?php echo $manuais_count; ?></span><span class="stat-lbl">Manuais &amp; Guias</span></div>
+                <div class="stat-item"><span class="stat-num" id="stat-manuais-books"><?php echo $manuais_count; ?></span><span class="stat-lbl" id="stat-lbl-manuais">Manuais &amp; Guias</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num"><?php echo $gratuito_count; ?></span><span class="stat-lbl">Materiais Gratuitos</span></div>
+                <div class="stat-item"><span class="stat-num" id="stat-gratis-books"><?php echo $gratuito_count; ?></span><span class="stat-lbl" id="stat-lbl-gratis">Materiais Gratuitos</span></div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="livraria-search-box">
-                <i class="fas fa-search search-icon" aria-hidden="true"></i>
-                <input type="text" id="livraria-search-input" placeholder="Pesquisar por tema, título ou autor (ex: Tantra, Pompoarismo, Orgasmo, Vibrador, Negócios)..." autocomplete="off" oninput="onLivrariaSearchInput(this.value)">
-                <button type="button" id="livraria-search-btn" class="livraria-btn-search" onclick="onLivrariaSearchClick()">Buscar</button>
+            <!-- Search Bar Form (Padrão Acervo com Busca Instantânea) -->
+            <form id="livraria-search-form" class="livraria-search-box" action="#" onsubmit="event.preventDefault(); doLivrariaSearch();" role="search">
+                <div class="livraria-input-wrap">
+                    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                    <input type="search" id="livraria-search-input" name="s" placeholder="Pesquisar por tema, título ou autor (ex: Tantra, Pompoarismo, Orgasmo, Vibrador, Negócios)..." autocomplete="off" enterkeyhint="search" oninput="onLivrariaSearchInput(this.value)" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault();doLivrariaSearch();}">
+                    <button type="button" id="livraria-clear-input-btn" class="livraria-clear-btn" title="Limpar busca" onclick="clearLivrariaSearchInput()"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <button type="submit" id="livraria-search-btn" class="livraria-btn-search">
+                    <span class="btn-text">Buscar no Catálogo</span>
+                </button>
+            </form>
+
+            <!-- Instant Search Feedback in Hero (Padrão Acervo) -->
+            <div id="livraria-hero-feedback" class="livraria-hero-feedback" style="display:none;"></div>
+
+            <!-- Lista de Resultados Dentro da Sessão do Topo -->
+            <div id="livraria-hero-results-list" class="livraria-hero-results-list" style="display:none;">
+                <div class="hero-results-header">
+                    <span id="hero-results-title"><i class="fas fa-book-open"></i> Resultados no Topo</span>
+                    <button type="button" class="btn-close-hero-results" onclick="closeHeroResultsList()" title="Fechar visualização rápida">&times;</button>
+                </div>
+                <div id="hero-results-items" class="hero-results-items"></div>
+                <div class="hero-results-footer">
+                    <button type="button" class="btn-view-all-results" onclick="scrollToLivrariaResults()">
+                        <i class="fas fa-arrow-down"></i> Ver todos os resultados na grade do catálogo
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -236,6 +258,19 @@ function mercado_livraria_shortcode() {
                     <div class="audience-title">Mercado Íntimo, Gestão &amp; Vendas <i class="fas fa-arrow-right"></i></div>
                     <div class="audience-desc">Manuais de abertura de Sex Shop, atendimento profissional, normas técnicas ISO, calendários e marketing.</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Banner de Recorte Ativo (Busca ou Categoria) -->
+        <div id="livraria-catalog-anchor"></div>
+        <div id="livraria-active-banner" class="livraria-active-banner" style="display:none;">
+            <div class="livraria-banner-content">
+                <div class="livraria-banner-badge" id="livraria-banner-badge-text">📚 RECORTE DE BUSCA ATIVO</div>
+                <h2 class="livraria-banner-title" id="livraria-banner-title-text">📚 0 Materiais encontrados</h2>
+                <p class="livraria-banner-desc" id="livraria-banner-desc-text">Exibindo títulos e manuais filtrados no catálogo da livraria.</p>
+            </div>
+            <div class="livraria-banner-actions">
+                <button type="button" class="btn-clear-livraria-banner" onclick="clearLivrariaSearchInput()"><i class="fas fa-undo"></i> Ver Todo o Catálogo (<?php echo $total_count; ?> obras)</button>
             </div>
         </div>
 
@@ -424,7 +459,20 @@ function mercado_livraria_shortcode() {
         const query = (window.currentLivrariaSearch || '').toLowerCase().trim();
         const cards = document.querySelectorAll('.book-card');
         const noResults = document.getElementById('livraria-no-results');
+        const heroBadge = document.getElementById('livraria-hero-badge');
+        const statTotal = document.getElementById('stat-total-books');
+        const statLbl = document.getElementById('stat-lbl-books');
+        const feedbackBox = document.getElementById('livraria-hero-feedback');
+        const heroList = document.getElementById('livraria-hero-results-list');
+        const heroItemsContainer = document.getElementById('hero-results-items');
+        const heroResultsTitle = document.getElementById('hero-results-title');
+        const activeBanner = document.getElementById('livraria-active-banner');
+        const bannerBadge = document.getElementById('livraria-banner-badge-text');
+        const bannerTitle = document.getElementById('livraria-banner-title-text');
+        const bannerDesc = document.getElementById('livraria-banner-desc-text');
+
         let visibleCount = 0;
+        let matchingItems = [];
 
         cards.forEach(function(card) {
             const slugs = (card.getAttribute('data-slugs') || '').split(',');
@@ -436,11 +484,28 @@ function mercado_livraria_shortcode() {
             if (matchCat && matchSearch) {
                 card.style.display = 'flex';
                 visibleCount++;
+
+                if (query) {
+                    const id = card.getAttribute('data-id') || '';
+                    const titleEl = card.querySelector('.book-title');
+                    const imgEl = card.querySelector('.book-cover-img');
+                    const priceEl = card.querySelector('.book-price');
+                    const isFree = card.getAttribute('data-free') === '1';
+
+                    matchingItems.push({
+                        id: id,
+                        title: titleEl ? titleEl.innerText : name,
+                        img: imgEl ? imgEl.src : '',
+                        price: priceEl ? priceEl.innerText : '',
+                        isFree: isFree
+                    });
+                }
             } else {
                 card.style.display = 'none';
             }
         });
 
+        // 1. Contador padrão na barra de filtros inferior
         const countEl = document.getElementById('livraria-count');
         if (countEl) {
             countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
@@ -454,26 +519,160 @@ function mercado_livraria_shortcode() {
         if (noResults) {
             noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
         }
+
+        const safeQ = query.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // 2. Dinamismo no Hero Badge e Stats Bar (Padrão Acervo)
+        if (heroBadge) {
+            if (query || slug !== 'all') {
+                heroBadge.style.background = '#e31c61';
+                heroBadge.style.color = '#ffffff';
+                heroBadge.innerHTML = '★ RECORTE ATIVO • ' + visibleCount + ' MATERIAIS ENCONTRADOS';
+            } else {
+                heroBadge.style.background = '';
+                heroBadge.style.color = '';
+                heroBadge.innerHTML = '★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO';
+            }
+        }
+
+        if (statTotal && statLbl) {
+            if (query || slug !== 'all') {
+                statTotal.style.color = '#ff3b7e';
+                statTotal.textContent = visibleCount;
+                statLbl.textContent = 'Materiais neste Recorte';
+            } else {
+                statTotal.style.color = '';
+                statTotal.textContent = cards.length;
+                statLbl.textContent = 'Títulos & Obras';
+            }
+        }
+
+        // 3. Feedback Interativo no Topo (Padrão Acervo)
+        if (feedbackBox) {
+            if (query) {
+                feedbackBox.style.display = 'inline-flex';
+                if (visibleCount > 0) {
+                    feedbackBox.className = 'livraria-hero-feedback has-results';
+                    feedbackBox.innerHTML = '<span><i class="fas fa-check-circle"></i> <strong>' + visibleCount + '</strong> ' + (visibleCount === 1 ? 'material encontrado' : 'materiais encontrados') + ' para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="scrollToLivrariaResults()">Ver no catálogo ↓</button>';
+                } else {
+                    feedbackBox.className = 'livraria-hero-feedback no-results';
+                    feedbackBox.innerHTML = '<span><i class="fas fa-exclamation-triangle"></i> Nenhum material encontrado para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="clearLivrariaSearchInput()">Limpar busca</button>';
+                }
+            } else {
+                feedbackBox.style.display = 'none';
+            }
+        }
+
+        // 4. Lista de Resultados Dentro da Sessão do Topo
+        if (heroList && heroItemsContainer) {
+            if (query && matchingItems.length > 0) {
+                let html = '';
+                const maxDisplay = Math.min(matchingItems.length, 8);
+                for (let i = 0; i < maxDisplay; i++) {
+                    const item = matchingItems[i];
+                    html += '<div class="hero-result-item" onclick="openBookModal(' + item.id + ')">';
+                    if (item.img) {
+                        html += '<img src="' + item.img + '" alt="' + item.title.replace(/"/g, '&quot;') + '" class="hero-result-thumb">';
+                    }
+                    html += '<div class="hero-result-info">';
+                    html += '<div class="hero-result-title">' + item.title + '</div>';
+                    html += '<div class="hero-result-meta">';
+                    if (item.isFree) {
+                        html += '<span class="hero-result-price free"><i class="fas fa-gift"></i> GRATUITO</span>';
+                    } else if (item.price) {
+                        html += '<span class="hero-result-price">' + item.price + '</span>';
+                    }
+                    html += '</div></div></div>';
+                }
+                heroItemsContainer.innerHTML = html;
+                if (heroResultsTitle) {
+                    heroResultsTitle.innerHTML = '<i class="fas fa-book-open"></i> ' + visibleCount + ' ' + (visibleCount === 1 ? 'Resultado Encontrado no Topo' : 'Resultados Encontrados no Topo');
+                }
+                heroList.style.display = 'block';
+            } else {
+                heroList.style.display = 'none';
+            }
+        }
+
+        // 5. Banner de Recorte Ativo acima da Grade (Padrão Acervo)
+        if (activeBanner) {
+            if (query) {
+                activeBanner.style.display = 'flex';
+                if (bannerBadge) bannerBadge.innerText = '📚 RECORTE DE BUSCA ATIVO';
+                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material encontrado' : 'Materiais encontrados') + ' para "' + safeQ + '"';
+                if (bannerDesc) bannerDesc.innerText = 'Exibindo e-books e manuais filtrados pelo termo pesquisado no catálogo da Livraria.';
+            } else if (slug !== 'all') {
+                activeBanner.style.display = 'flex';
+                const activeTab = document.querySelector('#livraria-tabs .livraria-tab.active');
+                const catName = activeTab ? activeTab.innerText : 'Categoria';
+                if (bannerBadge) bannerBadge.innerText = '📚 CATEGORIA SELECIONADA';
+                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material catalogado' : 'Materiais catalogados') + ' em ' + catName;
+                if (bannerDesc) bannerDesc.innerText = 'Exibindo obras filtradas exclusivamente nesta categoria.';
+            } else {
+                activeBanner.style.display = 'none';
+            }
+        }
+    };
+
+    window.doLivrariaSearch = function() {
+        const input = document.getElementById('livraria-search-input');
+        const q = (input ? input.value : '').trim();
+        window.currentLivrariaSearch = q;
+        window.applyLivrariaFilter();
+    };
+
+    window.clearLivrariaSearchInput = function() {
+        const input = document.getElementById('livraria-search-input');
+        const clearBtn = document.getElementById('livraria-clear-input-btn');
+        const feedbackBox = document.getElementById('livraria-hero-feedback');
+        const heroList = document.getElementById('livraria-hero-results-list');
+        const activeBanner = document.getElementById('livraria-active-banner');
+
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (feedbackBox) feedbackBox.style.display = 'none';
+        if (heroList) heroList.style.display = 'none';
+        if (activeBanner) activeBanner.style.display = 'none';
+
+        window.currentLivrariaSearch = '';
+        window.applyLivrariaFilter();
+    };
+
+    window.scrollToLivrariaResults = function() {
+        const heroList = document.getElementById('livraria-hero-results-list');
+        if (heroList) heroList.style.display = 'none';
+
+        const target = document.getElementById('livraria-active-banner') || document.getElementById('livraria-filter-section') || document.querySelector('.livraria-filter-section');
+        if (target) {
+            const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    };
+
+    window.closeHeroResultsList = function() {
+        const heroList = document.getElementById('livraria-hero-results-list');
+        if (heroList) heroList.style.display = 'none';
     };
 
     window.onLivrariaSearchInput = function(val) {
+        const clearBtn = document.getElementById('livraria-clear-input-btn');
+        if (clearBtn) {
+            clearBtn.style.display = (val && val.trim() !== '') ? 'block' : 'none';
+        }
         window.currentLivrariaSearch = val || '';
         window.applyLivrariaFilter();
     };
 
     window.onLivrariaSearchClick = function() {
-        const input = document.getElementById('livraria-search-input');
-        if (input) {
-            window.currentLivrariaSearch = input.value || '';
-            window.applyLivrariaFilter();
-        }
+        window.doLivrariaSearch();
     };
 
     window.resetLivrariaFilters = function() {
+        window.clearLivrariaSearchInput();
         window.currentLivrariaSlug = 'all';
-        window.currentLivrariaSearch = '';
-        const input = document.getElementById('livraria-search-input');
-        if (input) input.value = '';
 
         const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
         tabs.forEach(function(t) {
@@ -575,53 +774,323 @@ function mercado_livraria_shortcode() {
         color: rgba(255,255,255,0.2);
     }
     .livraria-search-box {
-        max-width: 650px;
+        max-width: 720px;
         margin: 0 auto;
         position: relative;
         display: flex;
         align-items: center;
+        background: #ffffff;
+        border-radius: 50px;
+        padding: 6px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        z-index: 5;
     }
-    .livraria-search-box .search-icon {
+    .livraria-input-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+    .livraria-input-wrap .search-icon {
         position: absolute;
         left: 20px;
-        color: #8e8293;
-        font-size: 1.1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 17px;
         pointer-events: none;
+        z-index: 2;
     }
-    .livraria-search-box input {
+    .livraria-input-wrap input {
         width: 100%;
-        padding: 16px 130px 16px 50px;
-        border-radius: 50px;
-        border: 2px solid rgba(255,255,255,0.18);
-        background: rgba(255,255,255,0.08);
-        color: #fff;
-        font-size: 1rem;
-        outline: none;
-        transition: all 0.25s ease;
+        border: none !important;
+        outline: none !important;
+        padding: 13px 40px 13px 52px !important;
+        font-size: 15px !important;
+        color: #0f172a !important;
+        border-radius: 50px !important;
+        background: transparent !important;
+        box-shadow: none !important;
     }
-    .livraria-search-box input:focus {
-        background: rgba(255,255,255,0.15);
-        border-color: #e31c61;
-        box-shadow: 0 0 20px rgba(227, 28, 97, 0.4);
+    .livraria-input-wrap input::placeholder {
+        color: #94a3b8;
     }
-    .livraria-search-box input::placeholder {
-        color: #9f91a5;
+    .livraria-clear-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 17px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        display: none;
+        z-index: 2;
+        transition: color 0.2s ease;
+    }
+    .livraria-clear-btn:hover {
+        color: #e31c61;
     }
     .livraria-btn-search {
-        position: absolute;
-        right: 8px;
-        background: #e31c61;
-        color: #fff;
+        background: linear-gradient(135deg, #e31c61 0%, #c4124e 100%);
+        color: #ffffff;
         border: none;
-        padding: 10px 24px;
-        border-radius: 40px;
+        border-radius: 50px;
+        padding: 0 28px;
+        height: 46px;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 14.5px;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-shrink: 0;
+        white-space: nowrap;
     }
     .livraria-btn-search:hover {
-        background: #b8144c;
+        transform: scale(1.02);
+        box-shadow: 0 4px 14px rgba(227, 28, 97, 0.4);
+    }
+
+    /* INSTANT SEARCH FEEDBACK IN HERO */
+    .livraria-hero-feedback {
+        margin-top: 18px;
+        padding: 9px 20px;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff;
+        backdrop-filter: blur(8px);
+        animation: livrariaFadeIn 0.2s ease;
+    }
+    .livraria-hero-feedback.has-results {
+        background: rgba(16, 185, 129, 0.25);
+        border-color: rgba(16, 185, 129, 0.45);
+        color: #a7f3d0;
+    }
+    .livraria-hero-feedback.no-results {
+        background: rgba(244, 63, 94, 0.25);
+        border-color: rgba(244, 63, 94, 0.45);
+        color: #fecdd3;
+    }
+    .livraria-hero-feedback.is-loading {
+        background: rgba(227, 28, 97, 0.25);
+        border-color: rgba(227, 28, 97, 0.45);
+        color: #fbcfe8;
+    }
+    .livraria-hero-feedback .feedback-btn {
+        background: #ffffff;
+        color: #0f172a;
+        border: none;
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .livraria-hero-feedback .feedback-btn:hover {
+        background: #fce7f0;
+        color: #e31c61;
+    }
+
+    /* QUICK RESULTS LIST INSIDE TOP SESSION */
+    .livraria-hero-results-list {
+        max-width: 720px;
+        margin: 18px auto 0 auto;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(227, 28, 97, 0.3);
+        overflow: hidden;
+        text-align: left;
+        animation: livrariaFadeIn 0.25s ease;
+        color: #0f172a;
+        position: relative;
+        z-index: 10;
+    }
+    @keyframes livrariaFadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-results-header {
+        background: #f8fafc;
+        padding: 10px 18px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .hero-results-header i {
+        color: #e31c61;
+        margin-right: 6px;
+    }
+    .btn-close-hero-results {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #94a3b8;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 4px;
+    }
+    .btn-close-hero-results:hover {
+        color: #e31c61;
+    }
+    .hero-results-items {
+        max-height: 290px;
+        overflow-y: auto;
+        padding: 6px 0;
+    }
+    .hero-result-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .hero-result-item:last-child {
+        border-bottom: none;
+    }
+    .hero-result-item:hover {
+        background: #fdf2f8;
+    }
+    .hero-result-thumb {
+        width: 40px;
+        height: 56px;
+        border-radius: 4px;
+        object-fit: cover;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        flex-shrink: 0;
+        background: #e2e8f0;
+    }
+    .hero-result-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .hero-result-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+    .hero-result-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.75rem;
+    }
+    .hero-result-price {
+        font-weight: 800;
+        color: #e31c61;
+    }
+    .hero-result-price.free {
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.12);
+        padding: 1px 6px;
+        border-radius: 4px;
+    }
+    .hero-results-footer {
+        background: #f8fafc;
+        padding: 8px 16px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+    }
+    .btn-view-all-results {
+        background: none;
+        border: none;
+        color: #e31c61;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s ease;
+    }
+    .btn-view-all-results:hover {
+        color: #c4124e;
+        text-decoration: underline;
+    }
+
+    /* ACTIVE BANNER ABOVE GRID */
+    .livraria-active-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #31102f 100%);
+        border: 1.5px solid #e31c61;
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin: 20px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        color: #ffffff;
+        box-shadow: 0 10px 25px rgba(227, 28, 97, 0.2);
+    }
+    .livraria-banner-badge {
+        display: inline-block;
+        background: #e31c61;
+        color: #ffffff;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+    .livraria-banner-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 4px 0;
+    }
+    .livraria-banner-desc {
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        margin: 0;
+    }
+    .btn-clear-livraria-banner {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-clear-livraria-banner:hover {
+        background: #e31c61;
+        border-color: #e31c61;
+        color: #ffffff;
     }
 
     /* AUDIENCE HIGHLIGHT BAR */
