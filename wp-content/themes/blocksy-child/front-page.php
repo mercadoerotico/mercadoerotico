@@ -91,38 +91,13 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
 ?>
 
 <div class="me-home-wrapper">
-        <!-- ESPAÇO DE PUBLICIDADE - BANNER PADRÃO ROTATIVO (PADRÃO IAB) -->
-    <div class="me-ad-standard-container" id="meStandardAdContainer">
-        <div class="ad-standard-header">
-            <span class="ad-standard-badge"><i class="fas fa-bullhorn"></i> PUBLICIDADE</span>
-            <a href="<?php echo home_url('/contato/'); ?>" class="ad-standard-mediakit">Anuncie no Portal <i class="fas fa-angle-right"></i></a>
-        </div>
-        <div class="ad-standard-track">
-            <!-- Banner Destaque 1: Anuário Grandes Marcas 2026 -->
-            <div class="ad-standard-slide active">
-                <a href="<?php echo home_url('/anuario-grandes-marcas-do-mercado-erotico-2026/'); ?>" title="Anuário Grandes Marcas do Mercado Erótico - Baixe Grátis">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_anuario_home_with_cover.png" alt="Anuário Grandes Marcas do Mercado Erótico - 4ª Edição" class="ad-img-standard" width="1200" height="300">
-                </a>
-            </div>
-            <!-- Banner Destaque 2: Livraria & Formação Profissional -->
-            <div class="ad-standard-slide">
-                <a href="<?php echo home_url('/livraria/'); ?>" title="Livraria Mercado Erótico - E-books, Manuais e Treinamentos">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_livraria_vitrine_digital.webp" alt="Livraria Mercado Erótico - Vitrine Digital e Conteúdos Gratuitos" class="ad-img-standard" width="1200" height="300">
-                </a>
-            </div>
-            <!-- Banner Destaque 3: Guia de Sexshop -->
-            <div class="ad-standard-slide">
-                <a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener noreferrer" title="Guia de Sexshop - O maior buscador de sexshops do Brasil">
-                    <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/banner_guia_de_sexshop.webp" alt="Guia de Sexshop - O maior buscador de sexshops do Brasil" class="ad-img-standard" width="1200" height="300">
-                </a>
-            </div>
-        </div>
-        <div class="ad-standard-dots" id="adStandardDots">
-            <button type="button" class="ad-dot active" onclick="goToAdBanner(0)" aria-label="Banner 1"></button>
-            <button type="button" class="ad-dot" onclick="goToAdBanner(1)" aria-label="Banner 2"></button>
-            <button type="button" class="ad-dot" onclick="goToAdBanner(2)" aria-label="Banner 3"></button>
-        </div>
-    </div>
+        <!-- ESPAÇO DE PUBLICIDADE - BANNER PADRÃO ROTATIVO (PADRÃO IAB) GERENCIADO NO PAINEL -->
+    <?php
+    if (function_exists('mercado_render_banners_slot')) {
+        mercado_render_banners_slot('home_top');
+    }
+    ?>
+
 
     <!-- BLOCO 1: BENTO GRID HERO (CARD PRINCIPAL FIXO + GRID 2x2 LATERAL) -->
     <section class="me-bento-hero">
