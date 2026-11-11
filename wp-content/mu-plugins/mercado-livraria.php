@@ -1399,17 +1399,199 @@ add_action('wp_footer', 'mercado_livraria_footer_scripts', 99);
 
 function mercado_livraria_admin_menu() {
     add_menu_page(
-        'Acervo & Envios',
-        'Acervo & Envios',
+        'Livraria Digital',
+        'Livraria Digital',
         'manage_options',
         'mercado-acervo-digital',
         'mercado_livraria_admin_page',
         'dashicons-book-alt',
         26
     );
+    add_submenu_page(
+        'mercado-acervo-digital',
+        'Catálogo de Livros',
+        'Catálogo de Livros',
+        'manage_options',
+        'mercado-acervo-digital',
+        'mercado_livraria_admin_page'
+    );
+    add_submenu_page(
+        'mercado-acervo-digital',
+        'Envios & PDFs',
+        'Envios & PDFs',
+        'manage_options',
+        'mercado-acervo-digital&tab=envios',
+        'mercado_livraria_admin_page'
+    );
 }
 add_action('admin_menu', 'mercado_livraria_admin_menu');
 
+// Salvar / Editar Livro
+function mercado_livraria_handle_save_book() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Acesso não autorizado.');
+    }
+    check_admin_referer('mercado_livraria_save_action', 'mercado_livraria_save_nonce');
+
+    $file_path = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
+    $books = file_exists($file_path) ? json_decode(file_get_contents($file_path), true) : array();
+    if (!is_array($books)) $books = array();
+
+    $book_id = isset($_POST['book_id']) ? intval($_POST['book_id']) : 0;
+    $name    = isset($_POST['book_name']) ? sanitize_text_field($_POST['book_name']) : '';
+    $price   = isset($_POST['book_price']) ? floatval(str_replace(',', '.', $_POST['book_price'])) : 0.0;
+    $is_free = ($price <= 0.0 || !empty($_POST['book_is_free']));
+
+    if (empty($name)) {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_name'));
+        exit;
+    }
+
+    $buy_type  = isset($_POST['book_buy_type']) ? sanitize_text_field($_POST['book_buy_type']) : 'mercadopago';
+    $buy_url   = isset($_POST['book_buy_url']) ? esc_url_raw($_POST['book_buy_url']) : '';
+    $image     = isset($_POST['book_image']) ? esc_url_raw($_POST['book_image']) : '';
+    $short_desc = isset($_POST['book_short_desc']) ? wp_kses_post($_POST['book_short_desc']) : '';
+    $desc       = isset($_POST['book_desc']) ? wp_kses_post($_POST['book_desc']) : '';
+
+    // Categorias
+    $categories = array();
+    if (!empty($_POST['book_categories'])) {
+        if (is_array($_POST['book_categories'])) {
+            $categories = array_map('sanitize_text_field', $_POST['book_categories']);
+        } else {
+            $categories = array_filter(array_map('trim', explode(',', sanitize_text_field($_POST['book_categories']))));
+        }
+    }
+    if (empty($categories)) {
+        $categories = array('Sexualidade');
+    }
+
+    // Buy label dinâmico
+    $buy_label = 'Comprar no Hotmart';
+    if ($is_free) {
+        $buy_label = 'Acessar Grátis';
+    } elseif ($buy_type === 'mercadopago') {
+        $buy_label = 'Comprar com Mercado Pago (PIX / Cartão)';
+    } elseif ($buy_type === 'loja_propria') {
+        $buy_label = 'Comprar na Loja';
+    } elseif ($buy_type === 'whatsapp') {
+        $buy_label = 'Adquirir via WhatsApp / PIX';
+    }
+
+    $price_formatted = $is_free ? 'Gratuito' : 'R$ ' . number_format($price, 2, ',', '.');
+
+    if ($book_id > 0) {
+        // Editar existente
+        $found = false;
+        foreach ($books as &$b) {
+            if ($b['id'] == $book_id) {
+                $b['name'] = $name;
+                $b['slug'] = sanitize_title($name);
+                $b['price'] = $is_free ? 0 : $price;
+                $b['price_formatted'] = $price_formatted;
+                $b['is_free'] = $is_free;
+                $b['categories'] = array_values($categories);
+                if (!empty($image)) $b['image'] = $image;
+                if (!empty($buy_url)) $b['buy_url'] = $buy_url;
+                $b['buy_type'] = $buy_type;
+                $b['buy_label'] = $buy_label;
+                if (!empty($short_desc)) $b['short_description'] = $short_desc;
+                if (!empty($desc)) $b['description'] = $desc;
+                $found = true;
+                break;
+            }
+        }
+        unset($b);
+        if (!$found) {
+            $book_id = 0; // Se não encontrou, insere
+        }
+    }
+
+    if ($book_id <= 0) {
+        // Criar novo ID
+        $max_id = 0;
+        foreach ($books as $b) {
+            if (isset($b['id']) && $b['id'] > $max_id) $max_id = $b['id'];
+        }
+        $new_id = $max_id > 0 ? $max_id + 1 : 2700;
+
+        $new_book = array(
+            'id' => $new_id,
+            'name' => $name,
+            'slug' => sanitize_title($name),
+            'price' => $is_free ? 0 : $price,
+            'price_formatted' => $price_formatted,
+            'is_free' => $is_free,
+            'categories' => array_values($categories),
+            'image' => $image ?: '/wp-content/uploads/livraria/default-book.webp',
+            'excerpt' => wp_trim_words(strip_tags($short_desc ?: $desc), 25, '...'),
+            'description' => $desc,
+            'short_description' => $short_desc,
+            'buy_url' => $buy_url,
+            'buy_type' => $buy_type,
+            'buy_label' => $buy_label
+        );
+
+        array_unshift($books, $new_book); // Inserir no topo
+        $book_id = $new_id;
+    }
+
+    // Salvar JSON
+    file_put_contents($file_path, json_encode($books, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+    // Limpar caches
+    if (defined('LSCWP_V')) {
+        do_action('litespeed_purge_all');
+    }
+    wp_cache_flush();
+
+    wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=success_save&book_id=' . $book_id));
+    exit;
+}
+add_action('admin_post_mercado_livraria_save_book', 'mercado_livraria_handle_save_book');
+
+// Excluir Livro
+function mercado_livraria_handle_delete_book() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Acesso não autorizado.');
+    }
+    check_admin_referer('mercado_livraria_delete_action', 'mercado_livraria_delete_nonce');
+
+    $book_id = isset($_GET['book_id']) ? intval($_GET['book_id']) : 0;
+    if ($book_id <= 0) {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_invalid'));
+        exit;
+    }
+
+    $file_path = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
+    $books = file_exists($file_path) ? json_decode(file_get_contents($file_path), true) : array();
+
+    $new_books = array();
+    $deleted = false;
+    foreach ($books as $b) {
+        if ($b['id'] == $book_id) {
+            $deleted = true;
+            continue;
+        }
+        $new_books[] = $b;
+    }
+
+    if ($deleted) {
+        file_put_contents($file_path, json_encode($new_books, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        if (defined('LSCWP_V')) {
+            do_action('litespeed_purge_all');
+        }
+        wp_cache_flush();
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=success_delete'));
+        exit;
+    } else {
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_not_found'));
+        exit;
+    }
+}
+add_action('admin_post_mercado_livraria_delete_book', 'mercado_livraria_handle_delete_book');
+
+// Handle PDF upload
 function mercado_livraria_handle_pdf_upload() {
     if (!current_user_can('manage_options')) {
         wp_die('Acesso não autorizado.');
@@ -1420,14 +1602,14 @@ function mercado_livraria_handle_pdf_upload() {
     $book_name = isset($_POST['book_name']) ? sanitize_text_field($_POST['book_name']) : 'ebook';
 
     if ($book_id <= 0 || empty($_FILES['pdf_file']['name'])) {
-        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_invalid'));
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&tab=envios&status=error_invalid'));
         exit;
     }
 
     $file = $_FILES['pdf_file'];
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if ($ext !== 'pdf') {
-        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_not_pdf'));
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&tab=envios&status=error_not_pdf'));
         exit;
     }
 
@@ -1443,10 +1625,10 @@ function mercado_livraria_handle_pdf_upload() {
 
     if (move_uploaded_file($file['tmp_name'], $target_path)) {
         chmod($target_path, 0644);
-        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=success_upload&book_id=' . $book_id));
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&tab=envios&status=success_upload&book_id=' . $book_id));
         exit;
     } else {
-        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&status=error_upload'));
+        wp_redirect(admin_url('admin.php?page=mercado-acervo-digital&tab=envios&status=error_upload'));
         exit;
     }
 }
@@ -1466,145 +1648,337 @@ function mercado_livraria_find_acervo_file($book_id, $book_slug) {
     return null;
 }
 
+// PÁGINA PRINCIPAL DO PAINEL DA LIVRARIA
 function mercado_livraria_admin_page() {
     if (!current_user_can('manage_options')) {
         return;
     }
 
-    $products = mercado_livraria_get_data();
-    $target_products = array_filter($products, function($p) {
-        $bt = $p['buy_type'] ?? '';
-        return ($bt === 'whatsapp' || !empty($p['is_free']) || $bt === 'free' || $bt === 'download' || $bt === 'mercadopago');
-    });
+    wp_enqueue_media();
 
+    $products = mercado_livraria_get_data();
     $acervo_url = content_url('uploads/acervo-digital');
     $status = $_GET['status'] ?? '';
+    $current_tab = $_GET['tab'] ?? 'catalogo';
+
+    // Lista de categorias conhecidas
+    $all_cats = array('Sexualidade', 'Negócios', 'Vendas', 'Manuais e etc', 'Pompoarismo', 'Consultoria', 'Cursos & Treinamentos');
     ?>
-    <div class="wrap" style="max-width:1200px; margin-top:20px;">
-        <h1 style="font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:10px;">
-            <span class="dashicons dashicons-book-alt" style="font-size:2rem; width:2rem; height:2rem; color:#e31c61;"></span>
-            Livraria Digital — Acervo & Envio de E-books (PIX / Mercado Pago)
-        </h1>
-        <p style="font-size:1rem; color:#555; margin-bottom:25px;">
-            Este painel permite consultar o arquivo PDF de cada e-book, copiar os links de download direto ou preparar na hora o e-mail de entrega para o comprador após a confirmação do pagamento.
-        </p>
-
-        <?php if ($status === 'success_upload'): ?>
-            <div class="notice notice-success is-dismissible" style="padding:12px; font-weight:600;">
-                ✅ Arquivo PDF enviado com sucesso e arquivado no acervo!
-            </div>
-        <?php elseif ($status === 'error_not_pdf'): ?>
-            <div class="notice notice-error is-dismissible" style="padding:12px; font-weight:600;">
-                ❌ Erro: O arquivo enviado precisa ser no formato .PDF.
-            </div>
-        <?php elseif ($status === 'error_upload'): ?>
-            <div class="notice notice-error is-dismissible" style="padding:12px; font-weight:600;">
-                ❌ Houve uma falha ao mover o arquivo. Verifique as permissões de pasta.
-            </div>
-        <?php endif; ?>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:30px;">
-            <div style="background:#fff; border-left:4px solid #10b981; padding:18px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-                <div style="font-size:0.85rem; color:#64748b; font-weight:700; text-transform:uppercase;">Entrega por E-mail</div>
-                <div style="font-size:1.4rem; font-weight:800; color:#1e293b; margin-top:5px;">Pronto para Envio</div>
-                <p style="margin:5px 0 0; font-size:0.85rem; color:#64748b;">Gere a mensagem de entrega do comprador com 1 clique.</p>
-            </div>
-            <div style="background:#fff; border-left:4px solid #e31c61; padding:18px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-                <div style="font-size:0.85rem; color:#64748b; font-weight:700; text-transform:uppercase;">Local do Acervo Seguro</div>
-                <div style="font-size:1.1rem; font-weight:700; color:#1e293b; margin-top:5px; word-break:break-all;">wp-content/uploads/acervo-digital/</div>
-                <p style="margin:5px 0 0; font-size:0.85rem; color:#64748b;">Protegido contra listagem de diretório.</p>
+    <div class="wrap" style="max-width:1300px; margin-top:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:15px;">
+            <h1 style="font-size:1.8rem; font-weight:800; display:flex; align-items:center; gap:10px; margin:0;">
+                <span class="dashicons dashicons-book-alt" style="font-size:2.2rem; width:2.2rem; height:2.2rem; color:#e31c61;"></span>
+                Livraria Digital — Gestão de Catálogo & Acervo
+            </h1>
+            <div style="display:flex; gap:10px;">
+                <a href="<?php echo home_url('/livraria/'); ?>" target="_blank" class="button" style="display:inline-flex; align-items:center; gap:6px;">
+                    <span class="dashicons dashicons-external" style="margin-top:2px;"></span> Ver Livraria no Site
+                </a>
+                <button type="button" class="button button-primary" style="background:#e31c61; border-color:#e31c61; font-weight:700; padding:4px 16px;" onclick="openBookModalForNew()">
+                    + Adicionar Novo Livro
+                </button>
             </div>
         </div>
 
-        <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden;">
-            <table class="wp-list-table widefat fixed striped" style="border:none;">
-                <thead>
-                    <tr style="background:#f8fafc;">
-                        <th style="width:70px; font-weight:700; padding:12px 16px;">Capa</th>
-                        <th style="font-weight:700; padding:12px 16px;">Livro / Material</th>
-                        <th style="width:110px; font-weight:700; padding:12px 16px;">Preço</th>
-                        <th style="width:170px; font-weight:700; padding:12px 16px;">Status no Acervo</th>
-                        <th style="width:340px; font-weight:700; padding:12px 16px; text-align:right;">Ações de Envio & Gestão</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($target_products as $p): 
-                        $pid = $p['id'];
-                        $title = $p['name'];
-                        $slug = $p['slug'] ?? sanitize_title($title);
-                        $price = $p['price_formatted'];
-                        $is_free = !empty($p['is_free']);
-                        $img = $p['image'] ?? '';
-                        $acervo_file = mercado_livraria_find_acervo_file($pid, $slug);
-                        $file_url = $acervo_file ? $acervo_url . '/' . $acervo_file : ($p['buy_url'] ?? '');
-                        $has_file = !empty($acervo_file) || (strpos($file_url, '.pdf') !== false);
-                    ?>
-                    <tr>
-                        <td style="padding:12px 16px; vertical-align:middle;">
-                            <?php if ($img): ?>
-                                <img src="<?php echo esc_url($img); ?>" style="width:48px; height:64px; object-fit:cover; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">
-                            <?php else: ?>
-                                <div style="width:48px; height:64px; background:#f1f5f9; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#94a3b8;"><span class="dashicons dashicons-book"></span></div>
-                            <?php endif; ?>
-                        </td>
-                        <td style="padding:12px 16px; vertical-align:middle;">
-                            <div style="font-weight:700; color:#1e293b; font-size:0.95rem; margin-bottom:4px;"><?php echo esc_html($title); ?></div>
-                            <div style="font-size:0.8rem; color:#64748b;">ID: <?php echo $pid; ?> • <?php echo $is_free ? '<span style="color:#10b981; font-weight:700;">Material Gratuito</span>' : 'Venda Direta (PIX / MP)'; ?></div>
-                            <?php if ($has_file): ?>
-                                <div style="font-size:0.75rem; color:#059669; margin-top:4px; font-family:monospace; word-break:break-all;">
-                                    📁 <?php echo esc_html($acervo_file ?: basename($file_url)); ?>
-                                </div>
-                            <?php endif; ?>
-                        </td>
-                        <td style="padding:12px 16px; vertical-align:middle; font-weight:700; color:<?php echo $is_free ? '#10b981' : '#e31c61'; ?>;">
-                            <?php echo esc_html($price); ?>
-                        </td>
-                        <td style="padding:12px 16px; vertical-align:middle;">
-                            <?php if ($has_file): ?>
-                                <span style="display:inline-flex; align-items:center; gap:5px; background:#ecfdf5; color:#065f46; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
-                                    <span class="dashicons dashicons-yes-alt" style="font-size:16px; width:16px; height:16px;"></span> PDF Arquivado
-                                </span>
-                            <?php else: ?>
-                                <span style="display:inline-flex; align-items:center; gap:5px; background:#fffbeb; color:#92400e; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
-                                    <span class="dashicons dashicons-warning" style="font-size:16px; width:16px; height:16px;"></span> PDF Pendente
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td style="padding:12px 16px; vertical-align:middle; text-align:right;">
-                            <div style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; align-items:center;">
-                                <?php if ($has_file): ?>
-                                    <button type="button" class="button button-primary" style="background:#e31c61; border-color:#e31c61; font-weight:600;" onclick="openEmailModal(<?php echo htmlspecialchars(json_encode(array(
-                                        'id' => $pid,
-                                        'title' => $title,
-                                        'file_url' => $file_url,
-                                        'price' => $price
-                                    )), ENT_QUOTES, 'UTF-8'); ?>)">
-                                        ✉️ Enviar p/ Comprador
-                                    </button>
-                                    <a href="<?php echo esc_url($file_url); ?>" target="_blank" download class="button button-secondary" title="Baixar arquivo agora">
-                                        📥 Baixar
-                                    </a>
-                                    <button type="button" class="button button-secondary" onclick="copyToClipboard('<?php echo esc_js($file_url); ?>', 'Link do PDF copiado!')" title="Copiar link direto do PDF">
-                                        🔗 Copiar Link
-                                    </button>
+        <!-- Notificações -->
+        <?php if ($status === 'success_save'): ?>
+            <div class="notice notice-success is-dismissible" style="padding:12px; font-weight:600;">
+                ✅ Livro salvo com sucesso no catálogo e publicado na Livraria!
+            </div>
+        <?php elseif ($status === 'success_delete'): ?>
+            <div class="notice notice-success is-dismissible" style="padding:12px; font-weight:600;">
+                🗑️ Livro excluído com sucesso do catálogo da Livraria.
+            </div>
+        <?php elseif ($status === 'success_upload'): ?>
+            <div class="notice notice-success is-dismissible" style="padding:12px; font-weight:600;">
+                ✅ Arquivo PDF enviado com sucesso e arquivado no acervo digital!
+            </div>
+        <?php elseif ($status === 'error_name'): ?>
+            <div class="notice notice-error is-dismissible" style="padding:12px; font-weight:600;">
+                ❌ Erro: O título do livro não pode ficar em branco.
+            </div>
+        <?php endif; ?>
+
+        <!-- Navegação por Abas -->
+        <h2 class="nav-tab-wrapper" style="margin-bottom:20px;">
+            <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=catalogo'); ?>" class="nav-tab <?php echo $current_tab === 'catalogo' ? 'nav-tab-active' : ''; ?>">
+                📚 Catálogo de Livros (<?php echo count($products); ?> títulos)
+            </a>
+            <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=envios'); ?>" class="nav-tab <?php echo $current_tab === 'envios' ? 'nav-tab-active' : ''; ?>">
+                ✉️ Acervo de PDFs & Envios para Compradores
+            </a>
+        </h2>
+
+        <?php if ($current_tab === 'catalogo'): ?>
+            <!-- ABA 1: CATÁLOGO COMPLETO (INCLUIR / EDITAR / EXCLUIR) -->
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:15px; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; gap:10px; align-items:center; flex:1; max-width:400px;">
+                        <input type="text" id="catalogo-search" placeholder="Buscar livro por título, autor ou ID..." style="width:100%; padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1;" oninput="filterCatalogoTable()">
+                    </div>
+                    <div style="font-size:0.88rem; color:#64748b;">
+                        Total: <strong><?php echo count($products); ?></strong> materiais cadastrados
+                    </div>
+                </div>
+            </div>
+
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden;">
+                <table class="wp-list-table widefat fixed striped" id="table-catalogo" style="border:none;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="width:65px; font-weight:700; padding:12px 14px;">Capa</th>
+                            <th style="width:38%; font-weight:700; padding:12px 14px;">Título & Detalhes</th>
+                            <th style="width:110px; font-weight:700; padding:12px 14px;">Preço</th>
+                            <th style="width:180px; font-weight:700; padding:12px 14px;">Plataforma / Checkout</th>
+                            <th style="font-weight:700; padding:12px 14px;">Categorias</th>
+                            <th style="width:180px; font-weight:700; padding:12px 14px; text-align:right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($products as $p): 
+                            $pid = $p['id'];
+                            $title = $p['name'];
+                            $price = $p['price_formatted'];
+                            $is_free = !empty($p['is_free']);
+                            $img = $p['image'] ?? '';
+                            $buy_type = $p['buy_type'] ?? 'whatsapp';
+                            $buy_url = $p['buy_url'] ?? '';
+                            $cats = $p['categories'] ?? array();
+                            $cats_str = implode(', ', $cats);
+                        ?>
+                        <tr class="catalogo-row" data-search="<?php echo esc_attr(strtolower($title . ' ' . $pid . ' ' . $cats_str)); ?>">
+                            <td style="padding:10px 14px; vertical-align:middle;">
+                                <?php if ($img): ?>
+                                    <img src="<?php echo esc_url($img); ?>" style="width:44px; height:60px; object-fit:cover; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">
                                 <?php else: ?>
-                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px; align-items:center;">
-                                        <?php wp_nonce_field('mercado_upload_acervo_action', 'mercado_upload_nonce'); ?>
-                                        <input type="hidden" name="action" value="mercado_upload_acervo_pdf">
-                                        <input type="hidden" name="book_id" value="<?php echo $pid; ?>">
-                                        <input type="hidden" name="book_name" value="<?php echo esc_attr($title); ?>">
-                                        <input type="file" name="pdf_file" accept=".pdf" required style="font-size:0.75rem; max-width:140px;">
-                                        <button type="submit" class="button button-secondary" style="font-size:0.75rem;">
-                                            ⬆️ Subir PDF
-                                        </button>
-                                    </form>
+                                    <div style="width:44px; height:60px; background:#f1f5f9; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#94a3b8;"><span class="dashicons dashicons-book"></span></div>
                                 <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                            </td>
+                            <td style="padding:10px 14px; vertical-align:middle;">
+                                <strong style="font-size:0.95rem; color:#0f172a; display:block; margin-bottom:3px;"><?php echo esc_html($title); ?></strong>
+                                <span style="font-size:0.75rem; color:#64748b;">ID: <code><?php echo $pid; ?></code></span>
+                            </td>
+                            <td style="padding:10px 14px; vertical-align:middle; font-weight:700; color:<?php echo $is_free ? '#10b981' : '#e31c61'; ?>;">
+                                <?php echo esc_html($price); ?>
+                            </td>
+                            <td style="padding:10px 14px; vertical-align:middle;">
+                                <?php if ($buy_type === 'mercadopago'): ?>
+                                    <span style="display:inline-block; background:#009ee3; color:#fff; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">MERCADO PAGO</span>
+                                <?php elseif ($buy_type === 'hotmart'): ?>
+                                    <span style="display:inline-block; background:#f04e23; color:#fff; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">HOTMART</span>
+                                <?php elseif ($is_free || $buy_type === 'download'): ?>
+                                    <span style="display:inline-block; background:#10b981; color:#fff; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">GRATUITO</span>
+                                <?php elseif ($buy_type === 'loja_propria'): ?>
+                                    <span style="display:inline-block; background:#8b5cf6; color:#fff; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">LOJA PRÓPRIA</span>
+                                <?php else: ?>
+                                    <span style="display:inline-block; background:#25d366; color:#fff; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:4px;">WHATSAPP</span>
+                                <?php endif; ?>
+                                <?php if (!empty($buy_url)): ?>
+                                    <a href="<?php echo esc_url($buy_url); ?>" target="_blank" style="display:block; font-size:0.75rem; color:#64748b; margin-top:4px; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;" title="<?php echo esc_attr($buy_url); ?>">🔗 <?php echo esc_html($buy_url); ?></a>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:10px 14px; vertical-align:middle; font-size:0.85rem; color:#475569;">
+                                <?php foreach ($cats as $c): ?>
+                                    <span style="background:#f1f5f9; padding:2px 6px; border-radius:3px; font-size:0.75rem; margin-right:4px; display:inline-block; margin-bottom:2px;"><?php echo esc_html($c); ?></span>
+                                <?php endforeach; ?>
+                            </td>
+                            <td style="padding:10px 14px; vertical-align:middle; text-align:right;">
+                                <div style="display:flex; justify-content:flex-end; gap:6px;">
+                                    <button type="button" class="button button-small" onclick="openBookModalForEdit(<?php echo htmlspecialchars(json_encode($p), ENT_QUOTES, 'UTF-8'); ?>)" style="color:#0284c7; border-color:#bae6fd;">
+                                        ✏️ Editar
+                                    </button>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mercado_livraria_delete_book&book_id=' . $pid), 'mercado_livraria_delete_action', 'mercado_livraria_delete_nonce'); ?>" class="button button-small" onclick="return confirm('Tem certeza que deseja excluir o livro '<?php echo esc_js($title); ?>' da Livraria?')" style="color:#e11d48; border-color:#fecdd3;">
+                                        🗑️ Excluir
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+        <?php else: ?>
+            <!-- ABA 2: ENVIOS DE PDF & COMPRADORES -->
+            <p style="font-size:1rem; color:#555; margin-bottom:20px;">
+                Este painel permite consultar o arquivo PDF de cada e-book, copiar os links de download direto ou preparar na hora o e-mail de entrega para o comprador após a confirmação do pagamento.
+            </p>
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden;">
+                <table class="wp-list-table widefat fixed striped" style="border:none;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="width:70px; font-weight:700; padding:12px 16px;">Capa</th>
+                            <th style="font-weight:700; padding:12px 16px;">Livro / Material</th>
+                            <th style="width:110px; font-weight:700; padding:12px 16px;">Preço</th>
+                            <th style="width:170px; font-weight:700; padding:12px 16px;">Status no Acervo</th>
+                            <th style="width:340px; font-weight:700; padding:12px 16px; text-align:right;">Ações de Envio & Gestão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $target_products = array_filter($products, function($p) {
+                            $bt = $p['buy_type'] ?? '';
+                            return ($bt === 'whatsapp' || !empty($p['is_free']) || $bt === 'free' || $bt === 'download' || $bt === 'mercadopago');
+                        });
+                        foreach ($target_products as $p): 
+                            $pid = $p['id'];
+                            $title = $p['name'];
+                            $slug = $p['slug'] ?? sanitize_title($title);
+                            $price = $p['price_formatted'];
+                            $is_free = !empty($p['is_free']);
+                            $img = $p['image'] ?? '';
+                            $acervo_file = mercado_livraria_find_acervo_file($pid, $slug);
+                            $file_url = $acervo_file ? $acervo_url . '/' . $acervo_file : ($p['buy_url'] ?? '');
+                            $has_file = !empty($acervo_file) || (strpos($file_url, '.pdf') !== false);
+                        ?>
+                        <tr>
+                            <td style="padding:12px 16px; vertical-align:middle;">
+                                <?php if ($img): ?>
+                                    <img src="<?php echo esc_url($img); ?>" style="width:48px; height:64px; object-fit:cover; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">
+                                <?php else: ?>
+                                    <div style="width:48px; height:64px; background:#f1f5f9; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#94a3b8;"><span class="dashicons dashicons-book"></span></div>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle;">
+                                <div style="font-weight:700; color:#1e293b; font-size:0.95rem; margin-bottom:4px;"><?php echo esc_html($title); ?></div>
+                                <div style="font-size:0.8rem; color:#64748b;">ID: <?php echo $pid; ?> • <?php echo $is_free ? '<span style="color:#10b981; font-weight:700;">Material Gratuito</span>' : 'Venda Direta (PIX / MP)'; ?></div>
+                                <?php if ($has_file): ?>
+                                    <div style="font-size:0.75rem; color:#059669; margin-top:4px; font-family:monospace; word-break:break-all;">
+                                        📁 <?php echo esc_html($acervo_file ?: basename($file_url)); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle; font-weight:700; color:<?php echo $is_free ? '#10b981' : '#e31c61'; ?>;">
+                                <?php echo esc_html($price); ?>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle;">
+                                <?php if ($has_file): ?>
+                                    <span style="display:inline-flex; align-items:center; gap:5px; background:#ecfdf5; color:#065f46; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                                        <span class="dashicons dashicons-yes-alt" style="font-size:16px; width:16px; height:16px;"></span> PDF Arquivado
+                                    </span>
+                                <?php else: ?>
+                                    <span style="display:inline-flex; align-items:center; gap:5px; background:#fffbeb; color:#92400e; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:700;">
+                                        <span class="dashicons dashicons-warning" style="font-size:16px; width:16px; height:16px;"></span> PDF Pendente
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle; text-align:right;">
+                                <div style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <?php if ($has_file): ?>
+                                        <button type="button" class="button button-primary" style="background:#e31c61; border-color:#e31c61; font-weight:600;" onclick="openEmailModal(<?php echo htmlspecialchars(json_encode(array(
+                                            'id' => $pid,
+                                            'title' => $title,
+                                            'file_url' => $file_url,
+                                            'price' => $price
+                                        )), ENT_QUOTES, 'UTF-8'); ?>)">
+                                            ✉️ Enviar p/ Comprador
+                                        </button>
+                                        <a href="<?php echo esc_url($file_url); ?>" target="_blank" download class="button button-secondary" title="Baixar arquivo agora">
+                                            📥 Baixar
+                                        </a>
+                                        <button type="button" class="button button-secondary" onclick="copyToClipboard('<?php echo esc_js($file_url); ?>', 'Link do PDF copiado!')" title="Copiar link direto do PDF">
+                                            🔗 Copiar Link
+                                        </button>
+                                    <?php else: ?>
+                                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data" style="display:inline-flex; gap:6px; align-items:center;">
+                                            <?php wp_nonce_field('mercado_upload_acervo_action', 'mercado_upload_nonce'); ?>
+                                            <input type="hidden" name="action" value="mercado_upload_acervo_pdf">
+                                            <input type="hidden" name="book_id" value="<?php echo $pid; ?>">
+                                            <input type="hidden" name="book_name" value="<?php echo esc_attr($title); ?>">
+                                            <input type="file" name="pdf_file" accept=".pdf" required style="font-size:0.75rem; max-width:140px;">
+                                            <button type="submit" class="button button-secondary" style="font-size:0.75rem;">
+                                                ⬆️ Subir PDF
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- MODAL DE INCLUSÃO & EDIÇÃO DE LIVRO -->
+    <div id="book-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:999999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:12px; width:100%; max-width:700px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px rgba(0,0,0,0.3); overflow:hidden;">
+            <div style="background:#0f172a; color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="modal-form-title" style="margin:0; font-size:1.2rem; color:#fff; font-weight:700;">📚 Adicionar Novo Livro</h3>
+                <button type="button" onclick="closeBookModal()" style="background:none; border:none; color:#94a3b8; font-size:1.8rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+                <?php wp_nonce_field('mercado_livraria_save_action', 'mercado_livraria_save_nonce'); ?>
+                <input type="hidden" name="action" value="mercado_livraria_save_book">
+                <input type="hidden" name="book_id" id="form-book-id" value="0">
+
+                <div style="padding:24px; overflow-y:auto; flex:1;">
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Título do Livro / Material *</label>
+                        <input type="text" name="book_name" id="form-book-name" required placeholder="Ex: Manual de Vendas para Sexshop" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Preço (R$)</label>
+                            <input type="text" name="book_price" id="form-book-price" placeholder="Ex: 19.80 (0 para Grátis)" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Plataforma de Checkout</label>
+                            <select name="book_buy_type" id="form-book-buy-type" style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;" onchange="updateBuyTypeNotice()">
+                                <option value="mercadopago">Mercado Pago (PIX / Cartão)</option>
+                                <option value="hotmart">Hotmart</option>
+                                <option value="download">Download Gratuito (PDF Direto)</option>
+                                <option value="loja_propria">Loja Própria</option>
+                                <option value="whatsapp">Atendimento WhatsApp</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;" id="label-buy-url">Link de Pagamento / Checkout (Mercado Pago ou Hotmart)</label>
+                        <input type="url" name="book_buy_url" id="form-book-buy-url" placeholder="Ex: https://mpago.la/... ou https://pay.hotmart.com/..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                        <span id="buy-url-hint" style="display:block; font-size:0.78rem; color:#64748b; margin-top:4px;">Cole aqui o link de pagamento do Mercado Pago gerado para este e-book.</span>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Imagem de Capa (URL)</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="book_image" id="form-book-image" placeholder="https://.../capa.jpg" style="flex:1; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
+                            <button type="button" class="button" onclick="chooseCoverMedia()" style="padding:4px 12px;">📁 Escolher da Mídia</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Categorias</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+                            <?php foreach ($all_cats as $c): ?>
+                                <label style="font-size:0.85rem; display:inline-flex; align-items:center; gap:5px; cursor:pointer;">
+                                    <input type="checkbox" name="book_categories[]" value="<?php echo esc_attr($c); ?>" class="cat-checkbox"> <?php echo esc_html($c); ?>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Sinopse Curta (Exibida no Card)</label>
+                        <textarea name="book_short_desc" id="form-book-short-desc" rows="3" placeholder="Resumo em 1 ou 2 parágrafos sobre o material..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;"></textarea>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-weight:700; margin-bottom:6px; font-size:0.9rem; color:#1e293b;">Descrição Completa (Exibida no Modal de Detalhes)</label>
+                        <textarea name="book_desc" id="form-book-desc" rows="6" placeholder="Informações completas, sumário, público-alvo, número de páginas..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.9rem;"></textarea>
+                    </div>
+                </div>
+
+                <div style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:16px 24px; display:flex; justify-content:flex-end; gap:12px;">
+                    <button type="button" class="button button-secondary" onclick="closeBookModal()">Cancelar</button>
+                    <button type="submit" class="button button-primary" style="background:#e31c61; border-color:#e31c61; font-weight:700; padding:4px 20px;">
+                        💾 Salvar Livro
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1644,8 +2018,95 @@ function mercado_livraria_admin_page() {
     </div>
 
     <script>
-    let currentModalBook = null;
+    // Filtro rápido no catálogo
+    function filterCatalogoTable() {
+        const q = document.getElementById('catalogo-search').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#table-catalogo .catalogo-row');
+        rows.forEach(r => {
+            const search = r.getAttribute('data-search') || '';
+            r.style.display = search.includes(q) ? '' : 'none';
+        });
+    }
 
+    // Modal de Livro (Novo / Editar)
+    function openBookModalForNew() {
+        document.getElementById('modal-form-title').innerText = '📚 Adicionar Novo Livro / E-book';
+        document.getElementById('form-book-id').value = '0';
+        document.getElementById('form-book-name').value = '';
+        document.getElementById('form-book-price').value = '';
+        document.getElementById('form-book-buy-type').value = 'mercadopago';
+        document.getElementById('form-book-buy-url').value = '';
+        document.getElementById('form-book-image').value = '';
+        document.getElementById('form-book-short-desc').value = '';
+        document.getElementById('form-book-desc').value = '';
+
+        document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = false);
+        updateBuyTypeNotice();
+        document.getElementById('book-edit-modal').style.display = 'flex';
+    }
+
+    function openBookModalForEdit(book) {
+        document.getElementById('modal-form-title').innerText = '✏️ Editar Livro: ' + book.name;
+        document.getElementById('form-book-id').value = book.id || 0;
+        document.getElementById('form-book-name').value = book.name || '';
+        document.getElementById('form-book-price').value = book.price !== undefined ? book.price : '';
+        document.getElementById('form-book-buy-type').value = book.buy_type || 'mercadopago';
+        document.getElementById('form-book-buy-url').value = book.buy_url || '';
+        document.getElementById('form-book-image').value = book.image || '';
+        document.getElementById('form-book-short-desc').value = book.short_description || '';
+        document.getElementById('form-book-desc').value = book.description || '';
+
+        const cats = Array.isArray(book.categories) ? book.categories : [];
+        document.querySelectorAll('.cat-checkbox').forEach(cb => {
+            cb.checked = cats.includes(cb.value);
+        });
+
+        updateBuyTypeNotice();
+        document.getElementById('book-edit-modal').style.display = 'flex';
+    }
+
+    function closeBookModal() {
+        document.getElementById('book-edit-modal').style.display = 'none';
+    }
+
+    function updateBuyTypeNotice() {
+        const type = document.getElementById('form-book-buy-type').value;
+        const hint = document.getElementById('buy-url-hint');
+        const label = document.getElementById('label-buy-url');
+        if (type === 'mercadopago') {
+            label.innerText = 'Link de Pagamento Mercado Pago (mpago.la)';
+            hint.innerText = 'Cole o link encurtado gerado no Mercado Pago (ex: https://mpago.la/...).';
+        } else if (type === 'hotmart') {
+            label.innerText = 'Link de Checkout Hotmart';
+            hint.innerText = 'Cole o link de checkout ou da página do Hotmart.';
+        } else if (type === 'download') {
+            label.innerText = 'Link Direto do Arquivo PDF';
+            hint.innerText = 'Cole a URL do arquivo PDF hospedado para download direto.';
+        } else if (type === 'loja_propria') {
+            label.innerText = 'Link do Produto na Loja Própria';
+            hint.innerText = 'Cole a URL da página de vendas da sua loja.';
+        } else {
+            label.innerText = 'Link do WhatsApp ou Atendimento';
+            hint.innerText = 'Deixe em branco para usar o número padrão ou cole o link wa.me.';
+        }
+    }
+
+    // Media library selector
+    function chooseCoverMedia() {
+        const mediaFrame = wp.media({
+            title: 'Selecionar Capa do Livro',
+            button: { text: 'Usar como Capa' },
+            multiple: false
+        });
+        mediaFrame.on('select', function() {
+            const attachment = mediaFrame.state().get('selection').first().toJSON();
+            document.getElementById('form-book-image').value = attachment.url;
+        });
+        mediaFrame.open();
+    }
+
+    // Modal de E-mail de entrega
+    let currentModalBook = null;
     function openEmailModal(book) {
         currentModalBook = book;
         const subject = '[Mercado Erótico] Seu E-book: ' + book.title + ' - Acesso Liberado! 📚';
