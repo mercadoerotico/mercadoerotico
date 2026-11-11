@@ -168,17 +168,17 @@ function mercado_acervo_shortcode() {
                 <div class="stat-item"><span class="stat-num">20+</span><span class="stat-lbl">Colunistas e Especialistas</span></div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="acervo-search-box">
+            <!-- Search Bar Form -->
+            <form id="acervo-search-form" class="acervo-search-box" action="#" onsubmit="event.preventDefault(); doAcervoSearch();" role="search">
                 <div class="acervo-input-wrap">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="acervo-search-input" placeholder="Pesquisar por tema, marca, produto ou termo..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doAcervoSearch();}">
+                    <input type="search" id="acervo-search-input" name="s" placeholder="Pesquisar por tema, marca, produto ou termo..." autocomplete="off" enterkeyhint="search" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault();doAcervoSearch();}">
                     <button type="button" id="acervo-clear-input-btn" class="acervo-clear-btn" title="Limpar busca" onclick="clearSearchInput()"><i class="fas fa-times-circle"></i></button>
                 </div>
-                <button type="button" id="acervo-search-btn" class="acervo-btn-search" onclick="doAcervoSearch()">
+                <button type="submit" id="acervo-search-btn" class="acervo-btn-search">
                     <span class="btn-text">Buscar</span>
                 </button>
-            </div>
+            </form>
 
             <!-- Instant Search Feedback in Hero -->
             <div id="acervo-hero-feedback" class="acervo-hero-feedback" style="display:none;"></div>
@@ -806,8 +806,23 @@ function mercado_acervo_footer_scripts() {
 
         window.doAcervoSearch = function() {
             const input = document.getElementById('acervo-search-input');
-            window.currentAcervoQuery = input ? input.value.trim() : '';
+            const query = input ? input.value.trim() : '';
+            window.currentAcervoQuery = query;
             window.currentAcervoPage = 1;
+
+            // Ao buscar termo específico, garantir busca ampla em Todos os Temas
+            if (query !== '') {
+                window.currentAcervoTheme = 'all';
+                const pills = document.querySelectorAll('#themes-filter-container .theme-pill');
+                pills.forEach(function(p) {
+                    if (p.getAttribute('data-theme') === 'all') {
+                        p.classList.add('active');
+                    } else {
+                        p.classList.remove('active');
+                    }
+                });
+            }
+
             window.fetchAcervoPosts(false);
         };
 
@@ -875,25 +890,34 @@ function mercado_acervo_footer_scripts() {
             }
 
             let data = null;
+            const queryParams = '?year=all&theme=' + encodeURIComponent(theme) + '&q=' + encodeURIComponent(q) + '&page=' + page + '&_=' + Date.now();
 
-            // 1. Try REST API
-            const requestUrl = restUrl + '?year=all&theme=' + encodeURIComponent(theme) + '&q=' + encodeURIComponent(q) + '&page=' + page;
+            // 1. Tentar REST API relativa (elimina problemas de protocolo/CORS)
             try {
-                const res = await fetch(requestUrl);
+                const res = await fetch('/wp-json/mercado/v1/acervo' + queryParams);
                 if (res.ok) {
                     data = await res.json();
                 } else {
-                    throw new Error('REST returned ' + res.status);
+                    throw new Error('Relative REST status: ' + res.status);
                 }
             } catch (err) {
-                // 2. Fallback to Admin AJAX
-                console.warn('REST failed, fallback to Admin AJAX:', err);
+                // 2. Tentar REST URL absoluta
                 try {
-                    const ajaxReqUrl = ajaxUrl + '?action=mercado_acervo_ajax&year=all&theme=' + encodeURIComponent(theme) + '&q=' + encodeURIComponent(q) + '&page=' + page;
-                    const ajaxRes = await fetch(ajaxReqUrl);
-                    data = await ajaxRes.json();
-                } catch (ajaxErr) {
-                    console.error('AJAX fallback failed:', ajaxErr);
+                    const res2 = await fetch(restUrl + queryParams);
+                    if (res2.ok) {
+                        data = await res2.json();
+                    } else {
+                        throw new Error('Absolute REST status: ' + res2.status);
+                    }
+                } catch (err2) {
+                    // 3. Fallback para Admin AJAX
+                    try {
+                        const ajaxReqUrl = '/wp-admin/admin-ajax.php?action=mercado_acervo_ajax&year=all&theme=' + encodeURIComponent(theme) + '&q=' + encodeURIComponent(q) + '&page=' + page + '&_=' + Date.now();
+                        const ajaxRes = await fetch(ajaxReqUrl);
+                        data = await ajaxRes.json();
+                    } catch (ajaxErr) {
+                        console.error('All search fetch attempts failed:', ajaxErr);
+                    }
                 }
             }
 
