@@ -75,3 +75,30 @@ add_filter('heartbeat_settings', function($settings) {
     $settings['interval'] = 60; // 60 segundos em vez de 15 segundos
     return $settings;
 });
+
+/**
+ * 6. ANTI-SPAM DEFINITIVO: Desativar Completamente Todos os Comentários no Portal
+ */
+// Fecha comentários e trackbacks em todas as consultas
+add_filter('comments_open', '__return_false', 20, 2);
+add_filter('pings_open', '__return_false', 20, 2);
+add_filter('comments_array', '__return_empty_array', 10, 2);
+
+// Bloqueia qualquer envio direto de bot via POST para wp-comments-post.php
+add_action('init', function() {
+    if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], 'wp-comments-post.php') !== false) {
+        wp_die('Os comentários neste portal estão permanentemente desativados.', 'Comentários Encerrados', array('response' => 403));
+    }
+});
+
+// Remove item "Comentários" do menu administrativo e da barra superior
+add_action('admin_menu', function() {
+    remove_menu_page('edit-comments.php');
+});
+add_action('wp_before_admin_bar_render', function() {
+    global $wp_admin_bar;
+    if ($wp_admin_bar) {
+        $wp_admin_bar->remove_menu('comments');
+    }
+});
+
