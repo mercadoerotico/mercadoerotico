@@ -10,16 +10,17 @@ $count_posts = wp_count_posts('post');
 $total_published_count = !empty($count_posts->publish) ? number_format($count_posts->publish, 0, ',', '.') : '2.115';
 
 // 1. Featured Posts for Bento Hero
-// Top 4 stories rotate inside the Main Bento Slide
-$main_slides = get_posts(array(
-    'numberposts' => 4,
+// Post #1 mais recente fixo no card principal
+$main_posts_query = get_posts(array(
+    'numberposts' => 1,
     'post_status' => 'publish'
 ));
+$main_post = !empty($main_posts_query) ? $main_posts_query[0] : null;
 
-// 4 Secondary stories on the right side of Bento Grid
+// 4 Secondary stories on the right side of Bento Grid (Posts #2, #3, #4 e #5 sem pular)
 $side_posts = get_posts(array(
     'numberposts' => 4,
-    'offset' => 4,
+    'offset' => 1,
     'post_status' => 'publish'
 ));
 
@@ -54,10 +55,10 @@ if (file_exists($livraria_file)) {
     $livraria_items = array_merge(array_slice($paid_sample, 0, 3), $highlighted_free);
 }
 
-// 4. Recent Feed Posts (offset 8)
+// 4. Recent Feed Posts (offset 5 - continua a partir da 6ª matéria mais recente)
 $feed_posts = get_posts(array(
     'numberposts' => 9,
-    'offset' => 8,
+    'offset' => 5,
     'post_status' => 'publish'
 ));
 
@@ -115,42 +116,33 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         </div>
     </div>
 
-    <!-- BLOCO 1: BENTO GRID HERO (COM SLIDE DINÂMICO NA IMAGEM PRINCIPAL) -->
+    <!-- BLOCO 1: BENTO GRID HERO (CARD PRINCIPAL FIXO + GRID 2x2 LATERAL) -->
     <section class="me-bento-hero">
-        <!-- Main Card: Slideshow Dinâmico das 4 Matérias de Capa -->
-        <div class="bento-main-slider" id="bentoSlider">
-            <div class="bento-slides-track">
-                <?php foreach ($main_slides as $idx => $slide): 
-                    $thumb = get_the_post_thumbnail_url($slide->ID, 'full') ?: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200';
-                    $cats = wp_get_post_categories($slide->ID, array('fields' => 'names'));
-                    $cat = !empty($cats) ? $cats[0] : 'Destaque';
-                    $author_name = get_the_author_meta('display_name', $slide->post_author);
-                ?>
-                    <article class="bento-slide-item <?php echo $idx === 0 ? 'active' : ''; ?>">
-                        <a href="<?php echo get_permalink($slide->ID); ?>" class="bento-card-link">
-                            <div class="bento-bg" style="background-image: url('<?php echo esc_url($thumb); ?>');"></div>
-                            <div class="bento-gradient"></div>
-                            <div class="bento-content">
-                                <span class="bento-cat-tag"><?php echo esc_html($cat); ?></span>
-                                <h1 class="bento-main-title"><?php echo esc_html($slide->post_title); ?></h1>
-                                <p class="bento-excerpt"><?php echo wp_trim_words($slide->post_content, 22, '...'); ?></p>
-                                <div class="bento-meta">
-                                    <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $slide->ID); ?></span>
-                                    <span>•</span>
-                                    <span><i class="far fa-user"></i> <?php echo esc_html($author_name); ?></span>
-                                </div>
+        <!-- Main Card: Matéria Mais Recente em Destaque Fixo -->
+        <div class="bento-main-card">
+            <?php if ($main_post): 
+                $thumb = get_the_post_thumbnail_url($main_post->ID, 'full') ?: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=1200';
+                $cats = wp_get_post_categories($main_post->ID, array('fields' => 'names'));
+                $cat = !empty($cats) ? $cats[0] : 'Destaque Principal';
+                $author_name = get_the_author_meta('display_name', $main_post->post_author);
+            ?>
+                <article class="bento-card-item">
+                    <a href="<?php echo get_permalink($main_post->ID); ?>" class="bento-card-link">
+                        <div class="bento-bg" style="background-image: url('<?php echo esc_url($thumb); ?>');"></div>
+                        <div class="bento-gradient"></div>
+                        <div class="bento-content">
+                            <span class="bento-cat-tag"><?php echo esc_html($cat); ?></span>
+                            <h1 class="bento-main-title"><?php echo esc_html($main_post->post_title); ?></h1>
+                            <p class="bento-excerpt"><?php echo wp_trim_words($main_post->post_content, 22, '...'); ?></p>
+                            <div class="bento-meta">
+                                <span><i class="far fa-calendar-alt"></i> <?php echo get_the_date('d/m/Y', $main_post->ID); ?></span>
+                                <span>•</span>
+                                <span><i class="far fa-user"></i> <?php echo esc_html($author_name); ?></span>
                             </div>
-                        </a>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Bento Slider Navigation Dots -->
-            <div class="bento-dots" id="bentoDots">
-                <?php for ($i = 0; $i < count($main_slides); $i++): ?>
-                    <button class="bdot <?php echo $i === 0 ? 'active' : ''; ?>" onclick="goToBentoSlide(<?php echo $i; ?>)" aria-label="Slide <?php echo $i + 1; ?>"></button>
-                <?php endfor; ?>
-            </div>
+                        </div>
+                    </a>
+                </article>
+            <?php endif; ?>
         </div>
 
         <!-- Side 4 Cards -->
@@ -418,50 +410,6 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
 
 
 <script>
-// SLIDER DINÂMICO NO CARD PRINCIPAL DO BENTO GRID
-let bentoSlideIdx = 0;
-const bentoSlides = document.querySelectorAll('.bento-slide-item');
-const bentoDots = document.querySelectorAll('#bentoDots .bdot');
-const totalBentoSlides = bentoSlides.length;
-let bentoInterval = null;
-const BENTO_DURATION = 6000; // 6 segundos
-
-function showBentoSlide(idx) {
-    if (idx >= totalBentoSlides) bentoSlideIdx = 0;
-    else if (idx < 0) bentoSlideIdx = totalBentoSlides - 1;
-    else bentoSlideIdx = idx;
-
-    bentoSlides.forEach((slide, i) => {
-        if (i === bentoSlideIdx) slide.classList.add('active');
-        else slide.classList.remove('active');
-    });
-
-    bentoDots.forEach((dot, i) => {
-        if (i === bentoSlideIdx) dot.classList.add('active');
-        else dot.classList.remove('active');
-    });
-}
-
-function goToBentoSlide(idx) {
-    clearInterval(bentoInterval);
-    showBentoSlide(idx);
-    startBentoTimer();
-}
-
-function startBentoTimer() {
-    bentoInterval = setInterval(() => {
-        showBentoSlide(bentoSlideIdx + 1);
-    }, BENTO_DURATION);
-}
-
-const bentoSliderElem = document.getElementById('bentoSlider');
-if (bentoSliderElem) {
-    bentoSliderElem.addEventListener('mouseenter', () => clearInterval(bentoInterval));
-    bentoSliderElem.addEventListener('mouseleave', () => startBentoTimer());
-}
-
-startBentoTimer();
-
 // BANNER PADRÃO ROTATIVO & RANDOMIZADO (PADRÃO IAB)
 const adSlides = document.querySelectorAll('.ad-standard-slide');
 const adDots = document.querySelectorAll('#adStandardDots .ad-dot');
@@ -564,7 +512,7 @@ if (totalAds > 1) {
 .ticker-item:hover { color: #e31c61; }
 .ticker-item span { color: #e31c61; margin-right: 5px; }
 
-/* BENTO HERO GRID COM SLIDE DINÂMICO */
+/* BENTO HERO GRID COM CARD PRINCIPAL FIXO */
 .me-bento-hero {
     display: grid;
     grid-template-columns: 1.35fr 1fr;
@@ -576,37 +524,26 @@ if (totalAds > 1) {
         grid-template-columns: 1fr;
     }
 }
-.bento-main-slider {
+.bento-main-card {
     position: relative;
     border-radius: 18px;
     overflow: hidden;
     min-height: 480px;
     background: #111;
     box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    display: flex;
 }
 @media (max-width: 768px) {
-    .bento-main-slider {
+    .bento-main-card {
         min-height: 400px;
     }
 }
-.bento-slides-track {
+.bento-card-item {
     position: relative;
     width: 100%;
     height: 100%;
     min-height: 480px;
-}
-.bento-slide-item {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
     display: flex;
-}
-.bento-slide-item.active {
-    opacity: 1;
-    visibility: visible;
-    z-index: 2;
 }
 .bento-card-link {
     display: flex;
@@ -625,10 +562,10 @@ if (totalAds > 1) {
     top: 0; left: 0; right: 0; bottom: 0;
     background-size: cover;
     background-position: center;
-    transition: transform 6s ease;
+    transition: transform 0.4s ease;
 }
-.bento-slide-item.active .bento-bg {
-    transform: scale(1.04);
+.bento-main-card:hover .bento-bg {
+    transform: scale(1.03);
 }
 .bento-gradient {
     position: absolute;
