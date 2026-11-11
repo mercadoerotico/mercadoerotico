@@ -68,13 +68,19 @@ function mercado_livraria_shortcode() {
             if (strpos($norm, 'curso') !== false || strpos($norm, 'workshop') !== false) {
                 $has_cursos = true;
             }
-            if (strpos($norm, 'sexual') !== false || strpos($norm, 'saude') !== false) {
+            if (strpos($norm, 'sexual') !== false || strpos($norm, 'saude') !== false || strpos($norm, 'produto') !== false || strpos($norm, 'prazer') !== false) {
                 $has_sexualidade = true;
             }
             if (strpos($norm, 'gratuito') !== false && !in_array('gratuito', $slugs)) {
                 $slugs[] = 'gratuito';
                 $gratuito_count++;
             }
+        }
+
+        // Reconhecimento semântico de temas de sexualidade e consumidor final
+        $p_name_lower = strtolower($p['name']);
+        if (preg_match('/(pompoar|vibrador|tantra|orgasmo|fetiche|striptease|sexo\s+anal|kama\s+sutra|fantasias|desejo|corpo\s+org|lingam|yoni|penisfit|my\s+vibe|sair\s+da\s+rotina|dicionario\s+do\s+sexo)/i', $p_name_lower) && strpos($p_name_lower, 'para lojistas') === false) {
+            $has_sexualidade = true;
         }
 
         if ($has_negocios) { $slugs[] = 'negocios'; $negocios_count++; }
@@ -91,46 +97,66 @@ function mercado_livraria_shortcode() {
     <div id="livraria-app" class="livraria-wrapper">
         <!-- Hero Header -->
         <div class="livraria-hero">
-            <div class="livraria-badge">★ LIVRARIA DIGITAL &amp; FORMAÇÃO PROFISSIONAL</div>
+            <div class="livraria-badge">★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO</div>
             <h1 class="livraria-title">Livraria Mercado Erótico</h1>
-            <p class="livraria-subtitle">E-books especializados, manuais de negócios, calendários para redes sociais e cursos práticos para o mercado íntimo e bem-estar sexual.</p>
+            <p class="livraria-subtitle">O mais completo acervo de e-books, cursos e guias sobre sexualidade humana, bem-estar íntimo, tantra e autoconhecimento para consumidores finais, além de manuais completos para profissionais do mercado íntimo.</p>
             
             <div class="livraria-stats-bar">
-                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Títulos &amp; Manuais</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Obras &amp; Cursos</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">Digital</span><span class="stat-lbl">Acesso Imediato</span></div>
+                <div class="stat-item"><span class="stat-num">Para Você &amp; Negócios</span><span class="stat-lbl">Consumidor &amp; B2B</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-lbl">Conteúdo Exclusivo</span></div>
+                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-lbl">Acesso Imediato</span></div>
             </div>
 
             <!-- Search Bar -->
             <div class="livraria-search-box">
                 <i class="fas fa-search search-icon" aria-hidden="true"></i>
-                <input type="text" id="livraria-search-input" placeholder="Pesquisar por título, autor ou tema (ex: Pompoarismo, Negócios, SexPack)..." autocomplete="off" oninput="onLivrariaSearchInput(this.value)">
+                <input type="text" id="livraria-search-input" placeholder="Pesquisar por tema, título ou autor (ex: Tantra, Pompoarismo, Orgasmo, Vibrador, Negócios)..." autocomplete="off" oninput="onLivrariaSearchInput(this.value)">
                 <button type="button" id="livraria-search-btn" class="livraria-btn-search" onclick="onLivrariaSearchClick()">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Audience Navigation Cards (Para Você vs Para o Seu Negócio) -->
+        <div class="livraria-audience-bar">
+            <div class="audience-card for-consumer" onclick="filterByAudience('sexualidade')">
+                <div class="audience-icon"><i class="fas fa-heart"></i></div>
+                <div class="audience-info">
+                    <div class="audience-tag">Para Você • Consumidor Final</div>
+                    <div class="audience-title">Sexualidade, Prazer &amp; Autoconhecimento <i class="fas fa-arrow-right"></i></div>
+                    <div class="audience-desc">Cursos e e-books sobre Tantra, Pompoarismo, Orgasmo, Fetiches, Guias de Vibradores e Práticas a Dois.</div>
+                </div>
+            </div>
+            <div class="audience-card for-business" onclick="filterByAudience('negocios')">
+                <div class="audience-icon"><i class="fas fa-briefcase"></i></div>
+                <div class="audience-info">
+                    <div class="audience-tag">Para Seu Negócio • B2B &amp; Lojistas</div>
+                    <div class="audience-title">Mercado Íntimo, Gestão &amp; Vendas <i class="fas fa-arrow-right"></i></div>
+                    <div class="audience-desc">Manuais de abertura de Sex Shop, atendimento profissional, normas técnicas ISO, calendários e marketing.</div>
+                </div>
             </div>
         </div>
 
         <!-- Category Filter Tabs -->
         <div class="livraria-filter-section">
             <div class="filter-header">
-                <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias &amp; Formatos:</span>
+                <span class="filter-label"><i class="fas fa-layer-group"></i> Categorias &amp; Temas:</span>
             </div>
             <div class="tabs-wrap" id="livraria-tabs">
                 <button type="button" class="livraria-tab active" data-slug="all" onclick="selectLivrariaTab('all', this)">
                     📚 Todos os Títulos (<?php echo $total_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="sexualidade" onclick="selectLivrariaTab('sexualidade', this)">
+                    ❤️ Sexualidade &amp; Consumidor Final (<?php echo $sexualidade_count; ?>)
+                </button>
+                <button type="button" class="livraria-tab" data-slug="cursos" onclick="selectLivrariaTab('cursos', this)">
+                    🎓 Cursos &amp; Workshops (<?php echo $cursos_count; ?>)
                 </button>
                 <button type="button" class="livraria-tab" data-slug="negocios" onclick="selectLivrariaTab('negocios', this)">
                     💼 Negócios &amp; SexShop (<?php echo $negocios_count; ?>)
                 </button>
                 <button type="button" class="livraria-tab" data-slug="manuais" onclick="selectLivrariaTab('manuais', this)">
                     📖 Manuais &amp; Guias (<?php echo $manuais_count; ?>)
-                </button>
-                <button type="button" class="livraria-tab" data-slug="cursos" onclick="selectLivrariaTab('cursos', this)">
-                    🎓 Cursos &amp; Workshops (<?php echo $cursos_count; ?>)
-                </button>
-                <button type="button" class="livraria-tab" data-slug="sexualidade" onclick="selectLivrariaTab('sexualidade', this)">
-                    ❤️ Saúde &amp; Sexualidade (<?php echo $sexualidade_count; ?>)
                 </button>
                 <button type="button" class="livraria-tab" data-slug="gratuito" onclick="selectLivrariaTab('gratuito', this)">
                     🎁 Gratuitos (<?php echo $gratuito_count; ?>)
@@ -267,6 +293,14 @@ function mercado_livraria_shortcode() {
     <script>
     window.currentLivrariaSlug = 'all';
     window.currentLivrariaSearch = '';
+
+    window.filterByAudience = function(slug) {
+        window.selectLivrariaTab(slug);
+        const filterSec = document.querySelector('.livraria-filter-section');
+        if (filterSec) {
+            filterSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     window.selectLivrariaTab = function(slug, btn) {
         window.currentLivrariaSlug = slug || 'all';
@@ -486,6 +520,111 @@ function mercado_livraria_shortcode() {
     }
     .livraria-btn-search:hover {
         background: #b8144c;
+    }
+
+    /* AUDIENCE HIGHLIGHT BAR */
+    .livraria-audience-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: -10px auto 25px auto;
+    }
+    .audience-card {
+        background: #ffffff;
+        border: 2px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        text-align: left;
+    }
+    .audience-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .audience-card.for-consumer {
+        border-color: #fbcfe8;
+        background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%);
+    }
+    .audience-card.for-consumer:hover {
+        border-color: #e31c61;
+    }
+    .audience-card.for-business {
+        border-color: #e2e8f0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+    .audience-card.for-business:hover {
+        border-color: #3b82f6;
+    }
+    .audience-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .audience-card.for-consumer .audience-icon {
+        background: #ffe4e6;
+        color: #e31c61;
+    }
+    .audience-card.for-business .audience-icon {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+    .audience-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .audience-tag {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+    .audience-card.for-consumer .audience-tag { color: #e11d48; }
+    .audience-card.for-business .audience-tag { color: #0284c7; }
+    .audience-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .audience-desc {
+        font-size: 0.82rem;
+        color: #64748b;
+        line-height: 1.35;
+    }
+    @media (max-width: 768px) {
+        .livraria-audience-bar {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .audience-card {
+            padding: 12px 16px;
+        }
+        .audience-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+        .audience-title {
+            font-size: 0.95rem;
+        }
+        .audience-desc {
+            font-size: 0.78rem;
+        }
     }
 
     /* FILTERS - HIGH CONTRAST & RESPONSIVE */
