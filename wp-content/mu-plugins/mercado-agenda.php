@@ -1863,3 +1863,279 @@ function me_agenda_shortcode_render() {
     <?php
     return ob_get_clean();
 }
+
+
+/**
+ * Shortcode [mercado_agenda_home_callout]
+ * Barra editorial "NO RADAR / ACONTECENDO" para a home do Portal Mercado Erótico
+ */
+add_shortcode('mercado_agenda_home_callout', 'me_agenda_home_callout_render');
+function me_agenda_home_callout_render() {
+    $today = current_time('Y-m-d');
+    $agenda_url = home_url('/agenda/');
+
+    $args = array(
+        'post_type'      => 'me_evento',
+        'post_status'    => 'publish',
+        'posts_per_page' => 15,
+        'meta_key'       => '_evento_data_inicio',
+        'orderby'        => 'meta_value',
+        'order'          => 'ASC'
+    );
+    $q = new WP_Query($args);
+
+    $next_event = null;
+    $is_happening_now = false;
+
+    if ($q->have_posts()) {
+        while ($q->have_posts()) {
+            $q->the_post();
+            $pid = get_the_ID();
+            $d_ini = get_post_meta($pid, '_evento_data_inicio', true);
+            $d_fim = get_post_meta($pid, '_evento_data_fim', true);
+            $d_lim = !empty($d_fim) ? $d_fim : $d_ini;
+
+            if ($d_lim && $d_lim >= $today) {
+                $next_event = $pid;
+                if ($d_ini && $today >= $d_ini && $today <= $d_lim) {
+                    $is_happening_now = true;
+                }
+                break;
+            }
+        }
+        wp_reset_postdata();
+    }
+
+    if (!$next_event) {
+        return '';
+    }
+
+    $event_title = get_the_title($next_event);
+    $event_url   = get_permalink($next_event);
+    $d_ini       = get_post_meta($next_event, '_evento_data_inicio', true);
+    $d_fim       = get_post_meta($next_event, '_evento_data_fim', true);
+    $cidade_pais = get_post_meta($next_event, '_evento_cidade_pais', true);
+    $local_nome  = get_post_meta($next_event, '_evento_local_nome', true);
+    $formato     = get_post_meta($next_event, '_evento_formato', true) ?: 'Presencial';
+
+    $ts_ini  = strtotime($d_ini);
+    $dia_ini = date('d', $ts_ini);
+    $data_display = $dia_ini . ' de ' . date_i18n('F', $ts_ini);
+    if ($d_fim && $d_fim !== $d_ini) {
+        $ts_fim = strtotime($d_fim);
+        $data_display = $dia_ini . ' a ' . date_i18n('d \d\e F', $ts_fim);
+    }
+
+    $location_snippet = '';
+    if (!empty($cidade_pais)) {
+        $location_snippet = $cidade_pais;
+    } elseif (!empty($local_nome)) {
+        $location_snippet = $local_nome;
+    }
+
+    $badge_text = $is_happening_now ? 'ACONTECENDO' : 'NO RADAR';
+    $badge_icon = $is_happening_now ? 'fa-satellite-dish' : 'fa-calendar-alt';
+    $label_text = $is_happening_now ? 'Acontecendo Agora:' : 'Próximo na Agenda:';
+
+    ob_start();
+    ?>
+    <!-- BARRA NO RADAR / ACONTECENDO: PRÓXIMO EVENTO DA AGENDA -->
+    <div class="me-agenda-callout-strip <?php echo $is_happening_now ? 'is-happening' : ''; ?>">
+        <div class="agenda-strip-inner">
+            <div class="agenda-strip-badge">
+                <span class="agenda-pulse-dot <?php echo $is_happening_now ? 'live' : ''; ?>"></span>
+                <i class="fas <?php echo esc_attr($badge_icon); ?>"></i> <?php echo esc_html($badge_text); ?>
+            </div>
+            <div class="agenda-strip-content">
+                <span class="agenda-strip-label"><?php echo esc_html($label_text); ?></span>
+                <a href="<?php echo esc_url($event_url); ?>" class="agenda-strip-title" title="Ver detalhes do evento"><?php echo esc_html($event_title); ?></a>
+                <span class="agenda-strip-meta">
+                    <span class="meta-sep">•</span>
+                    <span class="meta-date"><i class="far fa-calendar-check"></i> <?php echo esc_html($data_display); ?></span>
+                    <?php if (!empty($location_snippet)): ?>
+                        <span class="meta-sep">•</span>
+                        <span class="meta-loc"><i class="fas fa-map-marker-alt"></i> <?php echo esc_html($location_snippet); ?></span>
+                    <?php endif; ?>
+                    <span class="agenda-format-pill"><?php echo esc_html($formato); ?></span>
+                </span>
+            </div>
+            <div class="agenda-strip-action">
+                <a href="<?php echo esc_url($agenda_url); ?>" class="agenda-strip-btn">
+                    <span>Acessar Agenda</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <style>
+    .me-agenda-callout-strip {
+        background: linear-gradient(90deg, #100f24 0%, #1f1435 50%, #130a1c 100%);
+        border: 1px solid rgba(227, 28, 97, 0.4);
+        border-radius: 12px;
+        margin: 25px auto 35px;
+        padding: 14px 22px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        position: relative;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .me-agenda-callout-strip::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        width: 4px;
+        background: #e31c61;
+    }
+    .me-agenda-callout-strip.is-happening {
+        border-color: rgba(239, 68, 68, 0.6);
+        background: linear-gradient(90deg, #1f0b12 0%, #2e0d1b 50%, #17070e 100%);
+    }
+    .me-agenda-callout-strip.is-happening::before {
+        background: #ef4444;
+    }
+    .agenda-strip-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+    .agenda-strip-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(227, 28, 97, 0.2);
+        color: #ff3b7e;
+        border: 1px solid rgba(227, 28, 97, 0.5);
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+    .me-agenda-callout-strip.is-happening .agenda-strip-badge {
+        background: rgba(239, 68, 68, 0.25);
+        color: #ff4d6d;
+        border-color: rgba(239, 68, 68, 0.6);
+    }
+    .agenda-pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: agendaPulse 1.8s infinite;
+        display: inline-block;
+    }
+    .agenda-pulse-dot.live {
+        background: #ef4444;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        animation: agendaPulseLive 1.5s infinite;
+    }
+    @keyframes agendaPulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes agendaPulseLive {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .agenda-strip-content {
+        flex: 1;
+        min-width: 280px;
+        font-size: 0.95rem;
+        color: #e2e8f0;
+        line-height: 1.4;
+    }
+    .agenda-strip-label {
+        font-weight: 700;
+        color: #fff;
+        margin-right: 6px;
+    }
+    .agenda-strip-title {
+        font-weight: 800;
+        color: #ff3b7e;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .agenda-strip-title:hover {
+        color: #ff759f;
+        text-decoration: underline;
+    }
+    .agenda-strip-meta {
+        color: #cbd5e1;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-left: 6px;
+    }
+    .meta-sep {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    .meta-date i {
+        color: #f59e0b;
+        margin-right: 3px;
+    }
+    .meta-loc i {
+        color: #e31c61;
+        margin-right: 3px;
+    }
+    .agenda-format-pill {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0;
+        padding: 1px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+    .agenda-strip-action {
+        white-space: nowrap;
+    }
+    .agenda-strip-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #e31c61 0%, #b8144b 100%);
+        color: #fff !important;
+        padding: 9px 20px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 14px rgba(227, 28, 97, 0.35);
+    }
+    .agenda-strip-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(227, 28, 97, 0.5);
+    }
+    @media (max-width: 860px) {
+        .me-agenda-callout-strip {
+            padding: 14px 18px;
+            margin: 20px auto;
+        }
+        .agenda-strip-inner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .agenda-strip-action {
+            width: 100%;
+        }
+        .agenda-strip-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    </style>
+    <?php
+    return ob_get_clean();
+}

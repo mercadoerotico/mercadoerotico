@@ -176,6 +176,9 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         </div>
     </section>
 
+    <!-- BARRA NO RADAR / ACONTECENDO: PRÓXIMO EVENTO DA AGENDA -->
+    <?php echo do_shortcode('[mercado_agenda_home_callout]'); ?>
+
     <!-- BLOCO 2: ACERVO DE NOTÍCIAS -->
     <section class="me-acervo-callout">
         <div class="acervo-callout-inner">
