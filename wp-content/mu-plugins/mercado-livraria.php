@@ -427,279 +427,7 @@ function mercado_livraria_shortcode() {
     </div>
 
     <!-- Inline Filter Logic Available Immediately -->
-    <script>
-    window.currentLivrariaSlug = 'all';
-    window.currentLivrariaSearch = '';
-
-    window.filterByAudience = function(slug) {
-        window.selectLivrariaTab(slug);
-        const filterSec = document.querySelector('.livraria-filter-section');
-        if (filterSec) {
-            filterSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    };
-
-    window.selectLivrariaTab = function(slug, btn) {
-        window.currentLivrariaSlug = slug || 'all';
-
-        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
-        tabs.forEach(function(t) {
-            if (t.getAttribute('data-slug') === slug) {
-                t.classList.add('active');
-            } else {
-                t.classList.remove('active');
-            }
-        });
-
-        window.applyLivrariaFilter();
-    };
-
-    window.applyLivrariaFilter = function() {
-        const slug = window.currentLivrariaSlug || 'all';
-        const query = (window.currentLivrariaSearch || '').toLowerCase().trim();
-        const cards = document.querySelectorAll('.book-card');
-        const noResults = document.getElementById('livraria-no-results');
-        const heroBadge = document.getElementById('livraria-hero-badge');
-        const statTotal = document.getElementById('stat-total-books');
-        const statLbl = document.getElementById('stat-lbl-books');
-        const feedbackBox = document.getElementById('livraria-hero-feedback');
-        const heroList = document.getElementById('livraria-hero-results-list');
-        const heroItemsContainer = document.getElementById('hero-results-items');
-        const heroResultsTitle = document.getElementById('hero-results-title');
-        const activeBanner = document.getElementById('livraria-active-banner');
-        const bannerBadge = document.getElementById('livraria-banner-badge-text');
-        const bannerTitle = document.getElementById('livraria-banner-title-text');
-        const bannerDesc = document.getElementById('livraria-banner-desc-text');
-
-        let visibleCount = 0;
-        let matchingItems = [];
-
-        cards.forEach(function(card) {
-            const slugs = (card.getAttribute('data-slugs') || '').split(',');
-            const name = card.getAttribute('data-name') || '';
-
-            const matchCat = (slug === 'all') || (slugs.indexOf(slug) !== -1);
-            const matchSearch = !query || (name.indexOf(query) !== -1);
-
-            if (matchCat && matchSearch) {
-                card.style.display = 'flex';
-                visibleCount++;
-
-                if (query) {
-                    const id = card.getAttribute('data-id') || '';
-                    const titleEl = card.querySelector('.book-title');
-                    const imgEl = card.querySelector('.book-cover-img');
-                    const priceEl = card.querySelector('.book-price');
-                    const isFree = card.getAttribute('data-free') === '1';
-
-                    matchingItems.push({
-                        id: id,
-                        title: titleEl ? titleEl.innerText : name,
-                        img: imgEl ? imgEl.src : '',
-                        price: priceEl ? priceEl.innerText : '',
-                        isFree: isFree
-                    });
-                }
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        // 1. Contador padrão na barra de filtros inferior
-        const countEl = document.getElementById('livraria-count');
-        if (countEl) {
-            countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
-        }
-
-        const clearBtn = document.getElementById('livraria-clear-btn');
-        if (clearBtn) {
-            clearBtn.style.display = (slug !== 'all' || query) ? 'inline-block' : 'none';
-        }
-
-        if (noResults) {
-            noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
-        }
-
-        const safeQ = query.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        // 2. Dinamismo no Hero Badge e Stats Bar (Padrão Acervo)
-        if (heroBadge) {
-            if (query || slug !== 'all') {
-                heroBadge.style.background = '#e31c61';
-                heroBadge.style.color = '#ffffff';
-                heroBadge.innerHTML = '★ RECORTE ATIVO • ' + visibleCount + ' MATERIAIS ENCONTRADOS';
-            } else {
-                heroBadge.style.background = '';
-                heroBadge.style.color = '';
-                heroBadge.innerHTML = '★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO';
-            }
-        }
-
-        if (statTotal && statLbl) {
-            if (query || slug !== 'all') {
-                statTotal.style.color = '#ff3b7e';
-                statTotal.textContent = visibleCount;
-                statLbl.textContent = 'Materiais neste Recorte';
-            } else {
-                statTotal.style.color = '';
-                statTotal.textContent = cards.length;
-                statLbl.textContent = 'Títulos & Obras';
-            }
-        }
-
-        // 3. Feedback Interativo no Topo (Padrão Acervo)
-        if (feedbackBox) {
-            if (query) {
-                feedbackBox.style.display = 'inline-flex';
-                if (visibleCount > 0) {
-                    feedbackBox.className = 'livraria-hero-feedback has-results';
-                    feedbackBox.innerHTML = '<span><i class="fas fa-check-circle"></i> <strong>' + visibleCount + '</strong> ' + (visibleCount === 1 ? 'material encontrado' : 'materiais encontrados') + ' para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="scrollToLivrariaResults()">Ver no catálogo ↓</button>';
-                } else {
-                    feedbackBox.className = 'livraria-hero-feedback no-results';
-                    feedbackBox.innerHTML = '<span><i class="fas fa-exclamation-triangle"></i> Nenhum material encontrado para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="clearLivrariaSearchInput()">Limpar busca</button>';
-                }
-            } else {
-                feedbackBox.style.display = 'none';
-            }
-        }
-
-        // 4. Lista de Resultados Dentro da Sessão do Topo
-        if (heroList && heroItemsContainer) {
-            if (query && matchingItems.length > 0) {
-                let html = '';
-                const maxDisplay = Math.min(matchingItems.length, 8);
-                for (let i = 0; i < maxDisplay; i++) {
-                    const item = matchingItems[i];
-                    html += '<div class="hero-result-item" onclick="openBookModal(' + item.id + ')">';
-                    if (item.img) {
-                        html += '<img src="' + item.img + '" alt="' + item.title.replace(/"/g, '&quot;') + '" class="hero-result-thumb">';
-                    }
-                    html += '<div class="hero-result-info">';
-                    html += '<div class="hero-result-title">' + item.title + '</div>';
-                    html += '<div class="hero-result-meta">';
-                    if (item.isFree) {
-                        html += '<span class="hero-result-price free"><i class="fas fa-gift"></i> GRATUITO</span>';
-                    } else if (item.price) {
-                        html += '<span class="hero-result-price">' + item.price + '</span>';
-                    }
-                    html += '</div></div></div>';
-                }
-                heroItemsContainer.innerHTML = html;
-                if (heroResultsTitle) {
-                    heroResultsTitle.innerHTML = '<i class="fas fa-book-open"></i> ' + visibleCount + ' ' + (visibleCount === 1 ? 'Resultado Encontrado no Topo' : 'Resultados Encontrados no Topo');
-                }
-                heroList.style.display = 'block';
-            } else {
-                heroList.style.display = 'none';
-            }
-        }
-
-        // 5. Banner de Recorte Ativo acima da Grade (Padrão Acervo)
-        if (activeBanner) {
-            if (query) {
-                activeBanner.style.display = 'flex';
-                if (bannerBadge) bannerBadge.innerText = '📚 RECORTE DE BUSCA ATIVO';
-                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material encontrado' : 'Materiais encontrados') + ' para "' + safeQ + '"';
-                if (bannerDesc) bannerDesc.innerText = 'Exibindo e-books e manuais filtrados pelo termo pesquisado no catálogo da Livraria.';
-            } else if (slug !== 'all') {
-                activeBanner.style.display = 'flex';
-                const activeTab = document.querySelector('#livraria-tabs .livraria-tab.active');
-                const catName = activeTab ? activeTab.innerText : 'Categoria';
-                if (bannerBadge) bannerBadge.innerText = '📚 CATEGORIA SELECIONADA';
-                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material catalogado' : 'Materiais catalogados') + ' em ' + catName;
-                if (bannerDesc) bannerDesc.innerText = 'Exibindo obras filtradas exclusivamente nesta categoria.';
-            } else {
-                activeBanner.style.display = 'none';
-            }
-        }
-    };
-
-    window.doLivrariaSearch = function() {
-        const input = document.getElementById('livraria-search-input');
-        const q = (input ? input.value : '').trim();
-        window.currentLivrariaSearch = q;
-        window.applyLivrariaFilter();
-    };
-
-    window.clearLivrariaSearchInput = function() {
-        const input = document.getElementById('livraria-search-input');
-        const clearBtn = document.getElementById('livraria-clear-input-btn');
-        const feedbackBox = document.getElementById('livraria-hero-feedback');
-        const heroList = document.getElementById('livraria-hero-results-list');
-        const activeBanner = document.getElementById('livraria-active-banner');
-
-        if (input) {
-            input.value = '';
-            input.focus();
-        }
-        if (clearBtn) clearBtn.style.display = 'none';
-        if (feedbackBox) feedbackBox.style.display = 'none';
-        if (heroList) heroList.style.display = 'none';
-        if (activeBanner) activeBanner.style.display = 'none';
-
-        window.currentLivrariaSearch = '';
-        window.applyLivrariaFilter();
-    };
-
-    window.scrollToLivrariaResults = function() {
-        const heroList = document.getElementById('livraria-hero-results-list');
-        if (heroList) heroList.style.display = 'none';
-
-        const target = document.getElementById('livraria-active-banner') || document.getElementById('livraria-filter-section') || document.querySelector('.livraria-filter-section');
-        if (target) {
-            const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-    };
-
-    window.closeHeroResultsList = function() {
-        const heroList = document.getElementById('livraria-hero-results-list');
-        if (heroList) heroList.style.display = 'none';
-    };
-
-    window.onLivrariaSearchInput = function(val) {
-        const clearBtn = document.getElementById('livraria-clear-input-btn');
-        if (clearBtn) {
-            clearBtn.style.display = (val && val.trim() !== '') ? 'block' : 'none';
-        }
-        window.currentLivrariaSearch = val || '';
-        window.applyLivrariaFilter();
-    };
-
-    window.onLivrariaSearchClick = function() {
-        window.doLivrariaSearch();
-    };
-
-    window.resetLivrariaFilters = function() {
-        window.clearLivrariaSearchInput();
-        window.currentLivrariaSlug = 'all';
-
-        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
-        tabs.forEach(function(t) {
-            if (t.getAttribute('data-slug') === 'all') {
-                t.classList.add('active');
-            } else {
-                t.classList.remove('active');
-            }
-        });
-
-        window.applyLivrariaFilter();
-    };
-
-    // Auto-ativar aba via hash da URL (ex: #gratuito)
-    function checkLivrariaHash() {
-        const hash = (window.location.hash || '').replace('#', '').toLowerCase();
-        if (hash === 'gratuito' || hash === 'gratuitos' || hash === 'free') {
-            window.selectLivrariaTab('gratuito');
-        } else if (hash && ['negocios', 'manuais', 'cursos', 'sexualidade'].indexOf(hash) !== -1) {
-            window.selectLivrariaTab(hash);
-        }
-    }
-    document.addEventListener('DOMContentLoaded', checkLivrariaHash);
-    window.addEventListener('hashchange', checkLivrariaHash);
-    setTimeout(checkLivrariaHash, 300);
-    setTimeout(checkLivrariaHash, 800);
-    </script>
+    
 
     <style>
     /* LIVRARIA STYLES */
@@ -1786,8 +1514,306 @@ function mercado_livraria_footer_scripts() {
     <?php echo json_encode($products, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
     </script>
 
-    <!-- Livraria Modal Script -->
+    <!-- Livraria Search, Filter & Modal Scripts -->
     <script>
+    window.currentLivrariaSlug = 'all';
+    window.currentLivrariaSearch = '';
+
+    window.filterByAudience = function(slug) {
+        window.selectLivrariaTab(slug);
+        const filterSec = document.querySelector('.livraria-filter-section');
+        if (filterSec) {
+            filterSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    window.selectLivrariaTab = function(slug, btn) {
+        window.currentLivrariaSlug = slug || 'all';
+
+        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
+        tabs.forEach(function(t) {
+            if (t.getAttribute('data-slug') === slug) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+
+        window.applyLivrariaFilter();
+    };
+
+    window.applyLivrariaFilter = function() {
+        const slug = window.currentLivrariaSlug || 'all';
+        const query = (window.currentLivrariaSearch || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.book-card');
+        const noResults = document.getElementById('livraria-no-results');
+        const heroBadge = document.getElementById('livraria-hero-badge');
+        const statTotal = document.getElementById('stat-total-books');
+        const statLbl = document.getElementById('stat-lbl-books');
+        const feedbackBox = document.getElementById('livraria-hero-feedback');
+        const heroList = document.getElementById('livraria-hero-results-list');
+        const heroItemsContainer = document.getElementById('hero-results-items');
+        const heroResultsTitle = document.getElementById('hero-results-title');
+        const activeBanner = document.getElementById('livraria-active-banner');
+        const bannerBadge = document.getElementById('livraria-banner-badge-text');
+        const bannerTitle = document.getElementById('livraria-banner-title-text');
+        const bannerDesc = document.getElementById('livraria-banner-desc-text');
+
+        let visibleCount = 0;
+        let matchingItems = [];
+
+        cards.forEach(function(card) {
+            const slugs = (card.getAttribute('data-slugs') || '').split(',');
+            const name = card.getAttribute('data-name') || '';
+
+            const matchCat = (slug === 'all') || (slugs.indexOf(slug) !== -1);
+            const matchSearch = !query || (name.indexOf(query) !== -1);
+
+            if (matchCat && matchSearch) {
+                card.style.display = 'flex';
+                visibleCount++;
+
+                if (query) {
+                    const id = card.getAttribute('data-id') || '';
+                    const titleEl = card.querySelector('.book-title');
+                    const imgEl = card.querySelector('.book-cover-img');
+                    const priceEl = card.querySelector('.book-price');
+                    const isFree = card.getAttribute('data-free') === '1';
+
+                    matchingItems.push({
+                        id: id,
+                        title: titleEl ? titleEl.innerText : name,
+                        img: imgEl ? imgEl.src : '',
+                        price: priceEl ? priceEl.innerText : '',
+                        isFree: isFree
+                    });
+                }
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // 1. Contador padrão na barra de filtros inferior
+        const countEl = document.getElementById('livraria-count');
+        if (countEl) {
+            countEl.innerHTML = 'Exibindo <strong>' + visibleCount + '</strong> itens';
+        }
+
+        const clearBtn = document.getElementById('livraria-clear-btn');
+        if (clearBtn) {
+            clearBtn.style.display = (slug !== 'all' || query) ? 'inline-block' : 'none';
+        }
+
+        if (noResults) {
+            noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
+        }
+
+        const safeQ = query.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // 2. Dinamismo no Hero Badge e Stats Bar (Padrão Acervo)
+        if (heroBadge) {
+            if (query || slug !== 'all') {
+                heroBadge.style.background = '#e31c61';
+                heroBadge.style.color = '#ffffff';
+                heroBadge.innerHTML = '★ RECORTE ATIVO • ' + visibleCount + ' MATERIAIS ENCONTRADOS';
+            } else {
+                heroBadge.style.background = '';
+                heroBadge.style.color = '';
+                heroBadge.innerHTML = '★ LIVRARIA DIGITAL • SEXUALIDADE, AUTOCONHECIMENTO &amp; MERCADO ÍNTIMO';
+            }
+        }
+
+        if (statTotal && statLbl) {
+            if (query || slug !== 'all') {
+                statTotal.style.color = '#ff3b7e';
+                statTotal.textContent = visibleCount;
+                statLbl.textContent = 'Materiais neste Recorte';
+            } else {
+                statTotal.style.color = '';
+                statTotal.textContent = cards.length;
+                statLbl.textContent = 'Títulos & Obras';
+            }
+        }
+
+        // 3. Feedback Interativo no Topo (Padrão Acervo)
+        if (feedbackBox) {
+            if (query) {
+                feedbackBox.style.display = 'inline-flex';
+                if (visibleCount > 0) {
+                    feedbackBox.className = 'livraria-hero-feedback has-results';
+                    feedbackBox.innerHTML = '<span><i class="fas fa-check-circle"></i> <strong>' + visibleCount + '</strong> ' + (visibleCount === 1 ? 'material encontrado' : 'materiais encontrados') + ' para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="scrollToLivrariaResults()">Ver no catálogo ↓</button>';
+                } else {
+                    feedbackBox.className = 'livraria-hero-feedback no-results';
+                    feedbackBox.innerHTML = '<span><i class="fas fa-exclamation-triangle"></i> Nenhum material encontrado para "<strong>' + safeQ + '</strong>"</span> <button type="button" class="feedback-btn" onclick="clearLivrariaSearchInput()">Limpar busca</button>';
+                }
+            } else {
+                feedbackBox.style.display = 'none';
+            }
+        }
+
+        // 4. Lista de Resultados Dentro da Sessão do Topo
+        if (heroList && heroItemsContainer) {
+            if (query && matchingItems.length > 0) {
+                heroItemsContainer.innerHTML = '';
+                const maxDisplay = Math.min(matchingItems.length, 8);
+                for (let i = 0; i < maxDisplay; i++) {
+                    const item = matchingItems[i];
+                    const row = document.createElement('div');
+                    row.className = 'hero-result-item';
+                    row.onclick = (function(id) {
+                        return function() { window.openBookModal(id); };
+                    })(item.id);
+
+                    if (item.img) {
+                        const img = document.createElement('img');
+                        img.src = item.img;
+                        img.alt = item.title;
+                        img.className = 'hero-result-thumb';
+                        row.appendChild(img);
+                    }
+
+                    const info = document.createElement('div');
+                    info.className = 'hero-result-info';
+
+                    const title = document.createElement('div');
+                    title.className = 'hero-result-title';
+                    title.textContent = item.title;
+                    info.appendChild(title);
+
+                    const meta = document.createElement('div');
+                    meta.className = 'hero-result-meta';
+                    if (item.isFree) {
+                        const freeTag = document.createElement('span');
+                        freeTag.className = 'hero-result-price free';
+                        freeTag.innerHTML = '<i class="fas fa-gift"></i> GRATUITO';
+                        meta.appendChild(freeTag);
+                    } else if (item.price) {
+                        const priceTag = document.createElement('span');
+                        priceTag.className = 'hero-result-price';
+                        priceTag.textContent = item.price;
+                        meta.appendChild(priceTag);
+                    }
+                    info.appendChild(meta);
+                    row.appendChild(info);
+
+                    heroItemsContainer.appendChild(row);
+                }
+
+                if (heroResultsTitle) {
+                    heroResultsTitle.innerHTML = '<i class="fas fa-book-open"></i> ' + visibleCount + ' ' + (visibleCount === 1 ? 'Resultado Encontrado no Topo' : 'Resultados Encontrados no Topo');
+                }
+                heroList.style.display = 'block';
+            } else {
+                heroList.style.display = 'none';
+            }
+        }
+
+        // 5. Banner de Recorte Ativo acima da Grade (Padrão Acervo)
+        if (activeBanner) {
+            if (query) {
+                activeBanner.style.display = 'flex';
+                if (bannerBadge) bannerBadge.innerText = '📚 RECORTE DE BUSCA ATIVO';
+                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material encontrado' : 'Materiais encontrados') + ' para "' + safeQ + '"';
+                if (bannerDesc) bannerDesc.innerText = 'Exibindo e-books e manuais filtrados pelo termo pesquisado no catálogo da Livraria.';
+            } else if (slug !== 'all') {
+                activeBanner.style.display = 'flex';
+                const activeTab = document.querySelector('#livraria-tabs .livraria-tab.active');
+                const catName = activeTab ? activeTab.innerText : 'Categoria';
+                if (bannerBadge) bannerBadge.innerText = '📚 CATEGORIA SELECIONADA';
+                if (bannerTitle) bannerTitle.innerHTML = '📚 ' + visibleCount + ' ' + (visibleCount === 1 ? 'Material catalogado' : 'Materiais catalogados') + ' em ' + catName;
+                if (bannerDesc) bannerDesc.innerText = 'Exibindo obras filtradas exclusivamente nesta categoria.';
+            } else {
+                activeBanner.style.display = 'none';
+            }
+        }
+    };
+
+    window.doLivrariaSearch = function() {
+        const input = document.getElementById('livraria-search-input');
+        const q = (input ? input.value : '').trim();
+        window.currentLivrariaSearch = q;
+        window.applyLivrariaFilter();
+    };
+
+    window.clearLivrariaSearchInput = function() {
+        const input = document.getElementById('livraria-search-input');
+        const clearBtn = document.getElementById('livraria-clear-input-btn');
+        const feedbackBox = document.getElementById('livraria-hero-feedback');
+        const heroList = document.getElementById('livraria-hero-results-list');
+        const activeBanner = document.getElementById('livraria-active-banner');
+
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (feedbackBox) feedbackBox.style.display = 'none';
+        if (heroList) heroList.style.display = 'none';
+        if (activeBanner) activeBanner.style.display = 'none';
+
+        window.currentLivrariaSearch = '';
+        window.applyLivrariaFilter();
+    };
+
+    window.scrollToLivrariaResults = function() {
+        const heroList = document.getElementById('livraria-hero-results-list');
+        if (heroList) heroList.style.display = 'none';
+
+        const target = document.getElementById('livraria-active-banner') || document.getElementById('livraria-filter-section') || document.querySelector('.livraria-filter-section');
+        if (target) {
+            const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    };
+
+    window.closeHeroResultsList = function() {
+        const heroList = document.getElementById('livraria-hero-results-list');
+        if (heroList) heroList.style.display = 'none';
+    };
+
+    window.onLivrariaSearchInput = function(val) {
+        const clearBtn = document.getElementById('livraria-clear-input-btn');
+        if (clearBtn) {
+            clearBtn.style.display = (val && val.trim() !== '') ? 'block' : 'none';
+        }
+        window.currentLivrariaSearch = val || '';
+        window.applyLivrariaFilter();
+    };
+
+    window.onLivrariaSearchClick = function() {
+        window.doLivrariaSearch();
+    };
+
+    window.resetLivrariaFilters = function() {
+        window.clearLivrariaSearchInput();
+        window.currentLivrariaSlug = 'all';
+
+        const tabs = document.querySelectorAll('#livraria-tabs .livraria-tab');
+        tabs.forEach(function(t) {
+            if (t.getAttribute('data-slug') === 'all') {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+
+        window.applyLivrariaFilter();
+    };
+
+    // Auto-ativar aba via hash da URL (ex: #gratuito)
+    function checkLivrariaHash() {
+        const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+        if (hash === 'gratuito' || hash === 'gratuitos' || hash === 'free') {
+            window.selectLivrariaTab('gratuito');
+        } else if (hash && ['negocios', 'manuais', 'cursos', 'sexualidade'].indexOf(hash) !== -1) {
+            window.selectLivrariaTab(hash);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', checkLivrariaHash);
+    window.addEventListener('hashchange', checkLivrariaHash);
+    setTimeout(checkLivrariaHash, 300);
+    setTimeout(checkLivrariaHash, 800);
+
     (function() {
         let livrariaProducts = [];
         try {
