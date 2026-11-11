@@ -627,29 +627,24 @@ function me_agenda_shortcode_render() {
         <!-- EXPLORAR AGENDA / FILTROS -->
         <div id="explorar-agenda" class="me-agenda-filter-section">
             <div class="me-filter-topbar">
-                <div class="me-search-wrapper">
-                    <i class="fas fa-search me-search-icon"></i>
-                    <input type="text" id="me-event-search" placeholder="Buscar por evento, cidade, tema ou organizador..." autocomplete="off">
+                <!-- FILTRO PILLS -->
+                <div class="me-filter-pills-wrap">
+                    <div class="me-filter-group">
+                        <span class="me-filter-label">Formato:</span>
+                        <button type="button" class="me-pill active" data-filter="all" data-type="formato">Todos</button>
+                        <button type="button" class="me-pill" data-filter="Presencial" data-type="formato">🏢 Presencial</button>
+                        <button type="button" class="me-pill" data-filter="Online" data-type="formato">🌐 Online</button>
+                        <button type="button" class="me-pill" data-filter="Híbrido" data-type="formato">🔄 Híbrido</button>
+                    </div>
+                    <div class="me-filter-group">
+                        <span class="me-filter-label">Região:</span>
+                        <button type="button" class="me-pill active" data-filter="all" data-type="regiao">Todas</button>
+                        <button type="button" class="me-pill" data-filter="Brasil" data-type="regiao">🇧🇷 Brasil</button>
+                        <button type="button" class="me-pill" data-filter="Internacional" data-type="regiao">🌍 Internacional</button>
+                    </div>
                 </div>
                 <div class="me-filter-stats">
                     <span id="me-event-counter"><?php echo $total_active_events; ?></span> eventos disponíveis
-                </div>
-            </div>
-
-            <!-- FILTRO PILLS -->
-            <div class="me-filter-pills-wrap">
-                <div class="me-filter-group">
-                    <span class="me-filter-label">Formato:</span>
-                    <button type="button" class="me-pill active" data-filter="all" data-type="formato">Todos</button>
-                    <button type="button" class="me-pill" data-filter="Presencial" data-type="formato">🏢 Presencial</button>
-                    <button type="button" class="me-pill" data-filter="Online" data-type="formato">🌐 Online</button>
-                    <button type="button" class="me-pill" data-filter="Híbrido" data-type="formato">🔄 Híbrido</button>
-                </div>
-                <div class="me-filter-group">
-                    <span class="me-filter-label">Região:</span>
-                    <button type="button" class="me-pill active" data-filter="all" data-type="regiao">Todas</button>
-                    <button type="button" class="me-pill" data-filter="Brasil" data-type="regiao">🇧🇷 Brasil</button>
-                    <button type="button" class="me-pill" data-filter="Internacional" data-type="regiao">🌍 Internacional</button>
                 </div>
             </div>
         </div>
@@ -1097,7 +1092,7 @@ function me_agenda_shortcode_render() {
         .me-agenda-filter-section {
             background: #ffffff;
             border-radius: 16px;
-            padding: 25px;
+            padding: 18px 24px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             margin-bottom: 35px;
@@ -1107,7 +1102,7 @@ function me_agenda_shortcode_render() {
             justify-content: space-between;
             align-items: center;
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             flex-wrap: wrap;
         }
         .me-search-wrapper {
@@ -1728,36 +1723,30 @@ function me_agenda_shortcode_render() {
         }
     </style>
 
-    <!-- JAVASCRIPT SCOPED DE BUSCA, FILTROS E SUBMISSÃO AJAX -->
+    <!-- JAVASCRIPT SCOPED DE FILTROS E SUBMISSÃO AJAX -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('me-event-search');
         const cards = document.querySelectorAll('.me-event-card');
         const counterEl = document.getElementById('me-event-counter');
         const emptyEl = document.getElementById('me-empty-results');
         const pills = document.querySelectorAll('.me-pill');
         
         let activeFilters = {
-            search: '',
             formato: 'all',
             regiao: 'all'
         };
 
         function filterEvents() {
             let visibleCount = 0;
-            const query = activeFilters.search.toLowerCase().trim();
 
             cards.forEach(card => {
-                const title = card.getAttribute('data-title') || '';
-                const location = card.getAttribute('data-location') || '';
                 const formato = card.getAttribute('data-formato') || '';
                 const regiao = card.getAttribute('data-regiao') || '';
 
-                const matchesSearch = !query || title.includes(query) || location.includes(query);
                 const matchesFormato = (activeFilters.formato === 'all') || (formato === activeFilters.formato);
                 const matchesRegiao = (activeFilters.regiao === 'all') || (regiao === activeFilters.regiao);
 
-                if (matchesSearch && matchesFormato && matchesRegiao) {
+                if (matchesFormato && matchesRegiao) {
                     card.style.display = 'flex';
                     visibleCount++;
                 } else {
@@ -1769,13 +1758,6 @@ function me_agenda_shortcode_render() {
             if (emptyEl) {
                 emptyEl.style.display = (visibleCount === 0) ? 'block' : 'none';
             }
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                activeFilters.search = e.target.value;
-                filterEvents();
-            });
         }
 
         pills.forEach(pill => {
@@ -1792,8 +1774,7 @@ function me_agenda_shortcode_render() {
         });
 
         window.meResetFilters = function() {
-            activeFilters = { search: '', formato: 'all', regiao: 'all' };
-            if (searchInput) searchInput.value = '';
+            activeFilters = { formato: 'all', regiao: 'all' };
             pills.forEach(p => {
                 if (p.getAttribute('data-filter') === 'all') {
                     p.classList.add('active');
