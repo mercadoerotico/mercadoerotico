@@ -1621,8 +1621,8 @@ function mercado_pesquisas_render_admin_dashboard() {
         <!-- Automated Status Banner -->
         <?php
         $dollar_info = mercado_get_bacen_dollar_info();
-        $posts_count = wp_count_posts('agenda_evento');
-        $agenda_count = !empty($posts_count->publish) ? intval($posts_count->publish) : 336;
+        $posts_count = wp_count_posts('me_evento');
+        $agenda_count = !empty($posts_count->publish) ? intval($posts_count->publish) : 28;
         $livraria_count = function_exists('mercado_livraria_get_data') ? count(mercado_livraria_get_data()) : 54;
         ?>
         <div class="me-status-box">

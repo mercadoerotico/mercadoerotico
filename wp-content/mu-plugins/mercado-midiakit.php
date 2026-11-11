@@ -279,11 +279,11 @@ function me_midiakit_render_shortcode() {
                     <div class="me-mk-format-badge" style="background:#8b5cf6;">INTELIGÊNCIA</div>
                     <div class="me-mk-format-media">
                         <i class="fas fa-chart-line"></i>
-                        <span class="me-mk-format-dim">Painel de Pesquisas &amp; 336 Feiras Mundiais</span>
+                        <span class="me-mk-format-dim">Painel de Pesquisas &amp; Calendário de Feiras</span>
                     </div>
                     <div class="me-mk-format-body">
                         <h3>Patrocínio do Radar Econômico &amp; Agenda</h3>
-                        <p>Associação da sua empresa ao radar de cotações, estatísticas de câmbio e ao calendário oficial das 336 feiras mundiais de negócios.</p>
+                        <p>Associação da sua empresa ao radar de cotações, estatísticas de câmbio e ao calendário oficial das principais feiras e congressos do setor.</p>
                         <ul class="me-mk-format-feats">
                             <li><i class="fas fa-check"></i> Exposição de marca junto a tomadores de decisão financeira</li>
                             <li><i class="fas fa-check"></i> Destaque em relatórios de cobertura de feiras globais</li>
