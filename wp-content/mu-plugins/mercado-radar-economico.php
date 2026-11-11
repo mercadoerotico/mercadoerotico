@@ -126,62 +126,6 @@ function me_radar_home_callout_render() {
         box-shadow: 0 6px 20px rgba(227, 28, 97, 0.55);
         color: #fff !important;
     }
-    
-    
-    /* Ecosystem Bar & BACEN Tag */
-    .radar-tag-sep {
-        opacity: 0.5;
-        margin: 0 4px;
-    }
-    .radar-tag-bacen {
-        color: #10b981;
-        font-weight: 600;
-    }
-    .radar-tag-bacen strong {
-        color: #fff;
-    }
-    .radar-ecosystem-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        padding: 14px 24px;
-        margin: 0 auto 30px;
-        max-width: 950px;
-    }
-    .eco-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-decoration: none !important;
-        transition: transform 0.2s ease;
-        padding: 4px 10px;
-    }
-    .eco-item:hover {
-        transform: translateY(-2px);
-    }
-    .eco-badge-num {
-        font-size: 1.35rem;
-        font-weight: 900;
-        color: #fff;
-        line-height: 1.1;
-    }
-    .eco-badge-lbl {
-        font-size: 0.75rem;
-        color: #cbd5e1;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-top: 3px;
-    }
-    .eco-sep {
-        width: 1px;
-        height: 28px;
-        background: rgba(255, 255, 255, 0.15);
-    }
 
     @media (max-width: 768px) {
         .radar-strip-inner {
@@ -458,13 +402,8 @@ function me_pesquisas_mercado_render() {
     $pesquisas_count = $pesquisas_cat ? intval($pesquisas_cat->count) : 153;
     $mes_atual = date_i18n('F \d\e Y');
 
-    // Câmbio oficial BACEN (PTAX) em tempo real
+    // Câmbio oficial BACEN (PTAX) em tempo real (utilizado na conversão dos cards)
     $dollar_info = mercado_get_bacen_dollar_info();
-
-    // Contadores vivos do ecossistema do portal
-    $posts_count = wp_count_posts('agenda_evento');
-    $agenda_count = !empty($posts_count->publish) ? intval($posts_count->publish) : 336;
-    $livraria_count = function_exists('mercado_livraria_get_data') ? count(mercado_livraria_get_data()) : 54;
 
     ob_start();
     ?>
@@ -482,32 +421,7 @@ function me_pesquisas_mercado_render() {
             
             <div class="radar-dynamic-tag">
                 <i class="fas fa-sync-alt fa-spin" style="--fa-animation-duration: 4s;"></i>
-                <span>Painel Dinâmico • Atualizado em <?php echo esc_html(ucfirst($mes_atual)); ?></span>
-                <span class="radar-tag-sep">•</span>
-                <span class="radar-tag-bacen"><i class="fas fa-university"></i> Câmbio BACEN: <strong>US$ 1 = R$ <?php echo number_format($dollar_info['rate'], 2, ',', '.'); ?></strong> (PTAX Oficial)</span>
-            </div>
-
-            <!-- ECOSSISTEMA DE DADOS VIVOS DO PORTAL -->
-            <div class="radar-ecosystem-bar">
-                <a href="<?php echo home_url('/acervo/?tema=pesquisas'); ?>" class="eco-item" title="Ver pesquisas catalogadas">
-                    <span class="eco-badge-num"><?php echo $pesquisas_count; ?></span>
-                    <span class="eco-badge-lbl">Pesquisas &amp; Estudos</span>
-                </a>
-                <div class="eco-sep"></div>
-                <a href="<?php echo home_url('/agenda/'); ?>" class="eco-item" title="Ver feiras e congressos">
-                    <span class="eco-badge-num"><?php echo $agenda_count; ?></span>
-                    <span class="eco-badge-lbl">Feiras na Agenda Mundial</span>
-                </a>
-                <div class="eco-sep"></div>
-                <a href="<?php echo home_url('/livraria/'); ?>" class="eco-item" title="Acessar livraria digital">
-                    <span class="eco-badge-num"><?php echo $livraria_count; ?></span>
-                    <span class="eco-badge-lbl">Manuais &amp; E-books</span>
-                </a>
-                <div class="eco-sep"></div>
-                <div class="eco-item eco-currency">
-                    <span class="eco-badge-num" style="color:#10b981;">R$ <?php echo number_format($dollar_info['rate'], 2, ',', '.'); ?></span>
-                    <span class="eco-badge-lbl">Dólar PTAX (Banco Central)</span>
-                </div>
+                <span>Painel Analítico • Atualizado em <?php echo esc_html(ucfirst($mes_atual)); ?></span>
             </div>
 
             <!-- 4 Big Key Figures Dinâmicos -->
