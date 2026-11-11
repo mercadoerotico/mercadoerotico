@@ -33,7 +33,7 @@ $livraria_items = array();
 $livraria_total_count = 0;
 $livraria_file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
 if (file_exists($livraria_file)) {
-    $all_books = json_decode(file_get_contents($livraria_file), true) ?: array();
+    $all_books = function_exists('mercado_livraria_get_data') ? mercado_livraria_get_data() : (json_decode(file_get_contents($livraria_file), true) ?: array());
     $livraria_total_count = count($all_books);
     $paid_sample = array_values(array_filter($all_books, function($b) { return empty($b['is_free']); }));
     $free_sample = array_values(array_filter($all_books, function($b) { return !empty($b['is_free']); }));

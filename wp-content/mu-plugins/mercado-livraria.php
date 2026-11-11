@@ -22,7 +22,16 @@ function mercado_livraria_get_data() {
     $file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
     if (!file_exists($file)) return array();
     $content = file_get_contents($file);
-    return json_decode($content, true) ?: array();
+    $data = json_decode($content, true) ?: array();
+
+    // Ordenar para que as inclusões mais recentes apareçam sempre primeiro (ID decrescente)
+    usort($data, function($a, $b) {
+        $id_a = isset($a['id']) ? intval($a['id']) : 0;
+        $id_b = isset($b['id']) ? intval($b['id']) : 0;
+        return $id_b - $id_a;
+    });
+
+    return $data;
 }
 
 global $mercado_livraria_rendered;
