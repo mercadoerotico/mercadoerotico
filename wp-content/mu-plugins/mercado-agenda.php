@@ -212,7 +212,12 @@ function me_evento_details_callback($post) {
                 <input type="checkbox" name="_evento_cobertura_jornalistica" value="1" <?php checked($cobertura, '1'); ?>>
                 <strong>Solicitou cobertura jornalística da equipe do Portal Mercado Erótico</strong>
             </label>
-            <small style="color:#64748b;display:block;margin-top:4px;">Marque se a organização quer reportagem exclusiva, envio de correspondente ou entrevista com palestrantes.</small>
+            <small style="color:#64748b;display:block;margin-top:4px;">Marque se o evento tem ou terá cobertura editorial pelo Portal.</small>
+        </div>
+        <div class="me-admin-field" style="grid-column: span 2;">
+            <label for="me_link_cobertura">Link da Matéria de Cobertura no Portal (opcional)</label>
+            <input type="url" id="me_link_cobertura" name="_evento_link_cobertura" placeholder="https://mercadoerotico.org/..." value="<?php echo esc_attr(get_post_meta($post->ID, '_evento_link_cobertura', true)); ?>">
+            <small style="color:#64748b;display:block;margin-top:4px;">Se preenchido, o botão e badge "Cobertura do Portal" levarão o leitor diretamente para a matéria publicada.</small>
         </div>
 
         <div class="me-admin-section-title">👤 Dados do Organizador / Responsável (Uso Editorial Interno)</div>
@@ -251,6 +256,7 @@ function me_agenda_save_meta($post_id) {
         '_evento_pais',
         '_evento_site_oficial',
         '_evento_link_ingressos',
+        '_evento_link_cobertura',
         '_evento_organizador_nome',
         '_evento_organizador_email',
         '_evento_organizador_telefone'
@@ -258,7 +264,7 @@ function me_agenda_save_meta($post_id) {
 
     foreach ($fields as $field) {
         if (isset($_POST[$field])) {
-            if ($field === '_evento_site_oficial' || $field === '_evento_link_ingressos') {
+            if ($field === '_evento_site_oficial' || $field === '_evento_link_ingressos' || $field === '_evento_link_cobertura') {
                 update_post_meta($post_id, $field, esc_url_raw($_POST[$field]));
             } elseif ($field === '_evento_organizador_email') {
                 update_post_meta($post_id, $field, sanitize_email($_POST[$field]));
@@ -665,6 +671,7 @@ function me_agenda_shortcode_render() {
                     $link_ingr    = get_post_meta($post_id, '_evento_link_ingressos', true);
                     $org_nome     = get_post_meta($post_id, '_evento_organizador_nome', true);
                     $cobertura    = get_post_meta($post_id, '_evento_cobertura_jornalistica', true);
+                    $link_cobertura = get_post_meta($post_id, '_evento_link_cobertura', true);
 
                     $is_brasil = (stripos($pais, 'Brasil') !== false || stripos($pais, 'Brazil') !== false || (empty($pais) && preg_match('/\b(Brasil|Brazil|SP|RJ|São Paulo|Rio de Janeiro)\b/i', $cidade_pais)));
                     $regiao_attr = $is_brasil ? 'Brasil' : 'Internacional';
@@ -715,7 +722,11 @@ function me_agenda_shortcode_render() {
                                 <?php echo esc_html($formato); ?>
                             </div>
                             <?php if ($cobertura === '1'): ?>
-                                <span class="me-coverage-badge" title="Cobertura Jornalística do Portal Confirmada"><i class="fas fa-camera"></i> Cobertura Portal</span>
+                                <?php if (!empty($link_cobertura)): ?>
+                                    <a href="<?php echo esc_url($link_cobertura); ?>" class="me-coverage-badge" title="Ler Cobertura Jornalística do Portal" target="_blank" rel="noopener"><i class="fas fa-camera"></i> Cobertura Portal</a>
+                                <?php else: ?>
+                                    <span class="me-coverage-badge" title="Cobertura Jornalística do Portal Confirmada"><i class="fas fa-camera"></i> Cobertura Portal</span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
 
@@ -752,6 +763,12 @@ function me_agenda_shortcode_render() {
                             </div>
 
                             <div class="me-card-footer">
+                                <?php if ($cobertura === '1'): ?>
+                                    <a href="<?php echo esc_url(!empty($link_cobertura) ? $link_cobertura : ($site_oficial ?: $link_ingr ?: '#')); ?>" <?php echo !empty($link_cobertura) ? 'target="_blank" rel="noopener"' : ''; ?> class="me-card-btn-coverage" title="Cobertura Jornalística do Portal Mercado Erótico">
+                                        <i class="fas fa-camera"></i> Cobertura do Portal
+                                    </a>
+                                <?php endif; ?>
+
                                 <?php if ($site_oficial || $link_ingr): ?>
                                     <a href="<?php echo esc_url($link_ingr ?: $site_oficial); ?>" target="_blank" rel="noopener" class="me-card-btn-action">
                                         Site &amp; Ingressos <i class="fas fa-external-link-alt"></i>
@@ -1362,6 +1379,40 @@ function me_agenda_shortcode_render() {
         }
         .me-card-btn-action:hover {
             background: #e31c61;
+            color: #fff !important;
+        }
+        .me-card-btn-coverage {
+            background: linear-gradient(135deg, #e31c61 0%, #b8144b 100%);
+            color: #fff !important;
+            text-align: center;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(227, 28, 97, 0.25);
+        }
+        .me-card-btn-coverage:hover {
+            background: linear-gradient(135deg, #ff236e 0%, #cc1754 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(227, 28, 97, 0.4);
+            color: #fff !important;
+        }
+        a.me-coverage-badge {
+            text-decoration: none !important;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        a.me-coverage-badge:hover {
+            background: #ff236e;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             color: #fff !important;
         }
         .me-card-btn-action.disabled {
