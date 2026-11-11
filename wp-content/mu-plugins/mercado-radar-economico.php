@@ -851,7 +851,7 @@ function me_pesquisas_mercado_render() {
                     </div>
                 </div>
                 <div class="radar-modal-footer">
-                    <small><i class="fas fa-shield-alt"></i> Portal Mercado Erótico • Jornalismo e Inteligência de Mercado desde 2000</small>
+                    <small><i class="fas fa-shield-alt"></i> Portal Mercado Erótico • Jornalismo e Inteligência de Mercado desde 2000 | Acervo Digital desde 2018</small>
                 </div>
             </div>
         </div>

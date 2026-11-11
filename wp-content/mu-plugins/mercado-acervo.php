@@ -359,7 +359,7 @@ function mercado_acervo_shortcode() {
     <div id="mercado-acervo-app" class="mercado-acervo-wrapper">
         <!-- Hero Header -->
         <div class="acervo-hero">
-            <div class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO HISTÓRICO DESDE 2018</div>
+            <div class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)</div>
             <h1 class="acervo-title">Arquivo Histórico &amp; Ferramenta de Pesquisa</h1>
             <p class="acervo-subtitle">O mais completo centro documental e analítico do mercado erótico no Brasil. Explore reportagens, censos e investigações estratégicas por período, território e linhas temáticas permanentes.</p>
             
@@ -556,7 +556,7 @@ function mercado_acervo_shortcode() {
 
             <div class="footer-bottom-bar">
                 <div class="footer-research-meta">
-                    <i class="fas fa-shield-alt"></i> <strong>Portal Mercado Erótico</strong> &bull; Acervo Histórico, Jornalismo e Inteligência de Mercado desde 2000.
+                    <i class="fas fa-shield-alt"></i> <strong>Portal Mercado Erótico</strong> &bull; Atuação e Inteligência de Mercado desde 2000 | Acervo Digital Documentado desde 2018.
                 </div>
                 <button type="button" class="btn-footer-reset" onclick="clearAcervoFilters()"><i class="fas fa-redo"></i> Resetar Todos os Filtros</button>
             </div>

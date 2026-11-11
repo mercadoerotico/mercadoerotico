@@ -875,3 +875,334 @@ div.me-internal-wrapper {
     max-width: 100% !important;
     width: 100% !important;
 }
+
+
+/* ==========================================================================
+   5.1. SEÇÃO DE TRAJETÓRIA CRONOLÓGICA & LIDERANÇA EDITORIAL (SOBRE)
+   ========================================================================== */
+
+.me-trajectory-section {
+    margin: 45px 0 50px;
+}
+.me-internal-wrapper .section-intro {
+    font-size: 1.02rem;
+    color: #475569;
+    line-height: 1.7;
+    margin: -10px 0 25px;
+    max-width: 960px;
+}
+.trajectory-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+.trajectory-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 28px;
+    border: 1px solid #ebdfee;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.trajectory-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+.trajectory-card.card-era-2000 {
+    border-top: 4px solid #f59e0b;
+}
+.trajectory-card.card-era-2018 {
+    border-top: 4px solid #e31c61;
+}
+.trajectory-era-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    margin-bottom: 16px;
+    align-self: flex-start;
+}
+.card-era-2000 .trajectory-era-badge {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.card-era-2018 .trajectory-era-badge {
+    background: #fdf2f6;
+    color: #be185d;
+    border: 1px solid #fbcfe8;
+}
+.trajectory-era-title {
+    font-size: 1.28rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 14px;
+    line-height: 1.35;
+}
+.trajectory-era-text {
+    font-size: 0.94rem;
+    color: #475569;
+    line-height: 1.68;
+    margin-bottom: 14px;
+}
+.trajectory-era-text strong {
+    color: #0f172a;
+}
+.trajectory-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px dashed #e2e8f0;
+}
+.th-pill {
+    font-size: 0.85rem;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+.card-era-2000 .th-pill i {
+    color: #d97706;
+}
+.card-era-2018 .th-pill i {
+    color: #e31c61;
+}
+
+/* Liderança e Referência Editorial */
+.me-editorial-leaders-section {
+    margin: 55px 0 50px;
+}
+.leaders-header {
+    margin-bottom: 25px;
+}
+.me-sub-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(227, 28, 97, 0.1);
+    color: #e31c61;
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 50px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+.leaders-deep-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+.leader-full-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px 28px;
+    border: 1px solid #ebdfee;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.leader-full-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 35px rgba(0,0,0,0.08);
+}
+.leader-full-card.card-paula {
+    border-top: 4px solid #e31c61;
+}
+.leader-full-card.card-julianna {
+    border-top: 4px solid #7c3aed;
+}
+.leader-profile-top {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.leader-avatar-wrap {
+    position: relative;
+    flex: 0 0 115px;
+}
+.leader-avatar-img {
+    width: 115px;
+    height: 145px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    display: block;
+}
+.avatar-flag {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 9px;
+    border-radius: 12px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.card-paula .avatar-flag {
+    background: #e31c61;
+}
+.card-julianna .avatar-flag {
+    background: #7c3aed;
+}
+.leader-titles {
+    flex: 1;
+}
+.leader-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+}
+.card-paula .leader-badge {
+    color: #e31c61;
+}
+.card-julianna .leader-badge {
+    color: #7c3aed;
+}
+.leader-name {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0 0 6px;
+    line-height: 1.2;
+}
+.leader-tagline {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    font-weight: 500;
+}
+.leader-content-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.leader-content-body p {
+    font-size: 0.93rem;
+    color: #475569;
+    line-height: 1.68;
+    margin-bottom: 14px;
+}
+.leader-content-body p strong {
+    color: #0f172a;
+}
+.leader-credentials-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin: 10px 0 22px;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.cred-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: #475569;
+}
+.cred-item i {
+    font-size: 1.15rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.card-paula .cred-item i {
+    color: #e31c61;
+}
+.card-julianna .cred-item i {
+    color: #7c3aed;
+}
+.cred-item strong {
+    color: #0f172a;
+    display: block;
+    margin-bottom: 2px;
+}
+.cred-item span {
+    font-size: 0.82rem;
+    color: #64748b;
+}
+.leader-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 10px;
+}
+.btn-leader-primary {
+    background: #0f172a;
+    color: #fff !important;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+.btn-leader-primary:hover {
+    background: #e31c61;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+.btn-leader-secondary {
+    background: #f1f5f9;
+    color: #334155 !important;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
+}
+.btn-leader-secondary:hover {
+    background: #e2e8f0;
+    color: #0f172a !important;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+    .trajectory-cards-grid,
+    .leaders-deep-grid {
+        grid-template-columns: 1fr;
+    }
+    .leader-profile-top {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .leader-avatar-wrap {
+        margin-bottom: 10px;
+    }
+}

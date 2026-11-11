@@ -16,7 +16,7 @@ do_action('blocksy:content:bottom');
                 <a href="<?php echo home_url('/'); ?>" class="footer-logo-link">
                     <img src="https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png" alt="Mercado Erótico" class="footer-logo-img">
                 </a>
-                <p class="footer-bio">O principal portal jornalístico, analítico e documental sobre o mercado íntimo, saúde sexual e bem-estar no Brasil. Cobertura especializada contínua desde 2018.</p>
+                <p class="footer-bio">O principal portal de jornalismo, pesquisa e documentação sobre o mercado íntimo, saúde sexual e bem-estar no Brasil: inteligência setorial desde 2000 e acervo digital documentado desde 2018.</p>
                 <div class="footer-social-links">
                     <a href="https://www.instagram.com/mercadoerotico/" target="_blank" rel="noopener noreferrer" class="social-icon instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="https://www.facebook.com/share/1MBvjVQm54/" target="_blank" rel="noopener noreferrer" class="social-icon facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -33,7 +33,7 @@ do_action('blocksy:content:bottom');
                     <li><a href="<?php echo home_url('/sobre/'); ?>">Sobre Nós</a></li>
                     <li><a href="<?php echo home_url('/colunistas/'); ?>">Colunistas Oficiais</a></li>
                     <li><a href="<?php echo home_url('/agenda/'); ?>"><strong style="color:#e31c61;">Agenda do Mercado Erótico</strong></a></li>
-                    <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo de Notícias (Desde 2018)</a></li>
+                    <li><a href="<?php echo home_url('/acervo/'); ?>">Acervo de Notícias (Documentado desde 2018)</a></li>
                     <li><a href="<?php echo home_url('/livraria/'); ?>">Livraria Digital</a></li>
                     <li><a href="<?php echo home_url('/contato/'); ?>">Contatos & Redação</a></li>
                 </ul>
