@@ -30,13 +30,28 @@ $eventos_posts = get_posts(array('category_name' => 'eventos', 'numberposts' => 
 
 // 3. Livraria Featured Items (Mix com destaques pagos e material gratuito em evidência)
 $livraria_items = array();
+$livraria_total_count = 0;
 $livraria_file = WP_CONTENT_DIR . '/uploads/livraria/livraria_clean.json';
 if (file_exists($livraria_file)) {
     $all_books = json_decode(file_get_contents($livraria_file), true) ?: array();
+    $livraria_total_count = count($all_books);
     $paid_sample = array_values(array_filter($all_books, function($b) { return empty($b['is_free']); }));
     $free_sample = array_values(array_filter($all_books, function($b) { return !empty($b['is_free']); }));
+    
+    // Prioriza o Guia ISO 3533 (ID 2585) como material gratuito em evidência se presente
+    $highlighted_free = array();
+    foreach ($free_sample as $f_item) {
+        if (!empty($f_item['id']) && $f_item['id'] == 2585) {
+            $highlighted_free[] = $f_item;
+            break;
+        }
+    }
+    if (empty($highlighted_free) && !empty($free_sample)) {
+        $highlighted_free[] = $free_sample[0];
+    }
+
     // 3 primeiros cursos/formações em destaque + 1 material gratuito oficial
-    $livraria_items = array_merge(array_slice($paid_sample, 0, 3), array_slice($free_sample, 0, 1));
+    $livraria_items = array_merge(array_slice($paid_sample, 0, 3), $highlighted_free);
 }
 
 // 4. Recent Feed Posts (offset 8)
@@ -280,7 +295,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
                     <i class="fas fa-gift"></i> Ver Materiais Gratuitos
                 </a>
                 <a href="<?php echo home_url('/livraria/'); ?>" class="btn-view-all-livraria">
-                    Ver todos os 54 títulos <i class="fas fa-arrow-right"></i>
+                    Ver todos os <?php echo $livraria_total_count ?: '55'; ?> títulos <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>

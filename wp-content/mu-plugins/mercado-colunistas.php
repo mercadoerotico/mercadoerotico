@@ -7,8 +7,8 @@
 
 if (!defined('ABSPATH')) exit;
 
-function mercado_colunistas_shortcode() {
-    $columnists = array(
+function mercado_colunistas_get_list() {
+    return array(
         array(
             'column_title' => 'Coluna Ká entre Nós',
             'author_name' => 'Karina Brum',
@@ -123,6 +123,13 @@ function mercado_colunistas_shortcode() {
             'highlight' => 'Dispositivos teledildônicos, IA generativa para educação sexual e tendências de inovação.'
         )
     );
+}
+
+function mercado_colunistas_shortcode() {
+    $columnists = mercado_colunistas_get_list();
+    $count_posts = wp_count_posts('post');
+    $total_posts_num = !empty($count_posts->publish) ? (int)$count_posts->publish : 2116;
+    $total_posts_formatted = number_format($total_posts_num, 0, ',', '.') . '+';
 
     ob_start();
     ?>
@@ -137,11 +144,11 @@ function mercado_colunistas_shortcode() {
         <!-- Estatísticas das Colunas -->
         <div class="me-stats-grid">
             <div class="me-stat-card">
-                <span class="stat-number">10</span>
+                <span class="stat-number"><?php echo count($columnists); ?></span>
                 <span class="stat-label">Colunas Editoriais Ativas</span>
             </div>
             <div class="me-stat-card">
-                <span class="stat-number">2.115+</span>
+                <span class="stat-number"><?php echo esc_html($total_posts_formatted); ?></span>
                 <span class="stat-label">Artigos & Análises Disponíveis</span>
             </div>
             <div class="me-stat-card">

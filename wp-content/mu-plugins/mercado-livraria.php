@@ -102,11 +102,11 @@ function mercado_livraria_shortcode() {
             <p class="livraria-subtitle">O mais completo acervo de e-books, cursos e guias sobre sexualidade humana, bem-estar íntimo, tantra e autoconhecimento para consumidores finais, além de manuais completos para profissionais do mercado íntimo.</p>
             
             <div class="livraria-stats-bar">
-                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Obras &amp; Cursos</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo $total_count; ?></span><span class="stat-lbl">Títulos &amp; Obras</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">Para Você &amp; Negócios</span><span class="stat-lbl">Consumidor &amp; B2B</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo $manuais_count; ?></span><span class="stat-lbl">Manuais &amp; Guias</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-lbl">Acesso Imediato</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo $gratuito_count; ?></span><span class="stat-lbl">Materiais Gratuitos</span></div>
             </div>
 
             <!-- Search Bar -->

@@ -151,6 +151,10 @@ function mercado_acervo_shortcode() {
 
     // Initial fetch in PHP
     $initial_data = mercado_acervo_get_posts('all', 'all', '', 1, 12);
+    $count_posts = wp_count_posts('post');
+    $total_posts_num = !empty($count_posts->publish) ? (int)$count_posts->publish : 2116;
+    $total_posts_formatted = number_format($total_posts_num, 0, ',', '.') . '+';
+    $col_count = function_exists('mercado_colunistas_get_list') ? count(mercado_colunistas_get_list()) : 10;
     ob_start();
     ?>
     <div id="mercado-acervo-app" class="mercado-acervo-wrapper">
@@ -161,11 +165,11 @@ function mercado_acervo_shortcode() {
             <p class="acervo-subtitle">Explore o mais completo arquivo histórico, jornalístico e analítico sobre o mercado erótico e a saúde sexual no Brasil, documentado continuamente desde 2018.</p>
             
             <div class="acervo-stats-bar">
-                <div class="stat-item"><span class="stat-num">2.115+</span><span class="stat-lbl">Artigos Documentados</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Artigos Documentados</span></div>
                 <div class="stat-sep">•</div>
                 <div class="stat-item"><span class="stat-num">Desde 2018</span><span class="stat-lbl">Documentação Contínua</span></div>
                 <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">20+</span><span class="stat-lbl">Colunistas e Especialistas</span></div>
+                <div class="stat-item"><span class="stat-num"><?php echo esc_html($col_count); ?>+</span><span class="stat-lbl">Colunistas e Especialistas</span></div>
             </div>
 
             <!-- Search Bar Form -->
