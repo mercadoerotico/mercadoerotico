@@ -43,6 +43,24 @@ add_action("wp_head", function() {
     <?php
 }, 99);
 
+// Abrir links de redes sociais e canais externos em nova aba/janela no conteúdo de artigos e páginas
+add_filter('the_content', function($content) {
+    if (empty($content)) return $content;
+    $pattern = '~<a\s+[^>]*href=["\'][^"\']*(?:facebook\.com|instagram\.com|youtube\.com|linkedin\.com|twitter\.com|x\.com|tiktok\.com|spotify\.com|threads\.net|t\.me|telegram\.me|whatsapp\.com|wa\.me)[^"\']*["\'][^>]*>~i';
+    return preg_replace_callback($pattern, function($matches) {
+        $tag = $matches[0];
+        if (strpos($tag, 'target=') === false) {
+            $tag = rtrim($tag, '>') . ' target="_blank" rel="noopener noreferrer">';
+        } else {
+            $tag = preg_replace('/target=["\'][^"\']*["\']/i', 'target="_blank"', $tag);
+            if (strpos($tag, 'rel=') === false) {
+                $tag = rtrim($tag, '>') . ' rel="noopener noreferrer">';
+            }
+        }
+        return $tag;
+    }, $content);
+}, 20);
+
 add_action('wp_footer', function() {
     ?>
     <script id="mercado-menu-unwrap-script">
@@ -68,6 +86,32 @@ add_action('wp_footer', function() {
         document.addEventListener('DOMContentLoaded', unwrapMenuMore);
         setTimeout(unwrapMenuMore, 500);
         setTimeout(unwrapMenuMore, 1500);
+
+        // Garantir abertura de redes sociais em nova janela/aba em qualquer elemento do portal
+        function ensureSocialLinksNewWindow() {
+            const socialRegex = /(?:facebook\.com|instagram\.com|youtube\.com|linkedin\.com|twitter\.com|x\.com|tiktok\.com|spotify\.com|threads\.net|t\.me|telegram\.me|whatsapp\.com|wa\.me)/i;
+            document.querySelectorAll('a[href]').forEach(function(a) {
+                if (socialRegex.test(a.href)) {
+                    a.setAttribute('target', '_blank');
+                    const rel = a.getAttribute('rel') || '';
+                    if (!rel.includes('noopener')) {
+                        a.setAttribute('rel', (rel ? rel + ' ' : '') + 'noopener noreferrer');
+                    }
+                }
+            });
+        }
+        ensureSocialLinksNewWindow();
+        document.addEventListener('DOMContentLoaded', ensureSocialLinksNewWindow);
+        document.addEventListener('click', function(e) {
+            const a = e.target.closest && e.target.closest('a[href]');
+            if (a && /(?:facebook\.com|instagram\.com|youtube\.com|linkedin\.com|twitter\.com|x\.com|tiktok\.com|spotify\.com|threads\.net|t\.me|telegram\.me|whatsapp\.com|wa\.me)/i.test(a.href)) {
+                a.setAttribute('target', '_blank');
+                const rel = a.getAttribute('rel') || '';
+                if (!rel.includes('noopener')) {
+                    a.setAttribute('rel', (rel ? rel + ' ' : '') + 'noopener noreferrer');
+                }
+            }
+        }, true);
     })();
     </script>
     <?php
