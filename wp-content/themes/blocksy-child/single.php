@@ -719,6 +719,7 @@ while (have_posts()) :
     color: #475569;
     line-height: 1.6;
     margin: 0 0 12px 0;
+    white-space: pre-line;
 }
 .bio-link {
     font-size: 0.88rem;
