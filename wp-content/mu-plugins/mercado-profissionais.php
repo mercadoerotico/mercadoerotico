@@ -62,7 +62,17 @@ function mercado_profissionais_shortcode() {
             'insta_label' => '@katiaarrudaoficial',
             'whatsapp' => '5561986531333'
         ),
-        array(
+                array(
+            'name' => 'Neusa Pandolfo',
+            'specialty' => 'Educadora Sexual & Palestrante',
+            'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2026/11/neusa_pandolfo_avatar.webp',
+            'bio' => 'Publicitária formada pela Unisinos e pós-graduada em Educação Sexual pela Unisal-SP. Palestrante e consultora de renome nacional com passagens pela TV (Amor & Sexo na Globo), especialista em autoestima, intimidade, comunicação de casais e quebra de tabus.',
+            'instagram' => 'https://www.instagram.com/neusapandolfo/',
+            'insta_label' => '@neusapandolfo',
+            'website' => 'https://neusapandolfo.com.br/',
+            'whatsapp' => '5551999690009'
+        ),
+array(
             'name' => 'Lucimara Siqueira (Lu Pompoar)',
             'specialty' => 'Fisioterapia Pélvica & Pompoarismo',
             'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2021/06/lu-pompoar.jpg',
@@ -143,8 +153,14 @@ function mercado_profissionais_shortcode() {
 
                     <div class="prof-card-footer">
                         <?php if (!empty($p['instagram'])): ?>
-                            <a href="<?php echo esc_url($p['instagram']); ?>" target="_blank" rel="noopener" class="btn-prof-insta">
+                            <a href="<?php echo esc_url($p['instagram']); ?>" target="_blank" rel="noopener noreferrer" class="btn-prof-insta">
                                 <i class="fab fa-instagram"></i> <?php echo esc_html($p['insta_label']); ?>
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if (!empty($p['website'])): ?>
+                            <a href="<?php echo esc_url($p['website']); ?>" target="_blank" rel="noopener noreferrer" class="btn-prof-web" title="Visitar Site Oficial">
+                                <i class="fas fa-globe"></i>
                             </a>
                         <?php endif; ?>
 
@@ -307,6 +323,25 @@ function mercado_profissionais_shortcode() {
         background: #e31c61;
         color: #fff;
         border-color: #e31c61;
+    }
+        .btn-prof-web {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #fff !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none !important;
+        font-size: 1rem;
+        flex-shrink: 0;
+        transition: transform 0.2s, background 0.2s;
+    }
+    .btn-prof-web:hover {
+        background: #1d4ed8;
+        transform: scale(1.08);
+        color: #fff !important;
     }
     .btn-prof-wpp {
         width: 38px;
