@@ -45,9 +45,9 @@ do_action('blocksy:content:bottom');
                 <ul class="footer-links">
                     <li><a href="<?php echo home_url('/profissionais-especialistas-em-sexualidade/'); ?>"><i class="fas fa-user-md" style="color:#e31c61; margin-right:5px;"></i> <strong>Guia de Profissionais</strong></a></li>
                     <li><a href="<?php echo home_url('/agenda/'); ?>"><i class="far fa-calendar-alt" style="color:#e31c61; margin-right:5px;"></i> Calendário de Eventos Mundiais</a></li>
-                    <li><a href="<?php echo home_url('/categoria/negocios/'); ?>">Negócios & SexShop</a></li>
-                    <li><a href="<?php echo home_url('/categoria/sexologia/'); ?>">Sexologia & Saúde</a></li>
-                    <li><a href="<?php echo home_url('/categoria/eventos/'); ?>">Eventos & Feiras</a></li>
+                    <li><a href="<?php echo home_url('/category/negocios/'); ?>">Negócios & SexShop</a></li>
+                    <li><a href="<?php echo home_url('/category/sexologia/'); ?>">Sexologia & Saúde</a></li>
+                    <li><a href="<?php echo home_url('/category/eventos/'); ?>">Eventos & Feiras</a></li>
                     <li><a href="https://www.guiadesexshop.com.br/" target="_blank" rel="noopener">Guia de Sex Shop <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a></li>
                 </ul>
             </div>

@@ -17,7 +17,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Psicóloga e sexóloga com o propósito de desmistificar tabus e preconceitos, abordando demandas sexuais e relacionamentos de forma divertida, científica, sensata e empática.',
             'badge' => '75 Artigos',
             'tag' => 'Comportamento & Emoções',
-            'url' => home_url('/categoria/coluna-ka-entre-nos/'),
+            'url' => home_url('/category/coluna-ka-entre-nos/'),
             'highlight' => 'Solidão masculina, intimidade emocional, relacionamentos contemporâneos e saúde sexual.'
         ),
         array(
@@ -28,7 +28,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Fundadora da Sexy Delícia há duas décadas no mercado de Sexual Wellness. Idealizadora do programa De Pernas pro Ar, voltado à formação de profissionais e desenvolvimento íntimo.',
             'badge' => 'Formação & Saúde',
             'tag' => 'Pompoarismo & Prazer',
-            'url' => home_url('/categoria/coluna-de-pernas-pro-ar-com-erica-rambalde/'),
+            'url' => home_url('/category/coluna-de-pernas-pro-ar-com-erica-rambalde/'),
             'highlight' => 'Exercícios pélvicos, ginástica íntima, empoderamento sexual e dinâmicas de casal.'
         ),
         array(
@@ -61,7 +61,7 @@ function mercado_colunistas_shortcode() {
             'image' => 'https://mercadoerotico-org-901765.hostingersite.com/wp-content/uploads/2024/08/marianna-kiss.jpg',
             'badge' => '23 Artigos',
             'tag' => 'Empoderamento Feminino',
-            'url' => home_url('/categoria/dona-do-proprio-poder/'),
+            'url' => home_url('/category/dona-do-proprio-poder/'),
             'highlight' => 'Despertar sensorial, tantra taoísta, autocuidado e liberação de culpas íntimas.'
         ),
         array(
@@ -83,7 +83,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Coach de Relacionamento e dona da sex shop Queridinhas da Adri há 7 anos. Une visão prática de balcão e gestão estratégica para compartilhar lições de empreendedorismo íntimo.',
             'badge' => '11 Artigos',
             'tag' => 'Empreendedorismo',
-            'url' => home_url('/categoria/coluna-empresarios-sex/'),
+            'url' => home_url('/category/coluna-empresarios-sex/'),
             'highlight' => 'Desafios do varejo, experiência do cliente, fluxo de caixa e rotina de sex shop.'
         ),
         array(
@@ -95,7 +95,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Coluna dedicada a explorar novas formas de prazer, testes de cosméticos sensuais, técnicas de estimulação e novidades do universo dos toys com linguagem direta e inclusiva.',
             'badge' => '37 Artigos',
             'tag' => 'Prazer & Toys',
-            'url' => home_url('/categoria/coluna-sexativar/'),
+            'url' => home_url('/category/coluna-sexativar/'),
             'highlight' => 'Reviews de produtos, cosméticos sensuais, jogos eróticos e exploração a dois.'
         ),
         array(
@@ -107,7 +107,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Histórias da vida real, crônicas afetivas, debates sobre novos modelos de relação e o lado bem-humorado da sexualidade humana.',
             'badge' => '37 Crônicas',
             'tag' => 'Crônicas & Vivências',
-            'url' => home_url('/categoria/cartas-sexo-diversao/'),
+            'url' => home_url('/category/cartas-sexo-diversao/'),
             'highlight' => 'Cartas de leitores, dilemas conjugais, encontros inusitados e diversão adulta.'
         ),
         array(
@@ -119,7 +119,7 @@ function mercado_colunistas_shortcode() {
             'bio' => 'Acompanhamento sistemático das inovações de ponta que estão transformando o bem-estar íntimo: inteligência artificial, realidade virtual, robótica e sextechs globais.',
             'badge' => '57 Relatórios',
             'tag' => 'Tecnologia & Sextech',
-            'url' => home_url('/categoria/iasex/'),
+            'url' => home_url('/category/iasex/'),
             'highlight' => 'Dispositivos teledildônicos, IA generativa para educação sexual e tendências de inovação.'
         )
     );

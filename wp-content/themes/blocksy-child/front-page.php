@@ -182,7 +182,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         <div class="editorial-col">
             <div class="col-head">
                 <h3 class="col-title"><span class="col-dot dot-negocios"></span> Negócios & SexShop</h3>
-                <a href="<?php echo home_url('/categoria/negocios/'); ?>" class="col-more">Mais →</a>
+                <a href="<?php echo home_url('/category/negocios/'); ?>" class="col-more">Mais →</a>
             </div>
             <div class="col-cards">
                 <?php foreach ($negocios_posts as $np): 
@@ -207,7 +207,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         <div class="editorial-col">
             <div class="col-head">
                 <h3 class="col-title"><span class="col-dot dot-sexologia"></span> Sexologia & Saúde</h3>
-                <a href="<?php echo home_url('/categoria/sexologia/'); ?>" class="col-more">Mais →</a>
+                <a href="<?php echo home_url('/category/sexologia/'); ?>" class="col-more">Mais →</a>
             </div>
             <div class="col-cards">
                 <?php foreach ($sexologia_posts as $xp): 
@@ -232,7 +232,7 @@ $most_read_posts = $wpdb->get_results($most_read_sql);
         <div class="editorial-col">
             <div class="col-head">
                 <h3 class="col-title"><span class="col-dot dot-eventos"></span> Eventos & Mercado</h3>
-                <a href="<?php echo home_url('/categoria/eventos/'); ?>" class="col-more">Mais →</a>
+                <a href="<?php echo home_url('/category/eventos/'); ?>" class="col-more">Mais →</a>
             </div>
             <div class="col-cards">
                 <?php foreach ($eventos_posts as $ep): 

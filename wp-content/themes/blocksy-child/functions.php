@@ -14,11 +14,16 @@ add_filter('gettext', function($translated_text, $text, $domain) {
     return $translated_text;
 }, 20, 3);
 
-// Redirecionamento amigável de /midia para /na-midia/
-add_action('template_redirect', function() {
+// Redirecionamentos amigáveis (SEO e prevenção de 404)
+add_action('init', function() {
     $request_uri = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
     if ($request_uri === 'midia') {
         wp_redirect(home_url('/na-midia/'), 301);
+        exit;
+    }
+    // Redirecionar /categoria/* para /category/*
+    if (preg_match('#^categoria/(.*)$#i', $request_uri, $matches)) {
+        wp_redirect(home_url('/category/' . $matches[1] . '/'), 301);
         exit;
     }
 });
