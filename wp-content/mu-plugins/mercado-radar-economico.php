@@ -784,7 +784,7 @@ function me_pesquisas_mercado_render() {
             </div>
 
             <div class="radar-news-footer">
-                <a href="<?php echo home_url('/acervo/?tema=pesquisas'); ?>" class="btn-radar-news-more">
+                <a href="<?php echo home_url('/acervo/?tema=pesquisas#acervo-recorte'); ?>" class="btn-radar-news-more">
                     <span>Ver todas as <?php echo $pesquisas_count; ?> pesquisas no Acervo Histórico</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>

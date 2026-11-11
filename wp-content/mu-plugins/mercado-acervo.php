@@ -358,15 +358,36 @@ function mercado_acervo_shortcode() {
     ?>
     <div id="mercado-acervo-app" class="mercado-acervo-wrapper">
         <!-- Hero Header -->
+        <?php 
+        $is_pesquisas_filter = ($init_theme === 'pesquisas');
+        $has_active_filter = (!empty($init_dossie) || $init_theme !== 'all' || $init_year !== 'all' || $init_geo !== 'all' || $init_type !== 'all' || !empty($init_q));
+        ?>
         <div class="acervo-hero">
-            <div class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)</div>
+            <?php if ($is_pesquisas_filter): ?>
+                <div class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> PESQUISAS CATALOGADAS</div>
+            <?php elseif ($has_active_filter): ?>
+                <div class="acervo-badge" style="background:#e31c61;color:#fff;">★ RECORTE ATIVO • <?php echo intval($initial_data['total_posts']); ?> ARTIGOS ENCONTRADOS</div>
+            <?php else: ?>
+                <div class="acervo-badge">★ CENTRO DE INTELIGÊNCIA &bull; ACERVO DIGITAL DESDE 2018 (HISTÓRIA SETORIAL DESDE 2000)</div>
+            <?php endif; ?>
+
             <h1 class="acervo-title">Arquivo Histórico &amp; Ferramenta de Pesquisa</h1>
             <p class="acervo-subtitle">O mais completo centro documental e analítico do mercado erótico no Brasil. Explore reportagens, censos e investigações estratégicas por período, território e linhas temáticas permanentes.</p>
             
             <div class="acervo-stats-bar">
-                <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Artigos Documentados</span></div>
-                <div class="stat-sep">•</div>
-                <div class="stat-item"><span class="stat-num">8+ Anos</span><span class="stat-lbl">Memória Contínua</span></div>
+                <?php if ($is_pesquisas_filter): ?>
+                    <div class="stat-item"><span class="stat-num" style="color:#ff3b7e;">153</span><span class="stat-lbl">Pesquisas neste Recorte</span></div>
+                    <div class="stat-sep">•</div>
+                    <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Total no Acervo Geral</span></div>
+                <?php elseif ($has_active_filter): ?>
+                    <div class="stat-item"><span class="stat-num" style="color:#ff3b7e;"><?php echo intval($initial_data['total_posts']); ?></span><span class="stat-lbl">Artigos neste Recorte</span></div>
+                    <div class="stat-sep">•</div>
+                    <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Total no Acervo Geral</span></div>
+                <?php else: ?>
+                    <div class="stat-item"><span class="stat-num"><?php echo esc_html($total_posts_formatted); ?></span><span class="stat-lbl">Artigos Documentados</span></div>
+                    <div class="stat-sep">•</div>
+                    <div class="stat-item"><span class="stat-num">8+ Anos</span><span class="stat-lbl">Memória Contínua</span></div>
+                <?php endif; ?>
                 <div class="stat-sep">•</div>
                 <div class="stat-item"><span class="stat-num">7 Dossiês</span><span class="stat-lbl">Linhas Estratégicas</span></div>
                 <div class="stat-sep">•</div>
@@ -389,15 +410,22 @@ function mercado_acervo_shortcode() {
             <div id="acervo-hero-feedback" class="acervo-hero-feedback" style="display:none;"></div>
         </div>
 
-        <!-- Banner de Dossiê Ativo (quando filtrado por linha temática) -->
-        <div id="active-dossier-banner" class="active-dossier-banner" <?php if (!$active_dossier) echo 'style="display:none;"'; ?>>
+        <div id="acervo-recorte"></div>
+        <!-- Banner de Recorte Ativo (Dossiê ou Tema Pesquisas) -->
+        <?php 
+        $show_banner = !empty($active_dossier) || $is_pesquisas_filter;
+        $banner_badge = $active_dossier ? esc_html($active_dossier['badge']) : '📊 RECORTE TEMÁTICO • ACERVO DE PESQUISAS';
+        $banner_title = $active_dossier ? esc_html($active_dossier['icon'] . ' ' . $active_dossier['title']) : '📊 153 Pesquisas &amp; Estudos de Mercado';
+        $banner_desc  = $active_dossier ? esc_html($active_dossier['description']) : 'Exibindo exclusivamente as 153 pesquisas comportamentais, censos setoriais e levantamentos estatísticos catalogados no acervo do MercadoErótico.org.';
+        ?>
+        <div id="active-dossier-banner" class="active-dossier-banner" <?php if (!$show_banner) echo 'style="display:none;"'; ?> style="<?php if ($show_banner) echo 'display:flex;'; ?>">
             <div class="dossier-banner-content">
-                <div class="dossier-banner-badge" id="dossier-badge-text"><?php echo $active_dossier ? esc_html($active_dossier['badge']) : 'DOSSIÊ ESTRATÉGICO'; ?></div>
-                <h2 class="dossier-banner-title" id="dossier-title-text"><?php echo $active_dossier ? esc_html($active_dossier['icon'] . ' ' . $active_dossier['title']) : ''; ?></h2>
-                <p class="dossier-banner-desc" id="dossier-desc-text"><?php echo $active_dossier ? esc_html($active_dossier['description']) : ''; ?></p>
+                <div class="dossier-banner-badge" id="dossier-badge-text"><?php echo $banner_badge; ?></div>
+                <h2 class="dossier-banner-title" id="dossier-title-text"><?php echo $banner_title; ?></h2>
+                <p class="dossier-banner-desc" id="dossier-desc-text"><?php echo $banner_desc; ?></p>
             </div>
             <div class="dossier-banner-actions">
-                <button type="button" class="btn-clear-dossier" onclick="clearAcervoFilters()"><i class="fas fa-times"></i> Ver Todo o Acervo Geral</button>
+                <button type="button" class="btn-clear-dossier" onclick="clearAcervoFilters()"><i class="fas fa-undo"></i> Ver Todo o Acervo Geral (<?php echo esc_html($total_posts_num); ?> artigos)</button>
             </div>
         </div>
 
@@ -1862,6 +1890,16 @@ function mercado_acervo_footer_scripts() {
         }
         if (urlQ) {
             window.currentAcervoQuery = urlQ;
+        }
+
+        // Auto-scroll para os resultados quando vindo com filtro temático ou âncora
+        if (urlTheme === 'pesquisas' || window.location.hash === '#acervo-recorte') {
+            setTimeout(function() {
+                const target = document.getElementById('acervo-recorte') || document.getElementById('active-dossier-banner') || document.getElementById('acervo-results-bar');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
         }
     })();
     </script>
