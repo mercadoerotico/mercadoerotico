@@ -14,6 +14,15 @@ add_filter('gettext', function($translated_text, $text, $domain) {
     return $translated_text;
 }, 20, 3);
 
+// Redirecionamento amigável de /midia para /na-midia/
+add_action('template_redirect', function() {
+    $request_uri = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+    if ($request_uri === 'midia') {
+        wp_redirect(home_url('/na-midia/'), 301);
+        exit;
+    }
+});
+
 add_action("wp_head", function() {
     // 1. Injetar style.css do child theme diretamente para eliminar cache e latência
     $child_css = get_stylesheet_directory() . "/style.css";
