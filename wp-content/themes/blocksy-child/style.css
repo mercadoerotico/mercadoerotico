@@ -847,13 +847,48 @@ Version: 1.2.0
     }
 }
 
-/* Permitir largura ampla (1200px) para páginas internas no Blocksy */
-.page:not(.home) .ct-container-full,
-.page:not(.home) .ct-container,
+/* Permitir largura ampla (1200px) para páginas internas no Blocksy apenas no conteúdo principal */
+.page:not(.home) #main-container main .ct-container-full,
+.page:not(.home) #main-container main .ct-container,
+.page:not(.home) #main-container #main .ct-container,
 .page:not(.home) .entry-content,
 .page:not(.home) .entry-content.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
     max-width: 1200px !important;
     width: 100% !important;
+}
+
+/* Garantir alinhamento e respiro perfeitos do cabeçalho mobile em todas as páginas */
+#main-container header[data-id="type-1"] [data-device="mobile"] .ct-container,
+#main-container .ct-header [data-device="mobile"] .ct-container,
+header[data-id="type-1"] [data-device="mobile"] .ct-container,
+.ct-header [data-device="mobile"] .ct-container {
+    width: var(--theme-container-edge-spacing, 88vw) !important;
+    max-width: var(--theme-container-edge-spacing, 88vw) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+header[data-id="type-1"] [data-device="mobile"] [data-column="start"],
+header[data-id="type-1"] [data-device="mobile"] [data-column="end"],
+.ct-header [data-device="mobile"] [data-column="start"],
+.ct-header [data-device="mobile"] [data-column="end"] {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Evitar overflow horizontal em telas mobile */
+html, body {
+    overflow-x: hidden;
+}
+.me-internal-wrapper {
+    overflow-x: hidden;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* Override Gutenberg is-layout-constrained constraint on me-internal-wrapper */
