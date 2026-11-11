@@ -153,6 +153,60 @@ add_shortcode('mercado_pesquisas_mercado', 'me_pesquisas_mercado_render');
 // Backwards compatibility for old shortcode
 add_shortcode('mercado_numeros_setor', 'me_pesquisas_mercado_render');
 
+/**
+ * Helper: Metadados das 3 Tipologias de Dados do Observatório
+ * - terceiros: Institutos e consultorias internacionais
+ * - proprios: Pesquisas exclusivas MercadoErótico.org
+ * - setoriais: Censos e associações da indústria (ABIPEA)
+ */
+function mercado_get_radar_provenance_info($prov) {
+    switch ($prov) {
+        case 'proprios':
+            return array(
+                'slug'        => 'proprios',
+                'label'       => 'Dados Próprios',
+                'short_label' => 'Próprio',
+                'subtitle'    => 'Pesquisas Exclusivas MercadoErótico.org',
+                'icon'        => '★',
+                'fa_icon'     => 'fas fa-certificate',
+                'color'       => '#e31c61',
+                'bg_badge'    => '#fff1f5',
+                'border'      => 'rgba(227, 28, 97, 0.35)',
+                'badge_class' => 'prov-proprios',
+                'desc'        => 'Pesquisas empíricas, censos de consultoras, auditorias de varejo e painéis exclusivos de consumidores conduzidos diretamente pela equipe de inteligência e jornalismo do MercadoErótico.org.'
+            );
+        case 'setoriais':
+            return array(
+                'slug'        => 'setoriais',
+                'label'       => 'Dados Setoriais',
+                'short_label' => 'Setorial',
+                'subtitle'    => 'Censos & Associações da Indústria',
+                'icon'        => '🏛️',
+                'fa_icon'     => 'fas fa-landmark',
+                'color'       => '#0284c7',
+                'bg_badge'    => '#f0f9ff',
+                'border'      => 'rgba(2, 132, 199, 0.35)',
+                'badge_class' => 'prov-setoriais',
+                'desc'        => 'Informações obtidas em censos oficiais, rankings de categorias e levantamentos promovidos por associações representativas da indústria (como a ABIPEA) e entidades setoriais brasileiras.'
+            );
+        case 'terceiros':
+        default:
+            return array(
+                'slug'        => 'terceiros',
+                'label'       => 'Dados de Terceiros',
+                'short_label' => 'Terceiros',
+                'subtitle'    => 'Institutos & Consultorias Globais',
+                'icon'        => '🌐',
+                'fa_icon'     => 'fas fa-globe',
+                'color'       => '#7c3aed',
+                'bg_badge'    => '#f5f3ff',
+                'border'      => 'rgba(124, 58, 237, 0.35)',
+                'badge_class' => 'prov-terceiros',
+                'desc'        => 'Pesquisas macroeconômicas de consultorias e institutos internacionais (Grand View Research, Statista, Allied Market Research, Eurostat, MRFR). Valores em dólar/euro com paridade PTAX oficial do Banco Central.'
+            );
+    }
+}
+
 function mercado_get_default_radar_kpis() {
     return array(
         array('num' => 'US$ 42+ Bi', 'label' => 'Mercado Global Atual'),
@@ -168,6 +222,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-1',
             'cats' => 'all,global,consumo',
             'cat_label' => 'Mercado Global',
+            'provenance' => 'terceiros',
             'icon' => '🌐',
             'value' => 'US$ 42+ Bi',
             'tag' => 'Faturamento Global',
@@ -180,6 +235,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-2',
             'cats' => 'all,global,inovacao',
             'cat_label' => 'Projeção 2030',
+            'provenance' => 'terceiros',
             'icon' => '🚀',
             'value' => 'US$ 80 a 115 Bi',
             'tag' => 'Expansão Composta',
@@ -192,6 +248,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-3',
             'cats' => 'all,brasil,varejo',
             'cat_label' => 'Panorama Brasil',
+            'provenance' => 'setoriais',
             'icon' => '🇧🇷',
             'value' => 'R$ 2,5+ Bi',
             'tag' => 'Movimentação Anual',
@@ -204,6 +261,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-4',
             'cats' => 'all,brasil,consumo',
             'cat_label' => 'Empreendedorismo',
+            'provenance' => 'setoriais',
             'icon' => '👩‍💼',
             'value' => '77,9%',
             'tag' => 'Liderança Feminina',
@@ -216,6 +274,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-5',
             'cats' => 'all,inovacao,global',
             'cat_label' => 'Sextech & IoT',
+            'provenance' => 'terceiros',
             'icon' => '⚡',
             'value' => '+22% a.a.',
             'tag' => 'Inovação Tecnológica',
@@ -228,6 +287,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-6',
             'cats' => 'all,global,varejo',
             'cat_label' => 'Estados Unidos',
+            'provenance' => 'terceiros',
             'icon' => '🇺🇸',
             'value' => 'US$ 20 Bi',
             'tag' => 'Maior Mercado',
@@ -240,6 +300,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-7',
             'cats' => 'all,brasil,varejo',
             'cat_label' => 'Mix de Produtos',
+            'provenance' => 'setoriais',
             'icon' => '🧴',
             'value' => '31,3%',
             'tag' => 'Categoria Líder Brasil',
@@ -252,18 +313,20 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-8',
             'cats' => 'all,brasil,varejo',
             'cat_label' => 'Venda Direta',
+            'provenance' => 'proprios',
             'icon' => '🛍️',
             'value' => '+150 Mil',
             'tag' => 'Consultoras Ativas',
             'title' => 'Consultoras Independentes & Venda Domiciliar',
-            'desc' => 'Mais de 150 mil profissionais atuam no modelo de venda domiciliar e eventos privativos como chás de lingerie, levando consultoria personalizada, educação corporal e desmistificação para lares de todo o território brasileiro.',
-            'source' => 'Levantamento da Indústria Íntima',
-            'date' => 'Censo de Atuação'
+            'desc' => 'Levantamento exclusivo realizado pelo MercadoErótico.org mapeando mais de 150 mil profissionais na venda domiciliar, eventos privativos e consultoria de bem-estar corporal em todas as regiões do Brasil.',
+            'source' => 'Censo de Consultoras MercadoErótico.org',
+            'date' => 'Levantamento Próprio'
         ),
         array(
             'id' => 'card-9',
             'cats' => 'all,global,consumo',
             'cat_label' => 'Europa',
+            'provenance' => 'terceiros',
             'icon' => '🇪🇺',
             'value' => '€ 9,8 Bi',
             'tag' => 'Saúde & Fisioterapia',
@@ -276,6 +339,7 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-10',
             'cats' => 'all,global,inovacao',
             'cat_label' => 'Ásia-Pacífico',
+            'provenance' => 'terceiros',
             'icon' => '🌏',
             'value' => '9,2% CAGR',
             'tag' => 'Aceleração Regional',
@@ -288,25 +352,27 @@ function mercado_get_default_radar_cards() {
             'id' => 'card-11',
             'cats' => 'all,consumo,global',
             'cat_label' => 'Consumo Consciente',
+            'provenance' => 'proprios',
             'icon' => '🌱',
             'value' => '68%',
             'tag' => 'Sustentabilidade',
             'title' => 'Exigência por Materiais Atóxicos e Sustentáveis',
-            'desc' => '68% dos novos compradores globais priorizam produtos fabricados em silicone de grau médico atóxico, livres de ftalatos, com baterias recarregáveis por indução e embalagens ecológicas com neutralização de carbono.',
-            'source' => 'Global Eco-Intimacy Survey',
-            'date' => 'Painel Internacional'
+            'desc' => 'Pesquisa conduzida pela redação do MercadoErótico.org com leitores e compradores: 68% priorizam itens em silicone de grau médico atóxico, livres de ftalatos, com carregamento magnético e embalagens ecológicas.',
+            'source' => 'Painel de Consumidores MercadoErótico.org',
+            'date' => 'Pesquisa Editorial Exclusiva'
         ),
         array(
             'id' => 'card-12',
             'cats' => 'all,varejo,global',
             'cat_label' => 'Varejo Global',
+            'provenance' => 'proprios',
             'icon' => '🏬',
             'value' => 'Mainstream',
             'tag' => 'Canais de Luxo',
             'title' => 'Entrada em Grandes Cadeias Globais de Beleza',
-            'desc' => 'Grandes magazines e redes mundiais como Sephora, Ulta Beauty, Boots e Nordstrom abriram corredores dedicados exclusivamente ao Sexual Wellness ao lado de skincare e perfumaria de prestígio.',
-            'source' => 'Retail Trends International',
-            'date' => 'Mapeamento de Gôndolas'
+            'desc' => 'Monitoramento contínuo da redação sobre o varejo mainstream: grandes redes como Sephora, Boots e redes farmacêuticas abriram seções exclusivas de Sexual Wellness integradas a skincare e autocuidado.',
+            'source' => 'Auditoria de Varejo MercadoErótico.org',
+            'date' => 'Monitoramento Contínuo'
         )
     );
 }
@@ -315,6 +381,19 @@ function mercado_get_radar_cards() {
     $cards = get_option('mercado_radar_cards', null);
     if (!is_array($cards) || empty($cards)) {
         return mercado_get_default_radar_cards();
+    }
+    // Garantir retrocompatibilidade caso algum card salvo não tenha 'provenance'
+    foreach ($cards as &$c) {
+        if (empty($c['provenance'])) {
+            $src = strtolower($c['source'] ?? '');
+            if (strpos($src, 'mercadoerótico') !== false || strpos($src, 'mercado erótico') !== false || strpos($src, 'painel de consumidores') !== false || strpos($src, 'censo de consultoras') !== false) {
+                $c['provenance'] = 'proprios';
+            } elseif (strpos($src, 'abipea') !== false || strpos($src, 'associação') !== false || strpos($src, 'censo oficial') !== false) {
+                $c['provenance'] = 'setoriais';
+            } else {
+                $c['provenance'] = 'terceiros';
+            }
+        }
     }
     return $cards;
 }
@@ -397,6 +476,17 @@ function me_pesquisas_mercado_render() {
     $cards = mercado_get_radar_cards();
     $kpis = mercado_get_radar_kpis();
 
+    // Contagem por proveniência para as abas e matriz metodológica
+    $count_terceiros = 0;
+    $count_proprios = 0;
+    $count_setoriais = 0;
+    foreach ($cards as $c) {
+        $p = $c['provenance'] ?? 'terceiros';
+        if ($p === 'proprios') $count_proprios++;
+        elseif ($p === 'setoriais') $count_setoriais++;
+        else $count_terceiros++;
+    }
+
     // Dados automatizados do portal
     $pesquisas_cat = get_category_by_slug('pesquisas');
     $pesquisas_count = $pesquisas_cat ? intval($pesquisas_cat->count) : 153;
@@ -436,37 +526,151 @@ function me_pesquisas_mercado_render() {
             </div>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="radar-filter-bar">
-            <div class="filter-headline">
-                <i class="fas fa-filter"></i> <strong>Filtrar Indicadores:</strong>
+        <!-- MATRIZ METODOLÓGICA: CRITÉRIOS DE RIGOR & CLASSIFICAÇÃO DOS DADOS -->
+        <section class="radar-methodology-section" aria-label="Matriz de Rigor Metodológico">
+            <div class="methodology-card-panel">
+                <div class="methodology-panel-header">
+                    <div class="methodology-badge">
+                        <i class="fas fa-microscope"></i> RIGOR METODOLÓGICO &bull; TRANSPARÊNCIA ANALÍTICA
+                    </div>
+                    <h2 class="methodology-title">Classificação &amp; Segregação das Informações</h2>
+                    <p class="methodology-subtitle">
+                        Para assegurar a máxima credibilidade do observatório, distinguimos com precisão a natureza de cada dado. Clique em qualquer um dos blocos para filtrar instantaneamente os indicadores correspondentes:
+                    </p>
+                </div>
+
+                <div class="methodology-grid">
+                    <!-- 1. Dados de Terceiros -->
+                    <div class="methodology-col col-terceiros" onclick="filterRadarCards('prov', 'terceiros', document.querySelector('.radar-prov-btn[data-prov=\'terceiros\']'))" role="button" tabindex="0" title="Clique para filtrar apenas Dados de Terceiros">
+                        <div class="methodology-col-top">
+                            <span class="methodology-icon"><i class="fas fa-globe"></i></span>
+                            <div class="methodology-col-labels">
+                                <span class="methodology-type-pill prov-terceiros">DADOS DE TERCEIROS</span>
+                                <h3 class="methodology-col-name">Institutos Internacionais</h3>
+                            </div>
+                        </div>
+                        <p class="methodology-col-desc">
+                            Pesquisas macroeconômicas consolidadas por institutos e consultorias globais de alta autoridade (como <strong>Grand View Research</strong>, <strong>Statista</strong>, <strong>Eurostat</strong> e <strong>Allied Market Research</strong>). Inclui conversão em tempo real pelo câmbio oficial BACEN.
+                        </p>
+                        <div class="methodology-col-foot">
+                            <span class="methodology-stat-badge"><strong><?php echo $count_terceiros; ?></strong> Indicadores Globais</span>
+                            <span class="methodology-click-hint">Filtrar <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Dados Próprios -->
+                    <div class="methodology-col col-proprios" onclick="filterRadarCards('prov', 'proprios', document.querySelector('.radar-prov-btn[data-prov=\'proprios\']'))" role="button" tabindex="0" title="Clique para filtrar apenas Dados Próprios">
+                        <div class="methodology-col-top">
+                            <span class="methodology-icon"><i class="fas fa-certificate"></i></span>
+                            <div class="methodology-col-labels">
+                                <span class="methodology-type-pill prov-proprios">DADOS PRÓPRIOS</span>
+                                <h3 class="methodology-col-name">MercadoErótico.org</h3>
+                            </div>
+                        </div>
+                        <p class="methodology-col-desc">
+                            Levantamentos empíricos exclusivos produzidos pela redação e inteligência do <strong>MercadoErótico.org</strong>, englobando censos de venda direta/consultoras, auditorias contínuas de gôndolas de varejo e painéis diretos com consumidores.
+                        </p>
+                        <div class="methodology-col-foot">
+                            <span class="methodology-stat-badge"><strong><?php echo $count_proprios; ?></strong> Pesquisas Exclusivas</span>
+                            <span class="methodology-click-hint">Filtrar <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Dados Setoriais -->
+                    <div class="methodology-col col-setoriais" onclick="filterRadarCards('prov', 'setoriais', document.querySelector('.radar-prov-btn[data-prov=\'setoriais\']'))" role="button" tabindex="0" title="Clique para filtrar apenas Dados Setoriais">
+                        <div class="methodology-col-top">
+                            <span class="methodology-icon"><i class="fas fa-landmark"></i></span>
+                            <div class="methodology-col-labels">
+                                <span class="methodology-type-pill prov-setoriais">DADOS SETORIAIS</span>
+                                <h3 class="methodology-col-name">Censos &amp; Associações</h3>
+                            </div>
+                        </div>
+                        <p class="methodology-col-desc">
+                            Informações e censos estatísticos oficiais obtidos junto a entidades de classe e associações representativas da indústria e do comércio brasileiro (como a <strong>ABIPEA</strong>), auditando faturamento nacional e liderança por categorias.
+                        </p>
+                        <div class="methodology-col-foot">
+                            <span class="methodology-stat-badge"><strong><?php echo $count_setoriais; ?></strong> Censos Oficiais</span>
+                            <span class="methodology-click-hint">Filtrar <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="radar-tabs-nav" id="radarTabsNav">
-                <button type="button" class="radar-tab-btn active" data-filter="all" onclick="filterRadarCards('all', this)">
-                    📊 Todos os Indicadores (<?php echo count($cards); ?>)
-                </button>
-                <button type="button" class="radar-tab-btn" data-filter="global" onclick="filterRadarCards('global', this)">
-                    🌍 Internacional &amp; Global
-                </button>
-                <button type="button" class="radar-tab-btn" data-filter="brasil" onclick="filterRadarCards('brasil', this)">
-                    🇧🇷 Brasil &amp; América Latina
-                </button>
-                <button type="button" class="radar-tab-btn" data-filter="inovacao" onclick="filterRadarCards('inovacao', this)">
-                    ⚡ Sextech &amp; Inovação IoT
-                </button>
-                <button type="button" class="radar-tab-btn" data-filter="varejo" onclick="filterRadarCards('varejo', this)">
-                    🛒 Varejo &amp; Distribuição
-                </button>
-                <button type="button" class="radar-tab-btn" data-filter="consumo" onclick="filterRadarCards('consumo', this)">
-                    👥 Comportamento &amp; Demografia
-                </button>
+        </section>
+
+        <!-- Filter Bar Interativo: Proveniência + Segmento -->
+        <div class="radar-filter-bar">
+            <!-- Nível 1: Origem / Proveniência dos Dados -->
+            <div class="filter-provenance-row">
+                <div class="filter-headline">
+                    <i class="fas fa-layer-group"></i> <strong>Filtrar por Origem:</strong>
+                </div>
+                <div class="radar-prov-tabs" id="radarProvTabs">
+                    <button type="button" class="radar-prov-btn active" data-prov="all" onclick="filterRadarCards('prov', 'all', this)">
+                        <span>📊 Todas as Origens (<?php echo count($cards); ?>)</span>
+                    </button>
+                    <button type="button" class="radar-prov-btn btn-terceiros" data-prov="terceiros" onclick="filterRadarCards('prov', 'terceiros', this)">
+                        <i class="fas fa-globe"></i>
+                        <span>Dados de Terceiros (<?php echo $count_terceiros; ?>)</span>
+                    </button>
+                    <button type="button" class="radar-prov-btn btn-proprios" data-prov="proprios" onclick="filterRadarCards('prov', 'proprios', this)">
+                        <i class="fas fa-certificate"></i>
+                        <span>Dados Próprios (<?php echo $count_proprios; ?>)</span>
+                    </button>
+                    <button type="button" class="radar-prov-btn btn-setoriais" data-prov="setoriais" onclick="filterRadarCards('prov', 'setoriais', this)">
+                        <i class="fas fa-landmark"></i>
+                        <span>Dados Setoriais (<?php echo $count_setoriais; ?>)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nível 2: Recorte Temático -->
+            <div class="filter-topic-row">
+                <div class="filter-headline">
+                    <i class="fas fa-tags"></i> <strong>Recorte Temático:</strong>
+                </div>
+                <div class="radar-topic-tabs" id="radarTopicTabs">
+                    <button type="button" class="radar-topic-btn active" data-topic="all" onclick="filterRadarCards('topic', 'all', this)">
+                        Todos os Segmentos
+                    </button>
+                    <button type="button" class="radar-topic-btn" data-topic="global" onclick="filterRadarCards('topic', 'global', this)">
+                        🌍 Internacional
+                    </button>
+                    <button type="button" class="radar-topic-btn" data-topic="brasil" onclick="filterRadarCards('topic', 'brasil', this)">
+                        🇧🇷 Brasil &amp; Latam
+                    </button>
+                    <button type="button" class="radar-topic-btn" data-topic="inovacao" onclick="filterRadarCards('topic', 'inovacao', this)">
+                        ⚡ Sextech &amp; IoT
+                    </button>
+                    <button type="button" class="radar-topic-btn" data-topic="varejo" onclick="filterRadarCards('topic', 'varejo', this)">
+                        🛒 Varejo &amp; Distribuição
+                    </button>
+                    <button type="button" class="radar-topic-btn" data-topic="consumo" onclick="filterRadarCards('topic', 'consumo', this)">
+                        👥 Comportamento
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Cards Grid -->
+        <!-- Cards Grid com Segregação Visual de Proveniência -->
         <div class="radar-cards-grid" id="radarCardsGrid">
-            <?php foreach ($cards as $c): ?>
-                <div class="radar-card" data-cats="<?php echo esc_attr($c['cats']); ?>" id="<?php echo esc_attr($c['id']); ?>">
+            <?php foreach ($cards as $c): 
+                $prov_slug = $c['provenance'] ?? 'terceiros';
+                $prov_info = mercado_get_radar_provenance_info($prov_slug);
+            ?>
+                <div class="radar-card card-prov-<?php echo esc_attr($prov_info['slug']); ?>" 
+                     data-cats="<?php echo esc_attr($c['cats']); ?>" 
+                     data-provenance="<?php echo esc_attr($prov_info['slug']); ?>" 
+                     id="<?php echo esc_attr($c['id']); ?>">
+                    
+                    <!-- Provenance Header Ribbon -->
+                    <div class="card-prov-ribbon ribbon-<?php echo esc_attr($prov_info['slug']); ?>">
+                        <span class="ribbon-label">
+                            <i class="<?php echo esc_attr($prov_info['fa_icon']); ?>"></i>
+                            <?php echo esc_html($prov_info['label']); ?>
+                        </span>
+                        <span class="ribbon-sub"><?php echo esc_html($prov_info['subtitle']); ?></span>
+                    </div>
+
                     <div class="radar-card-top">
                         <div class="card-icon-tag">
                             <span class="card-icon"><?php echo $c['icon']; ?></span>
@@ -492,7 +696,10 @@ function me_pesquisas_mercado_render() {
 
                     <div class="radar-card-meta">
                         <div class="card-source">
-                            <i class="fas fa-chart-pie"></i> <strong>Fonte:</strong> <?php echo esc_html($c['source']); ?>
+                            <span class="source-prov-chip chip-<?php echo esc_attr($prov_info['slug']); ?>">
+                                <i class="<?php echo esc_attr($prov_info['fa_icon']); ?>"></i> <?php echo esc_html($prov_info['short_label']); ?>
+                            </span>
+                            <span class="source-text"><strong>Fonte:</strong> <?php echo esc_html($c['source']); ?></span>
                         </div>
                         <div class="card-period">
                             <i class="fas fa-calendar-alt"></i> <?php echo esc_html($c['date']); ?>
@@ -500,7 +707,7 @@ function me_pesquisas_mercado_render() {
                     </div>
 
                     <div class="radar-card-footer">
-                        <button type="button" class="btn-solicitar-editorial" onclick="openEditorialModal('<?php echo esc_js($c['title']); ?>', '<?php echo esc_js($c['value']); ?>', '<?php echo esc_js($c['source']); ?>')">
+                        <button type="button" class="btn-solicitar-editorial" onclick="openEditorialModal('<?php echo esc_js($c['title']); ?>', '<?php echo esc_js($c['value']); ?>', '<?php echo esc_js($c['source']); ?>', '<?php echo esc_js($prov_info['label']); ?>')">
                             <i class="fas fa-file-contract"></i> Solicitar Detalhes à Equipe Editorial
                         </button>
                     </div>
@@ -508,6 +715,14 @@ function me_pesquisas_mercado_render() {
             <?php endforeach; ?>
         </div>
 
+        <div id="radarNoResults" class="radar-no-results" style="display:none;">
+            <i class="fas fa-search" style="font-size:2rem;color:#94a3b8;margin-bottom:12px;"></i>
+            <h3>Nenhum indicador encontrado para esta combinação</h3>
+            <p>Tente selecionar outro segmento ou clique abaixo para ver todos os dados.</p>
+            <button type="button" class="btn-radar-reset-filter" onclick="resetRadarFilters()">
+                <i class="fas fa-undo"></i> Redefinir Todos os Filtros
+            </button>
+        </div>
         <!-- SEÇÃO DINÂMICA: ÚLTIMAS PESQUISAS & ESTUDOS PUBLICADOS PELA REDAÇÃO -->
                 <!-- SEÇÃO EDITORIAL: PESQUISAS & ESTUDOS DA REDAÇÃO -->
         <?php
@@ -644,29 +859,68 @@ function me_pesquisas_mercado_render() {
 
     <!-- Scripts and Styles -->
     <script>
-    function filterRadarCards(filter, btn) {
-        const buttons = document.querySelectorAll('#radarTabsNav .radar-tab-btn');
-        buttons.forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
+    let currentProvFilter = 'all';
+    let currentTopicFilter = 'all';
 
+    function filterRadarCards(type, val, btn) {
+        if (type === 'prov') {
+            currentProvFilter = val;
+            const provButtons = document.querySelectorAll('#radarProvTabs .radar-prov-btn');
+            provButtons.forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        } else if (type === 'topic') {
+            currentTopicFilter = val;
+            const topicButtons = document.querySelectorAll('#radarTopicTabs .radar-topic-btn');
+            topicButtons.forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        let visibleCount = 0;
         const cards = document.querySelectorAll('#radarCardsGrid .radar-card');
         cards.forEach(card => {
-            const cats = (card.getAttribute('data-cats') || '').split(',');
-            if (filter === 'all' || cats.includes(filter)) {
+            const cardProv = card.getAttribute('data-provenance') || 'terceiros';
+            const cardCats = (card.getAttribute('data-cats') || '').split(',');
+
+            const matchProv = (currentProvFilter === 'all' || cardProv === currentProvFilter);
+            const matchTopic = (currentTopicFilter === 'all' || cardCats.includes(currentTopicFilter));
+
+            if (matchProv && matchTopic) {
                 card.style.display = 'flex';
+                visibleCount++;
             } else {
                 card.style.display = 'none';
             }
         });
+
+        const noRes = document.getElementById('radarNoResults');
+        if (noRes) {
+            noRes.style.display = (visibleCount === 0) ? 'block' : 'none';
+        }
     }
 
-    function openEditorialModal(title, value, source) {
+    function resetRadarFilters() {
+        currentProvFilter = 'all';
+        currentTopicFilter = 'all';
+        document.querySelectorAll('#radarProvTabs .radar-prov-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-prov') === 'all');
+        });
+        document.querySelectorAll('#radarTopicTabs .radar-topic-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-topic') === 'all');
+        });
+        document.querySelectorAll('#radarCardsGrid .radar-card').forEach(card => {
+            card.style.display = 'flex';
+        });
+        const noRes = document.getElementById('radarNoResults');
+        if (noRes) noRes.style.display = 'none';
+    }
+
+    function openEditorialModal(title, value, source, provLabel) {
         document.getElementById('modalIndicatorTitle').innerText = title;
         document.getElementById('modalIndicatorValue').innerText = value;
-        document.getElementById('modalIndicatorSource').innerText = source;
+        document.getElementById('modalIndicatorSource').innerText = source + (provLabel ? ' [' + provLabel + ']' : '');
 
         const phone = '5562982763039';
-        const msg = 'Olá equipe editorial do Portal Mercado Erótico! Gostaria de receber os dados detalhados e relatório completo sobre a pesquisa "' + title + '" (Valor: ' + value + ', Fonte: ' + source + ').';
+        const msg = 'Olá equipe editorial do Portal Mercado Erótico! Gostaria de receber os dados detalhados e relatório completo sobre a pesquisa "' + title + '" (Valor: ' + value + ', Fonte: ' + source + (provLabel ? ', Tipo: ' + provLabel : '') + ').';
         
         const waUrl = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
         const mailUrl = 'mailto:contato@mercadoerotico.org?subject=' + encodeURIComponent('Solicitação Editorial: ' + title) + '&body=' + encodeURIComponent(msg);
@@ -706,6 +960,458 @@ function me_pesquisas_mercado_render() {
         padding: 20px 20px 80px;
     }
     
+    
+    /* MATRIZ METODOLÓGICA & CREDIBILIDADE EDITORIAL */
+    .radar-methodology-section {
+        margin: 35px 0 30px;
+    }
+    .methodology-card-panel {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        padding: 35px 30px 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    .methodology-card-panel::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #7c3aed 0%, #e31c61 50%, #0284c7 100%);
+    }
+    .methodology-panel-header {
+        text-align: center;
+        max-width: 820px;
+        margin: 0 auto 30px;
+    }
+    .methodology-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+    .methodology-badge i {
+        color: #e31c61;
+    }
+    .methodology-title {
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin: 0 0 10px;
+        line-height: 1.25;
+        letter-spacing: -0.3px;
+    }
+    .methodology-subtitle {
+        font-size: 0.98rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+    .methodology-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+    }
+    .methodology-col {
+        border-radius: 14px;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        position: relative;
+    }
+    .methodology-col:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+    }
+    /* Coluna Terceiros */
+    .methodology-col.col-terceiros {
+        background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+        border: 1.5px solid #e9d5ff;
+    }
+    .methodology-col.col-terceiros:hover {
+        border-color: #7c3aed;
+    }
+    .methodology-col.col-terceiros .methodology-icon {
+        background: #7c3aed;
+        color: #ffffff;
+    }
+    /* Coluna Próprios */
+    .methodology-col.col-proprios {
+        background: linear-gradient(180deg, #fff1f5 0%, #ffffff 100%);
+        border: 1.5px solid #fbcfe8;
+    }
+    .methodology-col.col-proprios:hover {
+        border-color: #e31c61;
+    }
+    .methodology-col.col-proprios .methodology-icon {
+        background: #e31c61;
+        color: #ffffff;
+    }
+    /* Coluna Setoriais */
+    .methodology-col.col-setoriais {
+        background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+        border: 1.5px solid #bae6fd;
+    }
+    .methodology-col.col-setoriais:hover {
+        border-color: #0284c7;
+    }
+    .methodology-col.col-setoriais .methodology-icon {
+        background: #0284c7;
+        color: #ffffff;
+    }
+
+    .methodology-col-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .methodology-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    }
+    .methodology-col-labels {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .methodology-type-pill {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+    .methodology-type-pill.prov-terceiros { color: #7c3aed; }
+    .methodology-type-pill.prov-proprios  { color: #e31c61; }
+    .methodology-type-pill.prov-setoriais { color: #0284c7; }
+    .methodology-col-name {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .methodology-col-desc {
+        font-size: 0.88rem;
+        color: #475569;
+        line-height: 1.55;
+        margin: 0 0 18px;
+        flex: 1;
+    }
+    .methodology-col-desc strong {
+        color: #1e293b;
+    }
+    .methodology-col-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px dashed #e2e8f0;
+    }
+    .methodology-stat-badge {
+        font-size: 0.78rem;
+        color: #64748b;
+    }
+    .methodology-stat-badge strong {
+        color: #0f172a;
+    }
+    .methodology-click-hint {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .methodology-col:hover .methodology-click-hint {
+        color: #0f172a;
+        transform: translateX(3px);
+    }
+
+    /* FILTER BAR DUPLA */
+    .radar-filter-bar {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 22px 24px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin: 0 0 35px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .filter-provenance-row,
+    .filter-topic-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .filter-provenance-row {
+        padding-bottom: 14px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .filter-headline {
+        font-size: 0.86rem;
+        color: #475569;
+        white-space: nowrap;
+        min-width: 155px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .filter-headline i {
+        color: #e31c61;
+    }
+    .radar-prov-tabs,
+    .radar-topic-tabs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+    .radar-prov-btn {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.2s ease;
+    }
+    .radar-prov-btn:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+    .radar-prov-btn.active {
+        background: #0f172a;
+        color: #ffffff;
+        border-color: #0f172a;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.25);
+    }
+    .radar-prov-btn.btn-terceiros.active {
+        background: #7c3aed;
+        border-color: #7c3aed;
+        box-shadow: 0 3px 12px rgba(124, 58, 237, 0.35);
+    }
+    .radar-prov-btn.btn-proprios.active {
+        background: #e31c61;
+        border-color: #e31c61;
+        box-shadow: 0 3px 12px rgba(227, 28, 97, 0.35);
+    }
+    .radar-prov-btn.btn-setoriais.active {
+        background: #0284c7;
+        border-color: #0284c7;
+        box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35);
+    }
+
+    .radar-topic-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: #64748b;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .radar-topic-btn:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .radar-topic-btn.active {
+        background: #f1f5f9;
+        color: #0f172a;
+        font-weight: 800;
+        border: 1px solid #cbd5e1;
+    }
+
+    /* CARDS: SEGREGAÇÃO VISUAL POR PROVENIÊNCIA */
+    .radar-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        padding: 20px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .radar-card.card-prov-terceiros {
+        border-top: 4px solid #7c3aed;
+    }
+    .radar-card.card-prov-terceiros:hover {
+        border-color: #c4b5fd;
+        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.12);
+        transform: translateY(-4px);
+    }
+    .radar-card.card-prov-proprios {
+        border-top: 4px solid #e31c61;
+    }
+    .radar-card.card-prov-proprios:hover {
+        border-color: #fbcfe8;
+        box-shadow: 0 12px 30px rgba(227, 28, 97, 0.12);
+        transform: translateY(-4px);
+    }
+    .radar-card.card-prov-setoriais {
+        border-top: 4px solid #0284c7;
+    }
+    .radar-card.card-prov-setoriais:hover {
+        border-color: #bae6fd;
+        box-shadow: 0 12px 30px rgba(2, 132, 199, 0.12);
+        transform: translateY(-4px);
+    }
+
+    /* CARD HEADER RIBBON */
+    .card-prov-ribbon {
+        margin: -20px -24px 16px -24px;
+        padding: 8px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid;
+    }
+    .card-prov-ribbon.ribbon-terceiros {
+        background: #faf5ff;
+        border-bottom-color: #ede9fe;
+        color: #6d28d9;
+    }
+    .card-prov-ribbon.ribbon-proprios {
+        background: #fff1f5;
+        border-bottom-color: #ffe4e6;
+        color: #be185d;
+    }
+    .card-prov-ribbon.ribbon-setoriais {
+        background: #f0f9ff;
+        border-bottom-color: #e0f2fe;
+        color: #0369a1;
+    }
+    .ribbon-label {
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ribbon-sub {
+        font-weight: 600;
+        opacity: 0.85;
+    }
+
+    /* SOURCE PROVENANCE CHIPS */
+    .source-prov-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-right: 6px;
+    }
+    .source-prov-chip.chip-terceiros {
+        background: #ede9fe;
+        color: #6d28d9;
+        border: 1px solid #ddd6fe;
+    }
+    .source-prov-chip.chip-proprios {
+        background: #fce7f3;
+        color: #be185d;
+        border: 1px solid #fbcfe8;
+    }
+    .source-prov-chip.chip-setoriais {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    /* NO RESULTS BLOCK */
+    .radar-no-results {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 50px 25px;
+        text-align: center;
+        margin: 30px auto;
+        max-width: 550px;
+    }
+    .radar-no-results h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 8px;
+    }
+    .radar-no-results p {
+        font-size: 0.95rem;
+        color: #64748b;
+        margin: 0 0 20px;
+    }
+    .btn-radar-reset-filter {
+        background: #e31c61;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .btn-radar-reset-filter:hover {
+        background: #c21550;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 900px) {
+        .methodology-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .filter-provenance-row,
+        .filter-topic-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
     /* Hero */
     .radar-hero {
         background: radial-gradient(circle at 50% 25%, #240c26 0%, #0d0413 100%);
@@ -1521,17 +2227,23 @@ function mercado_pesquisas_handle_admin_actions() {
             $cats = 'all,' . $cats;
         }
 
+        $prov = isset($_POST['card_provenance']) ? sanitize_key($_POST['card_provenance']) : 'terceiros';
+        if (!in_array($prov, array('terceiros', 'proprios', 'setoriais'))) {
+            $prov = 'terceiros';
+        }
+
         $new_card = array(
-            'id'        => $card_id,
-            'cats'      => $cats,
-            'cat_label' => sanitize_text_field($_POST['card_cat_label']),
-            'icon'      => sanitize_text_field($_POST['card_icon']),
-            'value'     => sanitize_text_field($_POST['card_value']),
-            'tag'       => sanitize_text_field($_POST['card_tag']),
-            'title'     => sanitize_text_field($_POST['card_title']),
-            'desc'      => sanitize_textarea_field($_POST['card_desc']),
-            'source'    => sanitize_text_field($_POST['card_source']),
-            'date'      => sanitize_text_field($_POST['card_date']),
+            'id'         => $card_id,
+            'cats'       => $cats,
+            'cat_label'  => sanitize_text_field($_POST['card_cat_label']),
+            'provenance' => $prov,
+            'icon'       => sanitize_text_field($_POST['card_icon']),
+            'value'      => sanitize_text_field($_POST['card_value']),
+            'tag'        => sanitize_text_field($_POST['card_tag']),
+            'title'      => sanitize_text_field($_POST['card_title']),
+            'desc'       => sanitize_textarea_field($_POST['card_desc']),
+            'source'     => sanitize_text_field($_POST['card_source']),
+            'date'       => sanitize_text_field($_POST['card_date']),
         );
 
         $exists = false;
@@ -1708,6 +2420,7 @@ function mercado_pesquisas_render_admin_dashboard() {
                                     <th style="width:50px;">Ícone</th>
                                     <th style="width:130px;">Valor Principal</th>
                                     <th>Título &amp; Categoria</th>
+                                    <th style="width:140px;">Tipologia</th>
                                     <th style="width:160px;">Fonte &amp; Ano</th>
                                     <th style="width:120px;text-align:right;">Ações</th>
                                 </tr>
@@ -1722,6 +2435,20 @@ function mercado_pesquisas_render_admin_dashboard() {
                                                 <strong><?php echo esc_html($c['title']); ?></strong><br>
                                                 <span class="me-cat-pill"><?php echo esc_html($c['cat_label']); ?></span>
                                                 <small style="color:#94a3b8;margin-left:6px;">Filtros: <code><?php echo esc_html($c['cats']); ?></code></small>
+                                            </td>
+                                            <td>
+                                                <?php 
+                                                $p_info = mercado_get_radar_provenance_info($c['provenance'] ?? 'terceiros'); 
+                                                $badge_styles = array(
+                                                    'terceiros' => 'background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;',
+                                                    'proprios'  => 'background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;',
+                                                    'setoriais' => 'background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;'
+                                                );
+                                                $bstyle = $badge_styles[$p_info['slug']] ?? $badge_styles['terceiros'];
+                                                ?>
+                                                <span style="<?php echo $bstyle; ?>padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;display:inline-block;">
+                                                    <?php echo $p_info['icon'] . ' ' . esc_html($p_info['label']); ?>
+                                                </span>
                                             </td>
                                             <td>
                                                 <small><strong><?php echo esc_html($c['source']); ?></strong></small><br>
@@ -1788,6 +2515,17 @@ function mercado_pesquisas_render_admin_dashboard() {
                                 <label><strong>Ícone Visual (Emoji ou Caractere):</strong></label><br>
                                 <input type="text" name="card_icon" value="<?php echo $editing_card ? esc_attr($editing_card['icon']) : '📊'; ?>" placeholder="Ex: 🌐, 🇧🇷, ⚡, 🛒, 👥, 📈" class="regular-text" style="width:80px;font-size:18px;">
                                 <small style="color:#64748b;display:block;margin-top:4px;">Copie e cole um emoji representativo.</small>
+                            </p>
+
+                            <p>
+                                <label><strong>Origem / Tipologia da Informação:</strong></label><br>
+                                <?php $cur_prov = $editing_card ? ($editing_card['provenance'] ?? 'terceiros') : 'terceiros'; ?>
+                                <select name="card_provenance" class="widefat" style="font-weight:700;">
+                                    <option value="terceiros" <?php selected($cur_prov, 'terceiros'); ?>>🌐 Dados de Terceiros (Institutos e consultorias internacionais)</option>
+                                    <option value="proprios" <?php selected($cur_prov, 'proprios'); ?>>★ Dados Próprios (Pesquisas exclusivas MercadoErótico.org)</option>
+                                    <option value="setoriais" <?php selected($cur_prov, 'setoriais'); ?>>🏛️ Dados Setoriais (Censos, levantamentos e associações)</option>
+                                </select>
+                                <small style="color:#64748b;display:block;margin-top:4px;">Fundamental para a separação visual e credibilidade do observatório.</small>
                             </p>
 
                             <p>
