@@ -126,6 +126,196 @@ function me_radar_home_callout_render() {
         box-shadow: 0 6px 20px rgba(227, 28, 97, 0.55);
         color: #fff !important;
     }
+    
+    /* Dynamic Articles Feed */
+    .radar-feed-section {
+        background: #f8fafc;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        padding: 40px 30px;
+        margin-bottom: 50px;
+        position: relative;
+    }
+    .radar-feed-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 35px;
+    }
+    .radar-feed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(227, 28, 97, 0.1);
+        color: #e31c61;
+        border: 1px solid rgba(227, 28, 97, 0.25);
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+    .radar-pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0.6);
+        animation: radarPulse 2s infinite;
+    }
+    @keyframes radarPulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .radar-feed-title {
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin: 0 0 10px;
+        letter-spacing: -0.5px;
+    }
+    .radar-feed-sub {
+        font-size: 0.96rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin: 0;
+    }
+    .radar-articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    .radar-article-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .radar-article-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .radar-article-thumb-wrap {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 190px;
+        overflow: hidden;
+        background: #0f172a;
+    }
+    .radar-article-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .radar-article-card:hover .radar-article-img {
+        transform: scale(1.04);
+    }
+    .radar-article-cat-tag {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: #e31c61;
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .radar-article-info {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .radar-article-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    }
+    .radar-article-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .radar-article-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 10px;
+        line-height: 1.4;
+    }
+    .radar-article-title a {
+        color: #0f172a !important;
+        text-decoration: none !important;
+        transition: color 0.2s ease;
+    }
+    .radar-article-title a:hover {
+        color: #e31c61 !important;
+    }
+    .radar-article-excerpt {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 18px;
+        flex: 1;
+    }
+    .radar-article-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #e31c61 !important;
+        text-decoration: none !important;
+        transition: gap 0.2s ease;
+    }
+    .radar-article-btn:hover {
+        gap: 12px;
+    }
+    .radar-feed-footer-bar {
+        text-align: center;
+        margin-top: 10px;
+    }
+    .btn-radar-acervo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #0f172a;
+        color: #fff !important;
+        padding: 13px 26px;
+        border-radius: 50px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+    }
+    .btn-radar-acervo-link:hover {
+        background: #e31c61;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(227, 28, 97, 0.35);
+    }
+    .btn-radar-acervo-link i:first-child {
+        color: #e31c61;
+    }
+    .btn-radar-acervo-link:hover i:first-child {
+        color: #fff;
+    }
+
     @media (max-width: 768px) {
         .radar-strip-inner {
             flex-direction: column;
@@ -152,8 +342,17 @@ add_shortcode('mercado_pesquisas_mercado', 'me_pesquisas_mercado_render');
 // Backwards compatibility for old shortcode
 add_shortcode('mercado_numeros_setor', 'me_pesquisas_mercado_render');
 
-function me_pesquisas_mercado_render() {
-    $cards = array(
+function mercado_get_default_radar_kpis() {
+    return array(
+        array('num' => 'US$ 42+ Bi', 'label' => 'Mercado Global Atual'),
+        array('num' => 'R$ 2,5+ Bi', 'label' => 'Faturamento Anual Brasil'),
+        array('num' => '+8,4% a.a.', 'label' => 'Projeção Média até 2030'),
+        array('num' => '77,9%', 'label' => 'Gestão Feminina no Brasil'),
+    );
+}
+
+function mercado_get_default_radar_cards() {
+    return array(
         array(
             'id' => 'card-1',
             'cats' => 'all,global,consumo',
@@ -299,6 +498,32 @@ function me_pesquisas_mercado_render() {
             'date' => 'Mapeamento de Gôndolas'
         )
     );
+}
+
+function mercado_get_radar_cards() {
+    $cards = get_option('mercado_radar_cards', null);
+    if (!is_array($cards) || empty($cards)) {
+        return mercado_get_default_radar_cards();
+    }
+    return $cards;
+}
+
+function mercado_get_radar_kpis() {
+    $kpis = get_option('mercado_radar_kpis', null);
+    if (!is_array($kpis) || empty($kpis)) {
+        return mercado_get_default_radar_kpis();
+    }
+    return $kpis;
+}
+
+function me_pesquisas_mercado_render() {
+    $cards = mercado_get_radar_cards();
+    $kpis = mercado_get_radar_kpis();
+
+    // Dados automatizados do portal
+    $pesquisas_cat = get_category_by_slug('pesquisas');
+    $pesquisas_count = $pesquisas_cat ? intval($pesquisas_cat->count) : 153;
+    $mes_atual = date_i18n('F \d\e Y');
 
     ob_start();
     ?>
@@ -307,7 +532,7 @@ function me_pesquisas_mercado_render() {
         <div class="radar-hero">
             <div class="radar-hero-badge">
                 <span class="radar-pulse-dot"></span>
-                ★ OBSERVATÓRIO ECONÔMICO &amp; DADOS INTERNACIONAIS
+                ★ OBSERVATÓRIO ECONÔMICO &bull; <?php echo $pesquisas_count; ?> PESQUISAS CATALOGADAS
             </div>
             <h1 class="radar-hero-title">Pesquisas de Mercado &amp; Radar Econômico</h1>
             <p class="radar-hero-subtitle">
@@ -316,30 +541,18 @@ function me_pesquisas_mercado_render() {
             
             <div class="radar-dynamic-tag">
                 <i class="fas fa-sync-alt fa-spin" style="--fa-animation-duration: 4s;"></i>
-                <span>Painel Dinâmico: Dados e projeções do setor no Brasil e no Mundo | Atualizado continuamente</span>
+                <span>Painel Dinâmico: Dados e projeções do setor no Brasil e no Mundo | Atualizado em <?php echo esc_html(ucfirst($mes_atual)); ?></span>
             </div>
 
-            <!-- 4 Big Key Figures -->
+            <!-- 4 Big Key Figures Dinâmicos -->
             <div class="radar-kpi-grid">
-                <div class="kpi-box">
-                    <span class="kpi-num">US$ 42+ Bi</span>
-                    <span class="kpi-lbl">Mercado Global Atual</span>
-                </div>
-                <div class="kpi-sep"></div>
-                <div class="kpi-box">
-                    <span class="kpi-num">R$ 2,5+ Bi</span>
-                    <span class="kpi-lbl">Faturamento Anual Brasil</span>
-                </div>
-                <div class="kpi-sep"></div>
-                <div class="kpi-box">
-                    <span class="kpi-num">+8,4% a.a.</span>
-                    <span class="kpi-lbl">Projeção Média até 2030</span>
-                </div>
-                <div class="kpi-sep"></div>
-                <div class="kpi-box">
-                    <span class="kpi-num">77,9%</span>
-                    <span class="kpi-lbl">Gestão Feminina no Brasil</span>
-                </div>
+                <?php foreach ($kpis as $idx => $kp): ?>
+                    <?php if ($idx > 0): ?><div class="kpi-sep"></div><?php endif; ?>
+                    <div class="kpi-box">
+                        <span class="kpi-num"><?php echo esc_html($kp['num']); ?></span>
+                        <span class="kpi-lbl"><?php echo esc_html($kp['label']); ?></span>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -407,6 +620,70 @@ function me_pesquisas_mercado_render() {
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <!-- SEÇÃO DINÂMICA: ÚLTIMAS PESQUISAS & ESTUDOS PUBLICADOS PELA REDAÇÃO -->
+        <?php
+        $pesquisas_query = new WP_Query(array(
+            'post_type'      => 'post',
+            'post_status'    => 'publish',
+            'category_name'  => 'pesquisas',
+            'posts_per_page' => 6,
+            'orderby'        => 'date',
+            'order'          => 'DESC'
+        ));
+        if ($pesquisas_query->have_posts()):
+        ?>
+        <div class="radar-feed-section">
+            <div class="radar-feed-header">
+                <div class="radar-feed-badge">
+                    <span class="radar-pulse-dot"></span>
+                    FEED DINÂMICO DA REDAÇÃO • ATUALIZAÇÃO AUTOMÁTICA
+                </div>
+                <h2 class="radar-feed-title">Últimas Pesquisas &amp; Estudos Publicados</h2>
+                <p class="radar-feed-sub">Acompanhe as reportagens investigativas, análises de comportamento e pesquisas setoriais divulgadas em primeira mão pelo Mercado Erótico.</p>
+            </div>
+
+            <div class="radar-articles-grid">
+                <?php while ($pesquisas_query->have_posts()): $pesquisas_query->the_post(); 
+                    $post_thumb = get_the_post_thumbnail_url(get_the_ID(), 'medium_large') ?: home_url('/wp-content/uploads/2022/10/Copia-de-Julianna-Santos-10.png');
+                    $post_date = get_the_date('d \d\e F, Y');
+                    $post_author = get_the_author();
+                ?>
+                    <article class="radar-article-card">
+                        <a href="<?php the_permalink(); ?>" class="radar-article-thumb-wrap">
+                            <img src="<?php echo esc_url($post_thumb); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy" class="radar-article-img">
+                            <span class="radar-article-cat-tag">Pesquisa</span>
+                        </a>
+                        <div class="radar-article-info">
+                            <div class="radar-article-meta">
+                                <span><i class="far fa-calendar-alt"></i> <?php echo esc_html($post_date); ?></span>
+                                <span>•</span>
+                                <span><i class="far fa-user"></i> <?php echo esc_html($post_author); ?></span>
+                            </div>
+                            <h3 class="radar-article-title">
+                                <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                            </h3>
+                            <p class="radar-article-excerpt">
+                                <?php echo esc_html(wp_trim_words(get_the_excerpt(), 18, '...')); ?>
+                            </p>
+                            <a href="<?php the_permalink(); ?>" class="radar-article-btn">
+                                <span>Ler pesquisa completa</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                <?php endwhile; wp_reset_postdata(); ?>
+            </div>
+
+            <div class="radar-feed-footer-bar">
+                <a href="<?php echo home_url('/acervo/?tema=pesquisas'); ?>" class="btn-radar-acervo-link">
+                    <i class="fas fa-archive"></i>
+                    <span>Explorar Todas as <?php echo $pesquisas_count; ?> Pesquisas no Acervo Histórico</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Editorial Banner & Contact Box -->
         <div class="radar-editorial-banner">
@@ -1078,4 +1355,510 @@ function me_pesquisas_mercado_render() {
     </style>
     <?php
     return ob_get_clean();
+}
+
+
+/**
+ * ============================================================================
+ * 3. PAINEL DE CONTROLE WORDPRESS: GESTÃO DO RADAR & PESQUISAS DE MERCADO
+ * ============================================================================
+ */
+add_action('admin_menu', 'mercado_pesquisas_register_admin_menu');
+function mercado_pesquisas_register_admin_menu() {
+    add_menu_page(
+        'Pesquisas & Radar Econômico',
+        'Pesquisas & Radar',
+        'manage_options',
+        'mercado-pesquisas-radar',
+        'mercado_pesquisas_render_admin_dashboard',
+        'dashicons-chart-area',
+        28
+    );
+}
+
+/**
+ * Admin Action Handlers (Save KPIs, Add/Edit Card, Delete Card, Reset)
+ */
+add_action('admin_init', 'mercado_pesquisas_handle_admin_actions');
+function mercado_pesquisas_handle_admin_actions() {
+    if (!current_user_can('manage_options')) return;
+
+    // A. Salvar KPIs do Topo
+    if (isset($_POST['mercado_pesquisas_action']) && $_POST['mercado_pesquisas_action'] === 'save_kpis') {
+        check_admin_referer('mercado_pesquisas_kpis_verify', 'mercado_kpis_nonce');
+
+        $kpis = array();
+        if (isset($_POST['kpi_num']) && is_array($_POST['kpi_num'])) {
+            foreach ($_POST['kpi_num'] as $i => $num) {
+                $lbl = isset($_POST['kpi_label'][$i]) ? sanitize_text_field($_POST['kpi_label'][$i]) : '';
+                $num = sanitize_text_field($num);
+                if (!empty($num) || !empty($lbl)) {
+                    $kpis[] = array('num' => $num, 'label' => $lbl);
+                }
+            }
+        }
+        if (!empty($kpis)) {
+            update_option('mercado_radar_kpis', $kpis);
+        }
+        wp_redirect(admin_url('admin.php?page=mercado-pesquisas-radar&msg=kpis_saved'));
+        exit;
+    }
+
+    // B. Salvar / Atualizar Card
+    if (isset($_POST['mercado_pesquisas_action']) && $_POST['mercado_pesquisas_action'] === 'save_card') {
+        check_admin_referer('mercado_pesquisas_card_verify', 'mercado_card_nonce');
+
+        $cards = mercado_get_radar_cards();
+        $card_id = sanitize_title($_POST['card_id']);
+        if (empty($card_id)) {
+            $card_id = 'card-' . time();
+        }
+
+        $cats = isset($_POST['card_cats']) && is_array($_POST['card_cats']) ? implode(',', array_map('sanitize_key', $_POST['card_cats'])) : 'all';
+        if (strpos($cats, 'all') === false) {
+            $cats = 'all,' . $cats;
+        }
+
+        $new_card = array(
+            'id'        => $card_id,
+            'cats'      => $cats,
+            'cat_label' => sanitize_text_field($_POST['card_cat_label']),
+            'icon'      => sanitize_text_field($_POST['card_icon']),
+            'value'     => sanitize_text_field($_POST['card_value']),
+            'tag'       => sanitize_text_field($_POST['card_tag']),
+            'title'     => sanitize_text_field($_POST['card_title']),
+            'desc'      => sanitize_textarea_field($_POST['card_desc']),
+            'source'    => sanitize_text_field($_POST['card_source']),
+            'date'      => sanitize_text_field($_POST['card_date']),
+        );
+
+        $exists = false;
+        foreach ($cards as $idx => $c) {
+            if ($c['id'] === $card_id) {
+                $cards[$idx] = $new_card;
+                $exists = true;
+                break;
+            }
+        }
+        if (!$exists) {
+            array_unshift($cards, $new_card);
+        }
+
+        update_option('mercado_radar_cards', $cards);
+        wp_redirect(admin_url('admin.php?page=mercado-pesquisas-radar&msg=card_saved'));
+        exit;
+    }
+
+    // C. Excluir Card
+    if (isset($_GET['action']) && $_GET['action'] === 'delete_card' && isset($_GET['card_id'])) {
+        check_admin_referer('delete_card_' . $_GET['card_id']);
+
+        $cards = mercado_get_radar_cards();
+        $target_id = sanitize_title($_GET['card_id']);
+        $filtered = array();
+        foreach ($cards as $c) {
+            if ($c['id'] !== $target_id) {
+                $filtered[] = $c;
+            }
+        }
+        update_option('mercado_radar_cards', $filtered);
+        wp_redirect(admin_url('admin.php?page=mercado-pesquisas-radar&msg=card_deleted'));
+        exit;
+    }
+
+    // D. Restaurar Padrões Originais
+    if (isset($_POST['mercado_pesquisas_action']) && $_POST['mercado_pesquisas_action'] === 'reset_defaults') {
+        check_admin_referer('mercado_pesquisas_reset_verify', 'mercado_reset_nonce');
+
+        delete_option('mercado_radar_cards');
+        delete_option('mercado_radar_kpis');
+
+        wp_redirect(admin_url('admin.php?page=mercado-pesquisas-radar&msg=reset_done'));
+        exit;
+    }
+}
+
+/**
+ * Render Admin Dashboard
+ */
+function mercado_pesquisas_render_admin_dashboard() {
+    $cards = mercado_get_radar_cards();
+    $kpis  = mercado_get_radar_kpis();
+    $pesquisas_cat = get_category_by_slug('pesquisas');
+    $pesquisas_count = $pesquisas_cat ? intval($pesquisas_cat->count) : 0;
+    $mes_atual = date_i18n('F \d\e Y');
+
+    // Edit mode
+    $editing_card = null;
+    if (isset($_GET['edit_card'])) {
+        $edit_id = sanitize_title($_GET['edit_card']);
+        foreach ($cards as $c) {
+            if ($c['id'] === $edit_id) {
+                $editing_card = $c;
+                break;
+            }
+        }
+    }
+    ?>
+    <div class="wrap me-admin-wrap">
+        <h1 class="wp-heading-inline"><span class="dashicons dashicons-chart-area" style="font-size:30px;width:30px;height:30px;margin-right:8px;color:#e31c61;"></span> Gestão do Radar Econômico &amp; Pesquisas</h1>
+        <hr class="wp-header-end">
+
+        <?php if (isset($_GET['msg'])): ?>
+            <?php if ($_GET['msg'] === 'kpis_saved'): ?>
+                <div class="notice notice-success is-dismissible"><p><strong>Sucesso:</strong> Indicadores macroeconômicos do topo (KPIs) atualizados com sucesso!</p></div>
+            <?php elseif ($_GET['msg'] === 'card_saved'): ?>
+                <div class="notice notice-success is-dismissible"><p><strong>Sucesso:</strong> Indicador de pesquisa salvo e atualizado no Radar!</p></div>
+            <?php elseif ($_GET['msg'] === 'card_deleted'): ?>
+                <div class="notice notice-warning is-dismissible"><p><strong>Aviso:</strong> Indicador excluído do Radar.</p></div>
+            <?php elseif ($_GET['msg'] === 'reset_done'): ?>
+                <div class="notice notice-info is-dismissible"><p><strong>Restaurado:</strong> Todos os indicadores e KPIs foram restaurados para a base analítica original da redação.</p></div>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <!-- Automated Status Banner -->
+        <div class="me-status-box">
+            <div class="me-status-item">
+                <span class="me-status-dot"></span>
+                <strong>Página Pública Ativa:</strong>
+                <a href="<?php echo esc_url(home_url('/pesquisas-de-mercado/')); ?>" target="_blank" class="button button-small" style="margin-left:8px;">
+                    Ver /pesquisas-de-mercado/ <span class="dashicons dashicons-external" style="font-size:14px;vertical-align:middle;"></span>
+                </a>
+            </div>
+            <div class="me-status-item">
+                <span class="dashicons dashicons-category" style="color:#10b981;"></span>
+                <strong>Feed de Reportagens Automático:</strong>
+                <span><?php echo $pesquisas_count; ?> matérias catalogadas em <code>/category/pesquisas/</code> (atualiza automaticamente ao publicar).</span>
+            </div>
+            <div class="me-status-item">
+                <span class="dashicons dashicons-calendar-alt" style="color:#3b82f6;"></span>
+                <strong>Data Dinâmica do Painel:</strong>
+                <span><?php echo esc_html(ucfirst($mes_atual)); ?> (calculada em tempo real pelo sistema).</span>
+            </div>
+        </div>
+
+        <div class="me-admin-columns">
+            <!-- Left Column: KPIs & Indicators List -->
+            <div class="me-col-main">
+
+                <!-- 1. KPIs Top Bar -->
+                <div class="postbox me-postbox">
+                    <div class="postbox-header">
+                        <h2><span class="dashicons dashicons-performance"></span> 1. Os 4 Indicadores Macroeconômicos do Topo (Hero KPIs)</h2>
+                    </div>
+                    <div class="inside">
+                        <p class="description">Estes 4 números aparecem com grande destaque no topo da página de pesquisas. Você pode alterar os valores e rótulos a qualquer momento.</p>
+                        <form method="post" action="">
+                            <?php wp_nonce_field('mercado_pesquisas_kpis_verify', 'mercado_kpis_nonce'); ?>
+                            <input type="hidden" name="mercado_pesquisas_action" value="save_kpis">
+
+                            <div class="me-kpis-grid">
+                                <?php for ($i = 0; $i < 4; $i++): 
+                                    $num_val = isset($kpis[$i]['num']) ? $kpis[$i]['num'] : '';
+                                    $lbl_val = isset($kpis[$i]['label']) ? $kpis[$i]['label'] : '';
+                                ?>
+                                    <div class="me-kpi-card-edit">
+                                        <div class="me-kpi-badge">KPI #<?php echo ($i+1); ?></div>
+                                        <label>Valor / Número:</label>
+                                        <input type="text" name="kpi_num[<?php echo $i; ?>]" value="<?php echo esc_attr($num_val); ?>" placeholder="Ex: US$ 42+ Bi" class="regular-text" style="width:100%;font-weight:700;">
+                                        
+                                        <label style="margin-top:8px;display:block;">Descrição / Legenda:</label>
+                                        <input type="text" name="kpi_label[<?php echo $i; ?>]" value="<?php echo esc_attr($lbl_val); ?>" placeholder="Ex: Mercado Global Atual" class="regular-text" style="width:100%;">
+                                    </div>
+                                <?php endfor; ?>
+                            </div>
+
+                            <p style="margin-top:20px;text-align:right;">
+                                <button type="submit" class="button button-primary button-large">
+                                    <span class="dashicons dashicons-saved" style="vertical-align:middle;"></span> Salvar KPIs do Topo
+                                </button>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. Active Research Cards List -->
+                <div class="postbox me-postbox">
+                    <div class="postbox-header">
+                        <h2><span class="dashicons dashicons-grid-view"></span> 2. Indicadores &amp; Cards Cadastrados (<?php echo count($cards); ?> no Total)</h2>
+                    </div>
+                    <div class="inside">
+                        <p class="description">Estes são os cards interativos que aparecem no grid da página de pesquisas com filtros e modal de contato editorial.</p>
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead>
+                                <tr>
+                                    <th style="width:50px;">Ícone</th>
+                                    <th style="width:130px;">Valor Principal</th>
+                                    <th>Título &amp; Categoria</th>
+                                    <th style="width:160px;">Fonte &amp; Ano</th>
+                                    <th style="width:120px;text-align:right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($cards)): ?>
+                                    <?php foreach ($cards as $c): ?>
+                                        <tr>
+                                            <td style="font-size:24px;text-align:center;"><?php echo $c['icon']; ?></td>
+                                            <td><strong style="color:#e31c61;font-size:15px;"><?php echo esc_html($c['value']); ?></strong><br><small style="color:#64748b;"><?php echo esc_html($c['tag']); ?></small></td>
+                                            <td>
+                                                <strong><?php echo esc_html($c['title']); ?></strong><br>
+                                                <span class="me-cat-pill"><?php echo esc_html($c['cat_label']); ?></span>
+                                                <small style="color:#94a3b8;margin-left:6px;">Filtros: <code><?php echo esc_html($c['cats']); ?></code></small>
+                                            </td>
+                                            <td>
+                                                <small><strong><?php echo esc_html($c['source']); ?></strong></small><br>
+                                                <small style="color:#64748b;"><?php echo esc_html($c['date']); ?></small>
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <a href="<?php echo admin_url('admin.php?page=mercado-pesquisas-radar&edit_card=' . esc_attr($c['id'])); ?>" class="button button-small">
+                                                    Editar
+                                                </a>
+                                                <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=mercado-pesquisas-radar&action=delete_card&card_id=' . esc_attr($c['id'])), 'delete_card_' . $c['id']); ?>" class="button button-small button-link-delete" onclick="return confirm('Tem certeza que deseja excluir este indicador?');">
+                                                    Excluir
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="5">Nenhum card cadastrado. Clique no formulário ao lado ou restaure os padrões.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Add / Edit Form & Reset -->
+            <div class="me-col-side">
+
+                <!-- Add/Edit Form -->
+                <div class="postbox me-postbox" style="border-top: 3px solid #e31c61;">
+                    <div class="postbox-header">
+                        <h2>
+                            <?php if ($editing_card): ?>
+                                <span class="dashicons dashicons-edit"></span> Editar Indicador: <em><?php echo esc_html($editing_card['title']); ?></em>
+                            <?php else: ?>
+                                <span class="dashicons dashicons-plus-alt"></span> Cadastrar Novo Indicador
+                            <?php endif; ?>
+                        </h2>
+                    </div>
+                    <div class="inside">
+                        <form method="post" action="">
+                            <?php wp_nonce_field('mercado_pesquisas_card_verify', 'mercado_card_nonce'); ?>
+                            <input type="hidden" name="mercado_pesquisas_action" value="save_card">
+                            <input type="hidden" name="card_id" value="<?php echo $editing_card ? esc_attr($editing_card['id']) : ''; ?>">
+
+                            <p>
+                                <label><strong>Valor em Destaque (Destaque visual):</strong></label><br>
+                                <input type="text" name="card_value" value="<?php echo $editing_card ? esc_attr($editing_card['value']) : ''; ?>" placeholder="Ex: US$ 42+ Bi ou 77,9%" class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Título da Pesquisa:</strong></label><br>
+                                <input type="text" name="card_title" value="<?php echo $editing_card ? esc_attr($editing_card['title']) : ''; ?>" placeholder="Ex: Faturamento do Mercado Brasileiro" class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Tag / Subtítulo Curto:</strong></label><br>
+                                <input type="text" name="card_tag" value="<?php echo $editing_card ? esc_attr($editing_card['tag']) : ''; ?>" placeholder="Ex: Mercado Nacional ou E-commerce" class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Ícone Visual (Emoji ou Caractere):</strong></label><br>
+                                <input type="text" name="card_icon" value="<?php echo $editing_card ? esc_attr($editing_card['icon']) : '📊'; ?>" placeholder="Ex: 🌐, 🇧🇷, ⚡, 🛒, 👥, 📈" class="regular-text" style="width:80px;font-size:18px;">
+                                <small style="color:#64748b;display:block;margin-top:4px;">Copie e cole um emoji representativo.</small>
+                            </p>
+
+                            <p>
+                                <label><strong>Categoria (Rótulo no Card):</strong></label><br>
+                                <input type="text" name="card_cat_label" value="<?php echo $editing_card ? esc_attr($editing_card['cat_label']) : 'Mercado Global'; ?>" placeholder="Ex: Mercado Global, Brasil, Sextech..." class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Filtros por Aba (Selecione onde aparece):</strong></label><br>
+                                <?php
+                                $selected_cats = $editing_card ? explode(',', $editing_card['cats']) : array('all', 'global');
+                                $available_filters = array(
+                                    'global'   => '🌐 Internacional & Global',
+                                    'brasil'   => '🇧🇷 Brasil & América Latina',
+                                    'inovacao' => '⚡ Sextech & Inovação IoT',
+                                    'varejo'   => '🛒 Varejo & Distribuição',
+                                    'consumo'  => '👥 Comportamento & Demografia'
+                                );
+                                foreach ($available_filters as $fkey => $flabel):
+                                    $checked = in_array($fkey, $selected_cats) ? 'checked' : '';
+                                ?>
+                                    <label style="display:block;margin:4px 0;">
+                                        <input type="checkbox" name="card_cats[]" value="<?php echo esc_attr($fkey); ?>" <?php echo $checked; ?>>
+                                        <?php echo esc_html($flabel); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </p>
+
+                            <p>
+                                <label><strong>Fonte Oficial / Instituto:</strong></label><br>
+                                <input type="text" name="card_source" value="<?php echo $editing_card ? esc_attr($editing_card['source']) : ''; ?>" placeholder="Ex: Grand View Research, ABEME, Statista" class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Período / Ano / Projeção:</strong></label><br>
+                                <input type="text" name="card_date" value="<?php echo $editing_card ? esc_attr($editing_card['date']) : ''; ?>" placeholder="Ex: Censo 2024 ou Projeção 2024–2030" class="widefat" required>
+                            </p>
+
+                            <p>
+                                <label><strong>Resumo Analítico / Metodologia:</strong></label><br>
+                                <textarea name="card_desc" rows="4" class="widefat" placeholder="Texto explicativo com os principais insights da pesquisa..."><?php echo $editing_card ? esc_textarea($editing_card['desc']) : ''; ?></textarea>
+                            </p>
+
+                            <p style="margin-top:15px;">
+                                <button type="submit" class="button button-primary button-large" style="width:100%;">
+                                    <span class="dashicons <?php echo $editing_card ? 'dashicons-update' : 'dashicons-plus'; ?>" style="vertical-align:middle;"></span>
+                                    <?php echo $editing_card ? 'Atualizar Indicador' : 'Adicionar ao Radar'; ?>
+                                </button>
+                                <?php if ($editing_card): ?>
+                                    <a href="<?php echo admin_url('admin.php?page=mercado-pesquisas-radar'); ?>" class="button button-secondary" style="width:100%;margin-top:8px;text-align:center;">
+                                        Cancelar Edição
+                                    </a>
+                                <?php endif; ?>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Reset Box -->
+                <div class="postbox me-postbox">
+                    <div class="postbox-header">
+                        <h2><span class="dashicons dashicons-image-rotate"></span> Restaurar Dados Padrão</h2>
+                    </div>
+                    <div class="inside">
+                        <p class="description">Se desejar voltar aos 12 indicadores analíticos originais e aos 4 KPIs recomendados pela equipe do Mercado Erótico, clique abaixo.</p>
+                        <form method="post" action="" onsubmit="return confirm('Atenção: Todos os dados personalizados serão substituídos pelos 12 indicadores e 4 KPIs padrão. Continuar?');">
+                            <?php wp_nonce_field('mercado_pesquisas_reset_verify', 'mercado_reset_nonce'); ?>
+                            <input type="hidden" name="mercado_pesquisas_action" value="reset_defaults">
+                            <button type="submit" class="button button-secondary" style="color:#d63638;border-color:#d63638;width:100%;">
+                                Restaurar Padrões da Redação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .me-admin-wrap {
+        max-width: 1300px;
+        margin-top: 20px;
+    }
+    .me-status-box {
+        background: #fff;
+        border: 1px solid #c3c4c7;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 20px 0 25px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .me-status-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #1d2327;
+    }
+    .me-status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+        display: inline-block;
+    }
+    .me-admin-columns {
+        display: flex;
+        gap: 25px;
+        align-items: flex-start;
+    }
+    .me-col-main {
+        flex: 1 1 65%;
+        min-width: 0;
+    }
+    .me-col-side {
+        flex: 1 1 35%;
+        min-width: 320px;
+    }
+    .me-postbox {
+        background: #fff;
+        border: 1px solid #c3c4c7;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+    .me-postbox .postbox-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 14px 20px;
+    }
+    .me-postbox .postbox-header h2 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .me-postbox .inside {
+        padding: 20px;
+        margin: 0;
+    }
+    .me-kpis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .me-kpi-card-edit {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px;
+        position: relative;
+    }
+    .me-kpi-badge {
+        display: inline-block;
+        background: #e31c61;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    .me-cat-pill {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #0f172a;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+    }
+    @media (max-width: 960px) {
+        .me-admin-columns {
+            flex-direction: column;
+        }
+        .me-col-side {
+            width: 100%;
+        }
+    }
+    </style>
+    <?php
 }
