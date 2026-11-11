@@ -34,6 +34,99 @@ function mercado_livraria_get_data() {
     return $data;
 }
 
+/**
+ * --------------------------------------------------------------------------
+ * RASTREAMENTO DE DOWNLOADS GRATUITOS
+ * --------------------------------------------------------------------------
+ */
+function mercado_livraria_get_download_counts() {
+    $counts = get_option('mercado_livraria_download_counts', array());
+    return is_array($counts) ? $counts : array();
+}
+
+function mercado_livraria_get_book_downloads($book_id) {
+    $counts = mercado_livraria_get_download_counts();
+    return isset($counts[$book_id]) ? intval($counts[$book_id]) : 0;
+}
+
+function mercado_livraria_get_download_logs($limit = 100) {
+    $logs = get_option('mercado_livraria_download_logs', array());
+    if (!is_array($logs)) $logs = array();
+    return array_slice($logs, 0, $limit);
+}
+
+function mercado_livraria_track_download($book_id, $format = 'PDF') {
+    $book_id = intval($book_id);
+    if ($book_id <= 0) return 0;
+
+    $format = in_array(strtoupper($format), array('PDF', 'PPTX')) ? strtoupper($format) : 'PDF';
+
+    // 1. Atualiza contadores acumulados
+    $counts = mercado_livraria_get_download_counts();
+    $current = isset($counts[$book_id]) ? intval($counts[$book_id]) : 0;
+    $counts[$book_id] = $current + 1;
+    update_option('mercado_livraria_download_counts', $counts, false);
+
+    // 2. Busca título do material para o log
+    $book_title = 'Material #' . $book_id;
+    $products = mercado_livraria_get_data();
+    foreach ($products as $p) {
+        if (isset($p['id']) && intval($p['id']) === $book_id) {
+            $book_title = $p['name'] ?? $book_title;
+            break;
+        }
+    }
+
+    // 3. Registra no log de auditoria
+    $logs = get_option('mercado_livraria_download_logs', array());
+    if (!is_array($logs)) $logs = array();
+
+    $ip = '';
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $ip = sanitize_text_field(trim($ip));
+
+    array_unshift($logs, array(
+        'time'   => current_time('mysql'),
+        'id'     => $book_id,
+        'title'  => $book_title,
+        'format' => $format,
+        'ip'     => $ip,
+        'ua'     => isset($_SERVER['HTTP_USER_AGENT']) ? substr(sanitize_text_field($_SERVER['HTTP_USER_AGENT']), 0, 120) : ''
+    ));
+
+    if (count($logs) > 150) {
+        $logs = array_slice($logs, 0, 150);
+    }
+    update_option('mercado_livraria_download_logs', $logs, false);
+
+    return $counts[$book_id];
+}
+
+// Endpoint AJAX (público e logado)
+function mercado_ajax_track_free_download() {
+    $book_id = isset($_POST['book_id']) ? intval($_POST['book_id']) : 0;
+    $format  = isset($_POST['format']) ? sanitize_text_field($_POST['format']) : 'PDF';
+
+    if ($book_id <= 0) {
+        wp_send_json_error(array('message' => 'ID inválido'));
+    }
+
+    $new_count = mercado_livraria_track_download($book_id, $format);
+    wp_send_json_success(array(
+        'book_id' => $book_id,
+        'format'  => $format,
+        'count'   => $new_count
+    ));
+}
+add_action('wp_ajax_mercado_track_free_download', 'mercado_ajax_track_free_download');
+add_action('wp_ajax_nopriv_mercado_track_free_download', 'mercado_ajax_track_free_download');
+
 global $mercado_livraria_rendered;
 $mercado_livraria_rendered = false;
 
@@ -1237,6 +1330,22 @@ function mercado_livraria_footer_scripts() {
             console.error('Error parsing livraria JSON:', e);
         }
 
+        // Rastreamento assíncrono de downloads gratuitos (sem delay para o usuário)
+        window.trackLivrariaDownload = function(bookId, format) {
+            try {
+                const ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                const fd = new FormData();
+                fd.append('action', 'mercado_track_free_download');
+                fd.append('book_id', bookId);
+                fd.append('format', format || 'PDF');
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(ajaxUrl, fd);
+                } else {
+                    fetch(ajaxUrl, { method: 'POST', body: fd, keepalive: true }).catch(function(){});
+                }
+            } catch(e) {}
+        };
+
         // Modal Functionality
         window.openBookModal = function(id) {
             const p = livrariaProducts.find(function(item) {
@@ -1319,7 +1428,7 @@ function mercado_livraria_footer_scripts() {
                 actionButtonsHtml = '';
                 if (hasPdf) {
                     actionButtonsHtml += `
-                        <a href="${buyUrl}" target="_blank" download rel="noopener" class="modal-btn-free">
+                        <a href="${buyUrl}" target="_blank" download rel="noopener" class="modal-btn-free" onclick="window.trackLivrariaDownload(${p.id}, 'PDF')">
                             <i class="fas fa-file-pdf" style="font-size:1.25rem;"></i> Baixar PDF Agora (Gratuito) <i class="fas fa-download"></i>
                         </a>
                     `;
@@ -1327,7 +1436,7 @@ function mercado_livraria_footer_scripts() {
 
                 if (hasPptx) {
                     actionButtonsHtml += `
-                        <a href="${p.download_pptx}" target="_blank" download rel="noopener" class="modal-btn-free" style="background:#b7410e; border-color:#b7410e; ${hasPdf ? 'margin-top:10px;' : ''}">
+                        <a href="${p.download_pptx}" target="_blank" download rel="noopener" class="modal-btn-free" onclick="window.trackLivrariaDownload(${p.id}, 'PPTX')" style="background:#b7410e; border-color:#b7410e; ${hasPdf ? 'margin-top:10px;' : ''}">
                             <i class="fas fa-file-powerpoint" style="font-size:1.25rem;"></i> Baixar Apresentação Slides (.PPTX) <i class="fas fa-download"></i>
                         </a>
                     `;
@@ -1422,6 +1531,14 @@ function mercado_livraria_admin_menu() {
         'Catálogo de Livros',
         'manage_options',
         'mercado-acervo-digital',
+        'mercado_livraria_admin_page'
+    );
+    add_submenu_page(
+        'mercado-acervo-digital',
+        'Downloads Gratuitos',
+        '📥 Downloads Gratuitos',
+        'manage_options',
+        'mercado-acervo-digital&tab=downloads',
         'mercado_livraria_admin_page'
     );
     add_submenu_page(
@@ -1670,6 +1787,36 @@ function mercado_livraria_admin_page() {
     $status = $_GET['status'] ?? '';
     $current_tab = $_GET['tab'] ?? 'catalogo';
 
+    // Rastreamento e Métricas de Downloads Gratuitos
+    $download_counts = mercado_livraria_get_download_counts();
+    $total_downloads = array_sum($download_counts);
+
+    $free_books = array();
+    $top_download_book = null;
+    $top_download_count = -1;
+
+    foreach ($products as $p) {
+        $pid = intval($p['id']);
+        $is_free = !empty($p['is_free']) || ($p['buy_type'] ?? '') === 'download' || ($p['buy_type'] ?? '') === 'free';
+        if ($is_free) {
+            $cnt = isset($download_counts[$pid]) ? intval($download_counts[$pid]) : 0;
+            $p['download_count'] = $cnt;
+            $free_books[] = $p;
+            if ($cnt > $top_download_count) {
+                $top_download_count = $cnt;
+                $top_download_book = $p;
+            }
+        }
+    }
+
+    // Ordenar materiais gratuitos por downloads decrescentes
+    usort($free_books, function($a, $b) {
+        if ($b['download_count'] === $a['download_count']) {
+            return $b['id'] - $a['id'];
+        }
+        return $b['download_count'] - $a['download_count'];
+    });
+
     // Lista de categorias conhecidas
     $all_cats = array('Sexualidade', 'Negócios', 'Vendas', 'Manuais e etc', 'Pompoarismo', 'Consultoria', 'Cursos & Treinamentos');
     ?>
@@ -1711,7 +1858,10 @@ function mercado_livraria_admin_page() {
         <!-- Navegação por Abas -->
         <h2 class="nav-tab-wrapper" style="margin-bottom:20px;">
             <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=catalogo'); ?>" class="nav-tab <?php echo $current_tab === 'catalogo' ? 'nav-tab-active' : ''; ?>">
-                📚 Catálogo de Livros (<?php echo count($products); ?> títulos)
+                📚 Catálogo Geral (<?php echo count($products); ?> títulos)
+            </a>
+            <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=downloads'); ?>" class="nav-tab <?php echo $current_tab === 'downloads' ? 'nav-tab-active' : ''; ?>">
+                📥 Downloads Gratuitos <?php if ($total_downloads > 0): ?><span class="update-plugins" style="margin-left:6px; background:#10b981;"><?php echo $total_downloads; ?></span><?php endif; ?>
             </a>
             <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=envios'); ?>" class="nav-tab <?php echo $current_tab === 'envios' ? 'nav-tab-active' : ''; ?>">
                 ✉️ Acervo de PDFs & Envios para Compradores
@@ -1720,6 +1870,38 @@ function mercado_livraria_admin_page() {
 
         <?php if ($current_tab === 'catalogo'): ?>
             <!-- ABA 1: CATÁLOGO COMPLETO (INCLUIR / EDITAR / EXCLUIR) -->
+
+            <!-- KPI Cards de Visão Geral -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom:20px;">
+                <div style="background:#fff; border-radius:10px; padding:16px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); border-left:4px solid #0284c7;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Catálogo Total</div>
+                    <div style="font-size:1.6rem; font-weight:800; color:#0f172a; margin-top:4px;"><?php echo count($products); ?> materiais</div>
+                    <div style="font-size:0.78rem; color:#64748b; margin-top:3px;">Livros, manuais e guias</div>
+                </div>
+                <div style="background:#fff; border-radius:10px; padding:16px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); border-left:4px solid #10b981;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Materiais Gratuitos</div>
+                    <div style="font-size:1.6rem; font-weight:800; color:#10b981; margin-top:4px;"><?php echo count($free_books); ?> títulos</div>
+                    <div style="font-size:0.78rem; color:#64748b; margin-top:3px;">Com download direto liberado</div>
+                </div>
+                <div style="background:#fff; border-radius:10px; padding:16px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); border-left:4px solid #8b5cf6;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Downloads Gratuitos Realizados</div>
+                    <div style="font-size:1.6rem; font-weight:800; color:#7c3aed; margin-top:4px; display:flex; align-items:center; gap:8px;">
+                        📥 <?php echo number_format($total_downloads, 0, ',', '.'); ?>
+                        <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=downloads'); ?>" style="font-size:0.8rem; font-weight:600; text-decoration:none; color:#0284c7;">Ver ranking &rarr;</a>
+                    </div>
+                    <div style="font-size:0.78rem; color:#64748b; margin-top:3px;">Total acumulado de downloads</div>
+                </div>
+                <div style="background:#fff; border-radius:10px; padding:16px 20px; box-shadow:0 2px 6px rgba(0,0,0,0.05); border-left:4px solid #f59e0b;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Mais Baixado da Livraria</div>
+                    <div style="font-size:0.95rem; font-weight:700; color:#0f172a; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo esc_attr($top_download_book ? $top_download_book['name'] : 'Nenhum ainda'); ?>">
+                        🏆 <?php echo esc_html($top_download_book ? $top_download_book['name'] : 'Aguardando downloads'); ?>
+                    </div>
+                    <div style="font-size:0.78rem; color:#d97706; font-weight:700; margin-top:3px;">
+                        <?php echo $top_download_count > 0 ? $top_download_count . ' downloads realizados' : 'Nenhum download ainda'; ?>
+                    </div>
+                </div>
+            </div>
+
             <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:15px; margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div style="display:flex; gap:10px; align-items:center; flex:1; max-width:400px;">
@@ -1736,11 +1918,12 @@ function mercado_livraria_admin_page() {
                     <thead>
                         <tr style="background:#f8fafc;">
                             <th style="width:65px; font-weight:700; padding:12px 14px;">Capa</th>
-                            <th style="width:38%; font-weight:700; padding:12px 14px;">Título & Detalhes</th>
-                            <th style="width:110px; font-weight:700; padding:12px 14px;">Preço</th>
-                            <th style="width:180px; font-weight:700; padding:12px 14px;">Plataforma / Checkout</th>
+                            <th style="width:34%; font-weight:700; padding:12px 14px;">Título & Detalhes</th>
+                            <th style="width:100px; font-weight:700; padding:12px 14px;">Preço</th>
+                            <th style="width:160px; font-weight:700; padding:12px 14px;">Plataforma / Checkout</th>
+                            <th style="width:130px; font-weight:700; padding:12px 14px;">Downloads</th>
                             <th style="font-weight:700; padding:12px 14px;">Categorias</th>
-                            <th style="width:180px; font-weight:700; padding:12px 14px; text-align:right;">Ações</th>
+                            <th style="width:170px; font-weight:700; padding:12px 14px; text-align:right;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1754,6 +1937,7 @@ function mercado_livraria_admin_page() {
                             $buy_url = $p['buy_url'] ?? '';
                             $cats = $p['categories'] ?? array();
                             $cats_str = implode(', ', $cats);
+                            $b_downloads = isset($download_counts[$pid]) ? intval($download_counts[$pid]) : 0;
                         ?>
                         <tr class="catalogo-row" data-search="<?php echo esc_attr(strtolower($title . ' ' . $pid . ' ' . $cats_str)); ?>">
                             <td style="padding:10px 14px; vertical-align:middle;">
@@ -1786,6 +1970,17 @@ function mercado_livraria_admin_page() {
                                     <a href="<?php echo esc_url($buy_url); ?>" target="_blank" style="display:block; font-size:0.75rem; color:#64748b; margin-top:4px; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;" title="<?php echo esc_attr($buy_url); ?>">🔗 <?php echo esc_html($buy_url); ?></a>
                                 <?php endif; ?>
                             </td>
+                            <td style="padding:10px 14px; vertical-align:middle;">
+                                <?php if ($is_free || $buy_type === 'download'): ?>
+                                    <a href="<?php echo admin_url('admin.php?page=mercado-acervo-digital&tab=downloads'); ?>" style="text-decoration:none;" title="Ver estatísticas detalhadas na aba de Downloads">
+                                        <span style="display:inline-flex; align-items:center; gap:5px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:4px 9px; border-radius:6px; font-size:0.82rem; font-weight:700;">
+                                            📥 <?php echo $b_downloads; ?> <?php echo $b_downloads === 1 ? 'download' : 'downloads'; ?>
+                                        </span>
+                                    </a>
+                                <?php else: ?>
+                                    <span style="color:#94a3b8; font-size:0.8rem; font-weight:500;">— (Venda)</span>
+                                <?php endif; ?>
+                            </td>
                             <td style="padding:10px 14px; vertical-align:middle; font-size:0.85rem; color:#475569;">
                                 <?php foreach ($cats as $c): ?>
                                     <span style="background:#f1f5f9; padding:2px 6px; border-radius:3px; font-size:0.75rem; margin-right:4px; display:inline-block; margin-bottom:2px;"><?php echo esc_html($c); ?></span>
@@ -1807,8 +2002,212 @@ function mercado_livraria_admin_page() {
                 </table>
             </div>
 
+        <?php elseif ($current_tab === 'downloads'): 
+            $logs = mercado_livraria_get_download_logs(50);
+            $last_download = !empty($logs) ? $logs[0] : null;
+        ?>
+            <!-- ABA 2: DOWNLOADS GRATUITOS -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-bottom:24px;">
+                <div style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #10b981;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Total de Downloads Acumulados</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#059669; margin-top:6px; display:flex; align-items:center; gap:8px;">
+                        📥 <?php echo number_format($total_downloads, 0, ',', '.'); ?>
+                    </div>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">Em todos os materiais gratuitos da Livraria</div>
+                </div>
+
+                <div style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #f59e0b;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Material Mais Baixado (#1)</div>
+                    <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-top:6px; line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                        🏆 <?php echo esc_html($top_download_book ? $top_download_book['name'] : 'Nenhum ainda'); ?>
+                    </div>
+                    <div style="font-size:0.82rem; color:#d97706; font-weight:700; margin-top:6px;">
+                        <?php echo $top_download_count > 0 ? $top_download_count . ' downloads realizados' : 'Aguardando downloads'; ?>
+                    </div>
+                </div>
+
+                <div style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #0284c7;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Materiais Gratuitos no Catálogo</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#0284c7; margin-top:6px;">
+                        📚 <?php echo count($free_books); ?>
+                    </div>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">E-books, manuais e apresentações com link direto</div>
+                </div>
+
+                <div style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #8b5cf6;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Último Download Registrado</div>
+                    <?php if ($last_download): ?>
+                        <div style="font-size:1rem; font-weight:700; color:#0f172a; margin-top:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <?php echo esc_html($last_download['title']); ?>
+                        </div>
+                        <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">
+                            ⏱️ <?php echo date_i18n('d/m/Y \à\s H:i', strtotime($last_download['time'])); ?> (<?php echo esc_html($last_download['format'] ?? 'PDF'); ?>)
+                        </div>
+                    <?php else: ?>
+                        <div style="font-size:0.95rem; font-weight:600; color:#94a3b8; margin-top:8px;">
+                            Aguardando primeiros cliques
+                        </div>
+                        <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">Os registros aparecerão em tempo real</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- TABELA DE RANKING DOS MATERIAIS GRATUITOS -->
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:30px;">
+                <div style="padding:16px 20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h2 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:0;">📊 Ranking de Downloads dos Materiais Gratuitos</h2>
+                        <p style="font-size:0.82rem; color:#64748b; margin:3px 0 0;">Todos os e-books, manuais e materiais com download direto liberado na Livraria.</p>
+                    </div>
+                    <a href="<?php echo home_url('/livraria/?categoria=gratuito'); ?>" target="_blank" class="button button-secondary" style="font-weight:600; font-size:0.82rem;">
+                        <span class="dashicons dashicons-external" style="margin-top:2px;"></span> Ver Filtro Gratuito no Site
+                    </a>
+                </div>
+
+                <table class="wp-list-table widefat striped" style="border:none; table-layout:auto;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="width:70px; font-weight:700; padding:12px 14px; text-align:center;">Posição</th>
+                            <th style="width:65px; font-weight:700; padding:12px 14px;">Capa</th>
+                            <th style="min-width:320px; font-weight:700; padding:12px 14px;">Material / E-book</th>
+                            <th style="width:110px; font-weight:700; padding:12px 14px;">Formato</th>
+                            <th style="width:200px; font-weight:700; padding:12px 14px;">Total de Downloads</th>
+                            <th style="width:110px; font-weight:700; padding:12px 14px; text-align:right;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $rank = 1;
+                        $max_count = max(1, $top_download_count);
+                        foreach ($free_books as $fb): 
+                            $fb_id = $fb['id'];
+                            $fb_title = $fb['name'];
+                            $fb_img = $fb['image'] ?? '';
+                            $fb_url = $fb['buy_url'] ?? '';
+                            $fb_pptx = !empty($fb['download_pptx']);
+                            $fb_count = intval($fb['download_count']);
+                            $percent = round(($fb_count / $max_count) * 100);
+                        ?>
+                        <tr>
+                            <td style="padding:12px 14px; vertical-align:middle; text-align:center; font-weight:800; font-size:1.1rem; color:<?php echo $rank === 1 ? '#f59e0b' : ($rank === 2 ? '#94a3b8' : ($rank === 3 ? '#d97706' : '#64748b')); ?>;">
+                                <?php 
+                                if ($rank === 1) echo '🥇';
+                                elseif ($rank === 2) echo '🥈';
+                                elseif ($rank === 3) echo '🥉';
+                                else echo '#' . $rank;
+                                ?>
+                            </td>
+                            <td style="padding:12px 14px; vertical-align:middle;">
+                                <?php if ($fb_img): ?>
+                                    <img src="<?php echo esc_url($fb_img); ?>" style="width:42px; height:58px; object-fit:cover; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">
+                                <?php else: ?>
+                                    <div style="width:42px; height:58px; background:#f1f5f9; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#94a3b8;"><span class="dashicons dashicons-book"></span></div>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 14px; vertical-align:middle;">
+                                <strong style="font-size:0.95rem; color:#0f172a; display:block; margin-bottom:3px;"><?php echo esc_html($fb_title); ?></strong>
+                                <span style="font-size:0.75rem; color:#64748b;">ID: <code><?php echo $fb_id; ?></code></span>
+                            </td>
+                            <td style="padding:12px 14px; vertical-align:middle;">
+                                <span style="display:inline-block; background:#ecfdf5; color:#065f46; font-size:0.75rem; font-weight:800; padding:3px 7px; border-radius:4px; border:1px solid #a7f3d0;">
+                                    PDF
+                                </span>
+                                <?php if ($fb_pptx): ?>
+                                    <span style="display:inline-block; background:#fff7ed; color:#c2410c; font-size:0.75rem; font-weight:800; padding:3px 7px; border-radius:4px; border:1px solid #fed7aa; margin-left:4px;">
+                                        PPTX
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 14px; vertical-align:middle;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <span style="font-weight:800; font-size:1.05rem; color:#059669;">
+                                        📥 <?php echo $fb_count; ?>
+                                    </span>
+                                    <span style="font-size:0.75rem; color:#64748b;">
+                                        <?php echo $total_downloads > 0 ? round(($fb_count / $total_downloads) * 100, 1) : 0; ?>% do total
+                                    </span>
+                                </div>
+                                <div style="width:100%; height:7px; background:#f1f5f9; border-radius:4px; overflow:hidden;">
+                                    <div style="width:<?php echo $percent; ?>%; height:100%; background:linear-gradient(90deg, #10b981, #059669); border-radius:4px;"></div>
+                                </div>
+                            </td>
+                            <td style="padding:12px 14px; vertical-align:middle; text-align:right;">
+                                <?php if ($fb_url): ?>
+                                    <a href="<?php echo esc_url($fb_url); ?>" target="_blank" download class="button button-small" title="Baixar arquivo">
+                                        📥 Arquivo
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php 
+                        $rank++;
+                        endforeach; 
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- REGISTRO RECENTE DE DOWNLOADS (AUDITORIA) -->
+            <div style="background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden;">
+                <div style="padding:16px 20px; border-bottom:1px solid #f1f5f9;">
+                    <h2 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0;">📋 Histórico Recente de Downloads (Últimos 50 cliques)</h2>
+                    <p style="font-size:0.8rem; color:#64748b; margin:3px 0 0;">Registro em tempo real com data, horário, material e formato baixado.</p>
+                </div>
+                <?php if (empty($logs)): ?>
+                    <div style="padding:40px 20px; text-align:center; color:#94a3b8;">
+                        <span class="dashicons dashicons-download" style="font-size:3rem; width:3rem; height:3rem; color:#cbd5e1; margin-bottom:10px; display:inline-block;"></span>
+                        <p style="font-size:0.95rem; font-weight:600; margin:0 0 5px; color:#64748b;">Nenhum download registrado ainda.</p>
+                        <p style="font-size:0.82rem; margin:0;">Assim que um visitante baixar um PDF ou PPTX na Livraria, o registro aparecerá aqui instantaneamente.</p>
+                    </div>
+                <?php else: ?>
+                    <table class="wp-list-table widefat fixed striped" style="border:none;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th style="width:170px; font-weight:700; padding:10px 14px;">Data & Hora</th>
+                                <th style="font-weight:700; padding:10px 14px;">Material Baixado</th>
+                                <th style="width:90px; font-weight:700; padding:10px 14px;">Formato</th>
+                                <th style="width:130px; font-weight:700; padding:10px 14px;">IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($logs as $log): ?>
+                            <tr>
+                                <td style="padding:8px 14px; vertical-align:middle; font-size:0.82rem; color:#64748b;">
+                                    <?php echo date_i18n('d/m/Y \à\s H:i:s', strtotime($log['time'])); ?>
+                                </td>
+                                <td style="padding:8px 14px; vertical-align:middle;">
+                                    <strong style="font-size:0.88rem; color:#1e293b;"><?php echo esc_html($log['title']); ?></strong>
+                                    <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">ID: <?php echo intval($log['id']); ?></span>
+                                </td>
+                                <td style="padding:8px 14px; vertical-align:middle;">
+                                    <span style="display:inline-block; font-size:0.72rem; font-weight:800; padding:2px 6px; border-radius:3px; <?php echo ($log['format'] ?? '') === 'PPTX' ? 'background:#fff7ed; color:#c2410c;' : 'background:#ecfdf5; color:#065f46;'; ?>">
+                                        <?php echo esc_html($log['format'] ?? 'PDF'); ?>
+                                    </span>
+                                </td>
+                                <td style="padding:8px 14px; vertical-align:middle; font-size:0.8rem; color:#94a3b8; font-family:monospace;">
+                                    <?php 
+                                    $raw_ip = $log['ip'] ?? '';
+                                    if ($raw_ip) {
+                                        $parts = explode('.', $raw_ip);
+                                        if (count($parts) === 4) {
+                                            echo esc_html($parts[0] . '.' . $parts[1] . '.*.*');
+                                        } else {
+                                            echo esc_html(substr($raw_ip, 0, 8) . '...');
+                                        }
+                                    } else {
+                                        echo '—';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+
         <?php else: ?>
-            <!-- ABA 2: ENVIOS DE PDF & COMPRADORES -->
+            <!-- ABA 3: ENVIOS DE PDF & COMPRADORES -->
             <p style="font-size:1rem; color:#555; margin-bottom:20px;">
                 Este painel permite consultar o arquivo PDF de cada e-book, copiar os links de download direto ou preparar na hora o e-mail de entrega para o comprador após a confirmação do pagamento.
             </p>
