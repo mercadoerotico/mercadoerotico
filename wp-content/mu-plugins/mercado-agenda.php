@@ -802,7 +802,7 @@ function me_agenda_shortcode_render() {
                     <div class="spec-banner-icon"><i class="fas fa-image"></i></div>
                     <div class="spec-banner-text">
                         <strong>Tamanho Recomendado para o Cartaz / Flyer:</strong>
-                        <span>Envie em <strong>1200 x 675 pixels</strong> (proporção 16:9 horizontal) ou <strong>1080 x 1080 pixels</strong> (quadrado). Formatos: JPG, PNG ou WEBP (máx. 5 MB). Isso garante que o cartaz fique perfeitamente nítido e legível tanto no computador quanto no celular.</span>
+                        <span>Envie em <strong>1200 x 675 pixels</strong> (proporção 16:9 horizontal). Formatos: JPG, PNG ou WEBP (máx. 5 MB). Isso garante que o cartaz fique perfeitamente nítido e legível tanto no computador quanto no celular.</span>
                     </div>
                 </div>
             </div>
@@ -891,12 +891,12 @@ function me_agenda_shortcode_render() {
                         <div class="me-field-group">
                             <label for="evento_flyer">
                                 Cartaz / Flyer do Evento 
-                                <span class="me-label-highlight">(Ideal: 1200 x 675 px ou 1080 x 1080 px)</span>
+                                <span class="me-label-highlight">(Ideal: 1200 x 675 px - horizontal)</span>
                             </label>
                             <input type="file" id="evento_flyer" name="evento_flyer" accept="image/jpeg,image/png,image/webp">
                             <div class="me-file-tip-box">
                                 <i class="fas fa-ruler-combined"></i> 
-                                <span><strong>Dimensão ideal:</strong> 1200 x 675 px (proporção 16:9 horizontal) ou 1080 x 1080 px (1:1 quadrado). Formatos aceitos: JPG, PNG ou WEBP (máx. 5 MB).</span>
+                                <span><strong>Dimensão ideal:</strong> 1200 x 675 px (proporção 16:9 horizontal). Formatos aceitos: JPG, PNG ou WEBP (máx. 5 MB).</span>
                             </div>
                         </div>
 
